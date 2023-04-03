@@ -1,3 +1,4 @@
 app/*
 README.Moodle.DevOps.md
 .env*
+.ssh/*
