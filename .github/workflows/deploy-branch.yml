@@ -3,11 +3,16 @@
 name: Deploy on Openshift
 
 on:
-  push:
-    branches:
-      - dev
-      - test
-      - prod
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - main
 
 jobs:
   #Print variables for logging and debugging purposes
@@ -52,42 +57,71 @@ jobs:
         run: |
           oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      # Build the app images
+      # Create Secrets
+      - name: Deploy Secrets
+        run: |
+          oc create secret generic moodle-secrets \
+            --from-literal=database-name=moodle \
+            --from-literal=database-user=moodle \
+            --from-literal=database-password=${{ secrets.DB_PASSWORD }} \
+            --from-literal=database-root-password=${{ secrets.DB_ROOT_PASSWORD }} \
+            || echo "Secrets already exists in $BUILD_NAMESPACE";
+
+      # Create Secrets
+      - name: Deploy Redis Caching
+        run: |
+          helm install redis bitnami/redis \
+          || echo "Redis already exists in $BUILD_NAMESPACE";
+
+      # Deploy Database
+      - name: Deploy MariaDB
+        working-directory: "./openshift"
+        run: |
+          oc create -f mariadb-sts-replication.yaml -n ${BUILD_NAMESPACE} \
+          || echo "MariaDB already exists in $BUILD_NAMESPACE";
+
+      # Build web deployment
       - name: Build App images
         working-directory: "./openshift"
         run: |
-          test -n "${BRANCH}"
-          test -n "${BUILD_NAMESPACE}"
-          echo "BUILIDING ${APP} with tag: ${BUILD_TAG}"
-                oc -n ${BUILD_NAMESPACE} process -f docker-build.yml \
-                -p TAG=${BUILD_TAG} \
-                -p SOURCE_REPOSITORY_REF=${BRANCH} \
-                -p BASE_IMAGE_NAME="ngnix" \
-                -p BASE_IMAGE_TAG="8.0-fpm" \
-                -p SITE_URL="https://moodle-e66ac2-${BUILD_TAG}.apps.silver.devops.gov.bc.ca" \
-                -p BASE_IMAGE_REPO="aro.jfrog.io/moodle/" \
-                -p GITHUB_AUTH_TOKEN=${{ secrets.AUTH_TOKEN }} \
-                -p DB_HOST="mysql.mysql" \
-                -p DB_PASSWORD="${{ secrets.DB_PASSWORD_ESCAPED }}" \
-                -p DB_USER="moodle" \
-                -p DB_NAME="moodle" \
-                -p SOURCE_CONTEXT_DIR=. \
-                -p NAME=${APP} | oc -n ${BUILD_NAMESPACE} apply -f -
-          oc -n ${BUILD_NAMESPACE} start-build bc/${APP} --no-cache --wait
+          test -n "${{BRANCH}}"
+          test -n "${{BUILD_NAMESPACE}}"
+          echo "BUILIDING ${{APP}} confifMap: web-config"
+          oc create configmap web-config \
+            --from-file=nginx.conf=../builds/web/nginx.conf
+          echo "BUILIDING ${{APP}} with tag: ${{BUILD_TAG}}"
+          oc -n ${BUILD_NAMESPACE} process -f docker-build.yml \
+            -p TAG=${BUILD_TAG} \
+            -p SOURCE_REPOSITORY_REF=${BRANCH} \
+            -p BASE_IMAGE_NAME="ngnix" \
+            -p BASE_IMAGE_TAG="8.0-fpm" \
+            -p SITE_URL="https://moodle-e66ac2-${BUILD_TAG}.apps.silver.devops.gov.bc.ca" \
+            -p BASE_IMAGE_REPO="aro.jfrog.io/moodle/" \
+            -p GITHUB_AUTH_TOKEN=${{ secrets.AUTH_TOKEN }} \
+            -p DB_HOST="mysql.mysql" \
+            -p DB_PASSWORD="${{ secrets.DB_PASSWORD_ESCAPED }}" \
+            -p DB_USER="moodle" \
+            -p DB_NAME="moodle" \
+            -p SOURCE_CONTEXT_DIR=. \
+            -p NAME=${APP} | oc -n ${BUILD_NAMESPACE} apply -f - \
+            || echo "${{APP}} already exists in $BUILD_NAMESPACE";
+          oc -n ${BUILD_NAMESPACE} start-build bc/${APP} --no-cache --wait \
+            || echo "bc/${{APP}} already exists in $BUILD_NAMESPACE";
 
-  # Deploy App images in Dev
-  deployDev:
-    name: Deploy APP to Dev environment
+  # Deploy App
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
-    if: github.ref_name == 'dev'
     env:
       BUILD_ID: ${{ github.event.number }}
       CRON_PASSWORD: ${{ secrets.CRON_PASSWORD }}
-      NAMESPACE: e66ac2-dev
+      NAMESPACE: e66ac2-${{ github.ref_name }}
       BUILD_NAMESPACE: e66ac2-tools
       BRANCH: ${{ github.ref_name }}
       APP: moodle
-      APP_HOST: moodle-e66ac2-dev.apps.silver.devops.gov.bc.ca
+      APP_HOST: moodle-e66ac2-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
+      DB_HOST: mysql
+      DB_HOST_2: mysql-read
       DB_BACKUP_APP: db-backup
       DB_NAME: moodle
     needs:
@@ -103,240 +137,78 @@ jobs:
         run: |
           oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      - name: Deploy APP
+      - name: Deploy Web Service
         run: |
           test -n "${NAMESPACE}"
           test -n "${BUILD_NAMESPACE}"
           test -n "${BRANCH}"
           echo "Current namespace is ${NAMESPACE}"
-          oc -n ${NAMESPACE} process -f openshift/app/moodle-dc-persistent-template.json \
-                -p APP_NAME=${APP} \
+          oc -n ${NAMESPACE} process -f openshift/web.json \
+                -p APP_NAME=web \
                 -p SITE_URL=${APP_HOST} \
-                -p DB_HOST=mysql-0.mysql \
-                -p DB_SECONDARY_NAME=mysql-read \
-                -p MOODLE_MEMORY_LIMIT=4Gi \
-                -p PROJECT_NAMESPACE=e66ac2-dev \
-                -p DB_SERVICE_NAME=mysql-0.mysql \
-                -p MOODLE_VOLUME_CAPACITY=10Gi \
-                -p BACKUP_VOLUME_SIZE=25Gi \
-                -p DB_NAME=moodle \
-                -p DB_USER=moodle \
+                -p DB_HOST=${DB_HOST} \
+                -p DB_HOST_2=${DB_HOST_2} \
+                -p MEMORY_LIMIT=512Mi \
+                -p MEMORY_REQUEST=128Mi \
+                -p CPU_LIMIT=1 \
+                -p CPU_REQUEST=0.5 \
+                -p PROJECT_NAMESPACE=${NAMESPACE} \
+                -p VOLUME_SIZE=10Gi \
                 -p HTTP_PORT=8080 \
-                -p DB_PORT=3306 \
-                -p APACHE_DOCUMENT_ROOT="/vendor/moodle/moodle" \
+                -p APACHE_DOCUMENT_ROOT="/app/public" \
                 -p SITE_NAME=Moodle \
-                -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-                -p GIT_PROJECT=moodle \
-                -p MOODLE_DATA_PATH="/vendor/moodle/moodledata/persistent" \
-                -p MOODLE_DATA_MOUNT_PATH="/vendor/moodle/moodledata/persistent" \
-                -p BUILD_NAMESPACE="e66ac2-tools" \
-                -p IMAGE_STREAM_TAG="moodle:dev" \
-                -p GIT_URL="https://github.com/moodle/moodle.git" \
-                -p GIT_TAG=openshift \
+                -p MOODLE_DATA_PATH="/app/moodledata" \
+                -p MOODLE_DATA_MOUNT_PATH="/app" \
+                -p BUILD_NAMESPACE="${BUILD_NAMESPACE}" \
+                -p IMAGE_STREAM_TAG="moodle:${BRANCH}" \
                 -p GITHUB_AUTH_TOKEN="${{ secrets.AUTH_TOKEN }}" \
-                -p CRON_PASSWORD="${{ secrets.CRON_PASSWORD }}" | \
-          oc -n ${NAMESPACE} apply -f -
-          oc rollout latest dc/moodle -n ${NAMESPACE}
+                || echo "Web already exists in $BUILD_NAMESPACE";
+          oc -n ${NAMESPACE} apply -f - \
+            || echo "Web cannot be applied in $BUILD_NAMESPACE";
+          oc rollout latest dc/moodle -n ${NAMESPACE} \
+            || echo "Web rollout cannot be completed in $BUILD_NAMESPACE";
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
           ATTEMPTS=0
-          ROLLOUT_STATUS_CMD="oc rollout status dc/moodle -n ${NAMESPACE}"
+          ROLLOUT_STATUS_CMD="oc rollout status dc/web -n ${NAMESPACE}"
           until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
             $ROLLOUT_STATUS_CMD
             ATTEMPTS=$((attempts + 1))
             sleep 10
           done
-          oc project ${NAMESPACE}
-          echo "Listing pods.."
-          oc get pods|grep moodle
-          for name in $podNames; do
-            oc exec $podNames -- bash -c "
-              cat <<- EOF > .env
-              DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-              SSL_PROXY=true
-              SITE_URL=https://moodle-e66ac2-dev.apps.silver.devops.gov.bc.ca
-              DB_HOST=mysql-0.mysql
-              `EOF` "
-          done
-          export ROUTE="$(oc get route moodle -o jsonpath='{.spec.host}')"
-          echo "${APP} is exposed at 'https://'${ROUTE}"
-  # Deploy App images in Test
-  deployTest:
-    name: Deploy APP to Test environment
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'test'
-    env:
-      BUILD_ID: ${{ github.event.number }}
-      CRON_PASSWORD: ${{ secrets.CRON_PASSWORD }}
-      NAMESPACE: e66ac2-test
-      BUILD_NAMESPACE: e66ac2-tools
-      BRANCH: ${{ github.ref_name }}
-      APP: moodle
-      APP_HOST: moodle-e66ac2-test.apps.silver.devops.gov.bc.ca
-      DB_BACKUP_APP: db-backup
-      DB_NAME: moodle
-    needs:
-      - build
-    steps:
-      - name: Checkout Target Branch
-        uses: actions/checkout@v1
 
-       # Log in to OpenShift.
-       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
-       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      - name: Log in to OpenShift
-        run: |
-          oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
-      - name: Deploy APP
+      - name: Deploy PHP-FPM-Moodle
         run: |
           test -n "${NAMESPACE}"
           test -n "${BUILD_NAMESPACE}"
           test -n "${BRANCH}"
           echo "Current namespace is ${NAMESPACE}"
-          oc -n ${NAMESPACE} process -f openshift/app/moodle-dc-persistent-template.json \
-                -p APP_NAME=${APP} \
+          oc -n ${NAMESPACE} process -f openshift/php.json \
+                -p APP_NAME=php \
                 -p SITE_URL=${APP_HOST} \
-                -p DB_HOST=mysql-0.mysql \
-                -p DB_SECONDARY_NAME=mysql-read \
-                -p MOODLE_MEMORY_LIMIT=6Gi \
-                -p PROJECT_NAMESPACE=e66ac2-test\
-                -p DB_SERVICE_NAME=mysql-0.mysql \
-                -p MOODLE_VOLUME_CAPACITY=10Gi \
-                -p BACKUP_VOLUME_SIZE=25Gi \
-                -p DB_NAME=moodle \
-                -p DB_USER=moodle \
+                -p MEMORY_LIMIT=1Gi \
+                -p MEMORY_REQUEST=128Mi \
+                -p CPU_LIMIT=1 \
+                -p CPU_REQUEST=0.2 \
+                -p PROJECT_NAMESPACE=${NAMESPACE} \
+                -p VOLUME_SIZE=10Gi \
                 -p HTTP_PORT=8080 \
                 -p DB_PORT=3306 \
-                -p APACHE_DOCUMENT_ROOT="/vendor/moodle/moodle" \
+                -p APACHE_DOCUMENT_ROOT="/app/public" \
                 -p SITE_NAME=Moodle \
-                -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-                -p GIT_PROJECT=moodle \
-                -p MOODLE_DATA_PATH="/vendor/moodle/moodledata/persistent" \
-                -p MOODLE_DATA_MOUNT_PATH="/vendor/moodle/moodledata/persistent" \
-                -p BUILD_NAMESPACE="e66ac2-tools" \
-                -p IMAGE_STREAM_TAG="moodle:test" \
-                -p GIT_URL="https://github.com/moodle/moodle.git" \
-                -p GIT_TAG=openshift \
-                -p GITHUB_AUTH_TOKEN="${{ secrets.AUTH_TOKEN }}" \
-                -p CRON_PASSWORD="${{ secrets.CRON_PASSWORD }}" | \
-          oc -n ${NAMESPACE} apply -f -
-          oc rollout latest dc/moodle -n ${NAMESPACE}
+                -p MOODLE_DATA_PATH="/app/moodledata" \
+                -p DATA_MOUNT_PATH="/app" \
+                -p BUILD_NAMESPACE="${BUILD_NAMESPACE}" \
+                -p IMAGE_STREAM_TAG="moodle:${BRANCH}" \
+                || echo "PHP already exists in $BUILD_NAMESPACE";
+          oc -n ${NAMESPACE} apply -f - \
+            || echo "PHP template cannot be applied in $BUILD_NAMESPACE";
+          oc rollout latest dc/php -n ${NAMESPACE} \
+            || echo "PHP rollout failed in $BUILD_NAMESPACE";
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
           ATTEMPTS=0
-          ROLLOUT_STATUS_CMD="oc rollout status dc/moodle -n ${NAMESPACE}"
+          ROLLOUT_STATUS_CMD="oc rollout status dc/php -n ${NAMESPACE}"
           until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
             $ROLLOUT_STATUS_CMD
             ATTEMPTS=$((attempts + 1))
             sleep 10
           done
-          oc project ${NAMESPACE}
-          echo "Listing pods.."
-          oc get pods|grep moodle
-          sleep 30
-          oc get pods -l deploymentconfig=moodle --field-selector=status.phase=Running -o name
-          sleep 20
-          podNames=$(oc get pods -l deploymentconfig=moodle --field-selector=status.phase=Running -o name)
-          pwd
-          ls -lrt .env
-          echo $podNames
-          for name in $podNames; do
-            oc exec $podNames -- bash -c "
-              cat <<- EOF > .env
-              DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-              SSL_PROXY=true
-              SITE_URL=https://moodle-e66ac2-test.apps.silver.devops.gov.bc.ca
-              DB_HOST=mysql-0.mysql
-              `EOF` "
-          done
-          export ROUTE="$(oc get route moodle -o jsonpath='{.spec.host}')"
-          echo "${APP} is exposed at 'https://'${ROUTE}"
-
-  # Deploy App images in Prod
-  deployProd:
-    name: Deploy APP to Prod environment
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'prod'
-    env:
-      BUILD_ID: ${{ github.event.number }}
-      CRON_PASSWORD: ${{ secrets.CRON_PASSWORD }}
-      NAMESPACE: e66ac2-prod
-      BUILD_NAMESPACE: e66ac2-tools
-      BRANCH: ${{ github.ref_name }}
-      APP: moodle
-      APP_HOST: moodle-e66ac2-prod.apps.silver.devops.gov.bc.ca
-      DB_BACKUP_APP: db-backup
-      DB_NAME: moodle
-    needs:
-      - build
-    steps:
-      - name: Checkout Target Branch
-        uses: actions/checkout@v1
-
-       # Log in to OpenShift.
-       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
-       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      - name: Log in to OpenShift
-        run: |
-          oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
-      - name: Deploy APP
-        run: |
-          test -n "${NAMESPACE}"
-          test -n "${BUILD_NAMESPACE}"
-          test -n "${BRANCH}"
-          echo "Current namespace is ${NAMESPACE}"
-          oc -n ${NAMESPACE} process -f openshift/app/moodle-dc-persistent-template.json \
-                -p APP_NAME=${APP} \
-                -p SITE_URL=${APP_HOST} \
-                -p DB_HOST=mysql-0.mysql \
-                -p DB_SECONDARY_NAME=mysql-read \
-                -p MOODLE_MEMORY_LIMIT=4Gi \
-                -p PROJECT_NAMESPACE=e66ac2-prod\
-                -p DB_SERVICE_NAME=mysql-0.mysql \
-                -p MOODLE_VOLUME_CAPACITY=15Gi \
-                -p BACKUP_VOLUME_SIZE=20Gi \
-                -p DB_NAME=moodle \
-                -p DB_USER=moodle \
-                -p HTTP_PORT=8080 \
-                -p DB_PORT=3306 \
-                -p APACHE_DOCUMENT_ROOT="/vendor/moodle/moodle" \
-                -p SITE_NAME=Moodle \
-                -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-                -p GIT_PROJECT=moodle \
-                -p MOODLE_DATA_PATH="/vendor/moodle/moodledata/persistent" \
-                -p MOODLE_DATA_MOUNT_PATH="/vendor/moodle/moodledata/persistent" \
-                -p BUILD_NAMESPACE="e66ac2-tools" \
-                -p IMAGE_STREAM_TAG="moodle:prod" \
-                -p GIT_URL="https://github.com/moodle/moodle.git" \
-                -p GIT_TAG=openshift \
-                -p GITHUB_AUTH_TOKEN="${{ secrets.AUTH_TOKEN }}" \
-                -p CRON_PASSWORD="${{ secrets.CRON_PASSWORD }}" | \
-          oc -n ${NAMESPACE} apply -f -
-          oc rollout latest dc/moodle -n ${NAMESPACE}
-          # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
-          ATTEMPTS=0
-          ROLLOUT_STATUS_CMD="oc rollout status dc/moodle -n ${NAMESPACE}"
-          until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
-            $ROLLOUT_STATUS_CMD
-            ATTEMPTS=$((attempts + 1))
-            sleep 10
-          done
-          oc project ${NAMESPACE}
-          echo "Listing pods.."
-          oc get pods|grep moodle
-          sleep 30
-          oc get pods -l deploymentconfig=moodle --field-selector=status.phase=Running -o name
-          sleep 20
-          podNames=$(oc get pods -l deploymentconfig=moodle --field-selector=status.phase=Running -o name)
-          pwd
-          ls -lrt .env
-          echo $podNames
-          for name in $podNames; do
-            oc exec $podNames -- bash -c "
-              cat <<- EOF > .env
-              DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-              SSL_PROXY=true
-              SITE_URL=https://moodle-e66ac2-prod.apps.silver.devops.gov.bc.ca
-              DB_HOST=mysql-0.mysql
-              `EOF` "
-          done
-          export ROUTE="$(oc get route moodle -o jsonpath='{.spec.host}')"
-          echo "${APP} is exposed at 'https://'${ROUTE}"

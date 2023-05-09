@@ -4,7 +4,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: ${NAME}
+  name: ${BASE_IMAGE_NAME}-${BASE_IMAGE_TAG}
 objects:
   - apiVersion: image.openshift.io/v1
     kind: ImageStream
@@ -28,17 +28,10 @@ objects:
         scheduled: true
       referencePolicy:
         type: Source
-  - kind: ImageStream
-    apiVersion: v1
-    metadata:
-      name: ${NAME}
-    spec:
-      lookupPolicy:
-        local: false
   - apiVersion: v1
     kind: BuildConfig
     metadata:
-      name: ${NAME}
+      name: ${BASE_IMAGE_NAME}-${BASE_IMAGE_TAG}
     spec:
       resources:
         limits:
@@ -50,44 +43,26 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: "${NAME}:${TAG}"
+          name: "${BASE_IMAGE_NAME}:${TAG}"
       runPolicy: SerialLatestOnly
       source:
         contextDir: "${SOURCE_CONTEXT_DIR}"
         git:
           uri: "${SOURCE_REPOSITORY_URL}"
-          ref: "${SOURCE_REPOSITORY_REF}"
+          ref: "${TAG}"
         type: Git
       strategy:
         dockerStrategy:
-          from:
-            kind: ImageStreamTag
-            name: ${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG}
-          buildArgs:
-            - name: GITHUB_AUTH_TOKEN
-              value: ${GITHUB_AUTH_TOKEN}
-            - name: SITE_URL
-              value: ${SITE_URL}
-            - name: DB_HOST
-              value: ${DB_HOST}
-            - name: DB_NAME
-              value: ${DB_NAME}
-            - name: DB_PASSWORD
-              value: ${DB_PASSWORD}
-            - name: DB_USER
-              value: ${DB_USER}
+          dockerfilePath: "${DOCKERFILE}"
         type: Docker
 parameters:
-  - name: NAME
-    required: true
   - name: SUFFIX
   - name: SOURCE_CONTEXT_DIR
+    value: .
+  - name: DOCKERFILE
     required: true
   - name: SOURCE_REPOSITORY_URL
-    required: true
-    value: https://github.com/bcgov/moodle.git
-  - name: SOURCE_REPOSITORY_REF
-    required: true
+    value: https://github.com/bcgov/moodle-nginx.git
   - name: TAG
     value: "latest"
   - name: BASE_IMAGE_REPO
@@ -96,22 +71,10 @@ parameters:
   - name: BASE_IMAGE_TAG
     required: true
   - name: CPU_LIMIT
-    value: "4"
-  - name: MEMORY_LIMIT
-    value: "8Gi"
+    value: "1"
   - name: CPU_REQUEST
-    value: "2"
+    value: "0.25"
+  - name: MEMORY_LIMIT
+    value: "2Gi"
   - name: MEMORY_REQUEST
-    value: "8Gi"
-  - name: GITHUB_AUTH_TOKEN
-    required: true
-  - name: SITE_URL
-    required: false
-  - name: DB_HOST
-    required: true
-  - name: DB_NAME
-    required: true
-  - name: DB_PASSWORD
-    required: true
-  - name: DB_USER
-    required: true
+    value: "128Mi"

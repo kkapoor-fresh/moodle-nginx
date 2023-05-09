@@ -2,3 +2,5 @@ app/*
 README.Moodle.DevOps.md
 .env*
 .ssh/*
+*tenant-gitops*
+.dccache
