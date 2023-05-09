@@ -4,8 +4,7 @@
 
 This directory contains the docker setup to run an instance of Moodle 3.11. A number of containers are created as follows
 
-* PHP 8.0-fpm to run the web instance of Moodle
-* PHP 7.4-fpm (second instance) to run cron
+* PHP 7.4-fpm for Moodle app and cron
 * nginx as the web server
 * redis for cache
 * mariadb for database
@@ -24,7 +23,7 @@ without worrying about the containers.
 
 Network host names are the same as the service names (e.g. just 'redis')
 
-== To set up ==
+== To set up locally ==
 
 * Install Docker daemon and get running
 * Stop any local instances of web server and mysql

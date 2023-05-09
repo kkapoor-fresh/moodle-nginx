@@ -1,7 +1,22 @@
-FROM php:8.0-fpm
+# FROM artifacts.developer.gov.bc.ca/docker-remote/php:7.4-fpm
+FROM php:8.1-fpm
+
+# Config arguments
+ARG PHP_FPM_PORT=9000
+ARG DB_PORT=3306
+ARG ENV_FILE=".env"
+ARG CRONTAB="FALSE"
+ARG DB_HOST="mysql"
+ARG DB_HOST_2="mysql"
+ARG DB_NAME="moodle"
+ARG DB_PASSWORD=""
+ARG DB_USER="moodle"
 
 # Moodle App directory
 ENV MOODLE_APP_DIR /app/public
+ENV CONF_FILE $MOODLE_APP_DIR/config.php
+ENV PHP_FPM_DIR /usr/local/etc/php-fpm.d
+ENV PHP_INI_FILE $ETC_DIR/php/conf.d/moodlephp.ini
 
 # Version control for Moodle and plugins
 ENV MOODLE_BRANCH_VERSION MOODLE_311_STABLE
@@ -20,10 +35,8 @@ RUN pecl install -o -f redis
 RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
 
-RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
-
-COPY ./moodlephp.ini "$PHP_INI_DIR/conf.d/moodlephp.ini"
-COPY ./moodlephpfpm.conf "/usr/local/etc/php-fpm.d"
+COPY ./moodlephp.ini $PHP_INI_FILE
+COPY ./moodlephpfpm.conf $PHP_FPM_DIR
 
 RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_APP_DIR
 
@@ -45,3 +58,17 @@ RUN git clone --recurse-submodules --jobs 8 https://github.com/catalyst/moodle-t
     git clone --recurse-submodules --jobs 8 --branch $FORMAT_BRANCH_VERSION --single-branch https://github.com/gjb2048/moodle-format_topcoll $MOODLE_APP_DIR/course/format/topcoll && \
     git clone --recurse-submodules --jobs 8 --branch $CERTIFICATE_BRANCH_VERSION --single-branch https://github.com/mdjnelson/moodle-mod_certificate $MOODLE_APP_DIR/mod/certificate && \
     git clone --recurse-submodules --jobs 8 --branch $CUSTOMCERT_BRANCH_VERSION --single-branch https://github.com/mdjnelson/moodle-mod_customcert $MOODLE_APP_DIR/mod/customcert
+
+# Copy Moodle config
+COPY --chown=www-data:www-data ./moodle-config.php $CONF_FILE
+
+# Update config with vars
+RUN sed -i "s|DB_PORT|${DB_PORT}|" $CONF_FILE  && \
+  sed -i "s|DB_PORT|${DB_PORT}|" $CONF_FILE  && \
+  sed -i "s|DB_HOST_2|${DB_HOST_2}|" $CONF_FILE  && \
+  sed -i "s|DB_HOST|${DB_HOST}|" $CONF_FILE  && \
+  sed -i "s|DB_NAME|${DB_NAME}|" $CONF_FILE  && \
+  sed -i "s|DB_USER|${DB_USER}|" $CONF_FILE  && \
+  sed -i "s|DB_PASSWORD|${DB_PASSWORD}|" $CONF_FILE  && \
+  sed -i "s|MOODLE_APP_DIR|${MOODLE_APP_DIR}|" $CONF_FILE  && \
+  sed -i "s|SITE_URL|${SITE_URL}|" $CONF_FILE
