@@ -64,29 +64,32 @@ jobs:
             --from-literal=database-name=moodle \
             --from-literal=database-user=moodle \
             --from-literal=database-password=${{ secrets.DB_PASSWORD }} \
-            --from-literal=database-root-password=${{ secrets.DB_ROOT_PASSWORD }}
+            --from-literal=database-root-password=${{ secrets.DB_ROOT_PASSWORD }} \
+            || echo "Secrets already exists in $BUILD_NAMESPACE";
 
       # Create Secrets
       - name: Deploy Redis Caching
         run: |
-          helm install redis bitnami/redis
+          helm install redis bitnami/redis \
+          || echo "Redis already exists in $BUILD_NAMESPACE";
 
       # Deploy Database
       - name: Deploy MariaDB
         working-directory: "./openshift"
         run: |
-          oc create -f mariadb-sts-replication.yaml -n ${BUILD_NAMESPACE}
+          oc create -f mariadb-sts-replication.yaml -n ${BUILD_NAMESPACE} \
+          || echo "MariaDB already exists in $BUILD_NAMESPACE";
 
-      # Build the app images
+      # Build web deployment
       - name: Build App images
         working-directory: "./openshift"
         run: |
-          test -n "${BRANCH}"
-          test -n "${BUILD_NAMESPACE}"
-          echo "BUILIDING ${APP} confifMap: web-config"
+          test -n "${{BRANCH}}"
+          test -n "${{BUILD_NAMESPACE}}"
+          echo "BUILIDING ${{APP}} confifMap: web-config"
           oc create configmap web-config \
             --from-file=nginx.conf=../builds/web/nginx.conf
-          echo "BUILIDING ${APP} with tag: ${BUILD_TAG}"
+          echo "BUILIDING ${{APP}} with tag: ${{BUILD_TAG}}"
           oc -n ${BUILD_NAMESPACE} process -f docker-build.yml \
             -p TAG=${BUILD_TAG} \
             -p SOURCE_REPOSITORY_REF=${BRANCH} \
@@ -100,8 +103,10 @@ jobs:
             -p DB_USER="moodle" \
             -p DB_NAME="moodle" \
             -p SOURCE_CONTEXT_DIR=. \
-            -p NAME=${APP} | oc -n ${BUILD_NAMESPACE} apply -f -
-          oc -n ${BUILD_NAMESPACE} start-build bc/${APP} --no-cache --wait
+            -p NAME=${APP} | oc -n ${BUILD_NAMESPACE} apply -f - \
+            || echo "${{APP}} already exists in $BUILD_NAMESPACE";
+          oc -n ${BUILD_NAMESPACE} start-build bc/${APP} --no-cache --wait \
+            || echo "bc/${{APP}} already exists in $BUILD_NAMESPACE";
 
   # Deploy App
   deploy:
@@ -156,9 +161,12 @@ jobs:
                 -p MOODLE_DATA_MOUNT_PATH="/app" \
                 -p BUILD_NAMESPACE="${BUILD_NAMESPACE}" \
                 -p IMAGE_STREAM_TAG="moodle:${BRANCH}" \
-                -p GITHUB_AUTH_TOKEN="${{ secrets.AUTH_TOKEN }}"
-          oc -n ${NAMESPACE} apply -f -
-          oc rollout latest dc/moodle -n ${NAMESPACE}
+                -p GITHUB_AUTH_TOKEN="${{ secrets.AUTH_TOKEN }}" \
+                || echo "Web already exists in $BUILD_NAMESPACE";
+          oc -n ${NAMESPACE} apply -f - \
+            || echo "Web cannot be applied in $BUILD_NAMESPACE";
+          oc rollout latest dc/moodle -n ${NAMESPACE} \
+            || echo "Web rollout cannot be completed in $BUILD_NAMESPACE";
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
           ATTEMPTS=0
           ROLLOUT_STATUS_CMD="oc rollout status dc/web -n ${NAMESPACE}"
@@ -190,9 +198,12 @@ jobs:
                 -p MOODLE_DATA_PATH="/app/moodledata" \
                 -p DATA_MOUNT_PATH="/app" \
                 -p BUILD_NAMESPACE="${BUILD_NAMESPACE}" \
-                -p IMAGE_STREAM_TAG="moodle:${BRANCH}"
-          oc -n ${NAMESPACE} apply -f -
-          oc rollout latest dc/php -n ${NAMESPACE}
+                -p IMAGE_STREAM_TAG="moodle:${BRANCH}" \
+                || echo "PHP already exists in $BUILD_NAMESPACE";
+          oc -n ${NAMESPACE} apply -f - \
+            || echo "PHP template cannot be applied in $BUILD_NAMESPACE";
+          oc rollout latest dc/php -n ${NAMESPACE} \
+            || echo "PHP rollout failed in $BUILD_NAMESPACE";
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
           ATTEMPTS=0
           ROLLOUT_STATUS_CMD="oc rollout status dc/php -n ${NAMESPACE}"
