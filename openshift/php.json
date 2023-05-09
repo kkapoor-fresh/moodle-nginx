@@ -4,36 +4,17 @@
   "labels": {
     "template": "${APP_NAME}"
   },
-  "message": "The following Site has been created in your project: ${APP_NAME}.\nDB: ${DB_NAME}.\n\n  URL: ${SITE_URL}",
+  "message": "${APP_NAME}",
   "metadata": {
     "annotations": {
-      "description": "PHP for Moodle application",
+      "description": "${APP_NAME} for Moodle",
       "openshift.io/display-name": "${APP_NAME}",
-      "openshift.io/long-description": "This template provides a Moodle buuld consisting of pods for: nginx, php, mysql, redis.",
+      "openshift.io/long-description": "This template provides a Moodle build consisting of pods for: nginx, php, mysql, redis.",
       "tags": "application,${APP_NAME}"
     },
     "name": "${APP_NAME}"
   },
   "objects": [
-    {
-			"apiVersion": "v1",
-			"kind": "Secret",
-			"metadata": {
-				"annotations": {
-					"template.openshift.io/expose-database_name": "{.data['database-name']}",
-					"template.openshift.io/expose-password": "{.data['database-password']}",
-					"template.openshift.io/expose-root_password": "{.data['database-root-password']}",
-					"template.openshift.io/expose-username": "{.data['database-user']}"
-				},
-				"name": "moodle-secrets"
-			},
-			"stringData": {
-				"database-name": "${DB_NAME}",
-				"database-password": "${DB_PASSWORD}",
-				"database-root-password": "${DB_ROOT_PASSWORD}",
-				"database-user": "${DB_USER}"
-			}
-    },
     {
       "apiVersion": "v1",
       "kind": "Service",
@@ -277,13 +258,6 @@
       "value": "/app/moodledata"
     },
     {
-      "description": "Website URL.",
-      "displayName": "URL",
-      "name": "SITE_URL",
-      "required": true,
-      "value": "https://moodle-e66ac2-dev.apps.silver.devops.gov.bc.ca"
-    },
-    {
       "description": "Image stream tag",
       "displayName": "Image Stream Tag",
       "required": true,
@@ -357,20 +331,6 @@
       "name": "DB_USER",
       "required": true,
       "value": "moodle"
-    },
-    {
-      "description": "Password for the MySQL connection user.",
-      "displayName": "MySQL Connection Password",
-      "name": "DB_PASSWORD",
-      "required": true,
-      "value": ""
-    },
-    {
-      "description": "Root password for the MySQL connection user.",
-      "displayName": "MySQL Connection Password",
-      "name": "DB_ROOT_PASSWORD",
-      "required": true,
-      "value": ""
     }
   ]
 }
