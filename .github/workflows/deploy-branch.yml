@@ -84,12 +84,12 @@ jobs:
       - name: Build App images
         working-directory: "./openshift"
         run: |
-          test -n "${{BRANCH}}"
-          test -n "${{BUILD_NAMESPACE}}"
-          echo "BUILIDING ${{APP}} confifMap: web-config"
+          test -n "${BRANCH}"
+          test -n "${BUILD_NAMESPACE}"
+          echo "BUILIDING ${APP} confifMap: web-config"
           oc create configmap web-config \
             --from-file=nginx.conf=../builds/web/nginx.conf
-          echo "BUILIDING ${{APP}} with tag: ${{BUILD_TAG}}"
+          echo "BUILIDING ${APP} with tag: ${BUILD_TAG}"
           oc -n ${BUILD_NAMESPACE} process -f docker-build.yml \
             -p TAG=${BUILD_TAG} \
             -p SOURCE_REPOSITORY_REF=${BRANCH} \
@@ -104,9 +104,9 @@ jobs:
             -p DB_NAME="moodle" \
             -p SOURCE_CONTEXT_DIR=. \
             -p NAME=${APP} | oc -n ${BUILD_NAMESPACE} apply -f - \
-            || echo "${{APP}} already exists in $BUILD_NAMESPACE";
+            || echo "${APP} already exists in $BUILD_NAMESPACE";
           oc -n ${BUILD_NAMESPACE} start-build bc/${APP} --no-cache --wait \
-            || echo "bc/${{APP}} already exists in $BUILD_NAMESPACE";
+            || echo "bc/${APP} already exists in $BUILD_NAMESPACE";
 
   # Deploy App
   deploy:
