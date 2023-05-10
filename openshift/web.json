@@ -61,7 +61,7 @@
           "insecureEdgeTerminationPolicy": "Redirect"
         },
         "port": {
-          "targetPort": 8081
+          "targetPort": ${HTTP_PORT}
         },
         "wildcardPolicy": "None"
       }
@@ -294,13 +294,19 @@
       "required": true,
       "value": "/var/cache/nginx"
     },
-
     {
       "description": "Website URL.",
       "displayName": "URL",
       "name": "SITE_URL",
       "required": true,
       "value": "moodle-e66ac2-dev.apps.silver.devops.gov.bc.ca"
+    },
+    {
+      "description": "HTTP Port",
+      "displayName": "PORT",
+      "name": "HTTP_PORT",
+      "required": true,
+      "value": 8081
     },
     {
       "description": "Image stream tag",
@@ -349,14 +355,6 @@
       "name": "MOODLE_DATA_MOUNT_PATH",
       "required": true,
       "value": "/app"
-    },
-
-    {
-      "description": "Server document root.",
-      "displayName": "Server Root",
-      "name": "DOCUMENT_ROOT",
-      "required": true,
-      "value": "/app/public"
     }
   ]
 }
