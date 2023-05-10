@@ -61,7 +61,7 @@
           "insecureEdgeTerminationPolicy": "Redirect"
         },
         "port": {
-          "targetPort": ${HTTP_PORT}
+          "targetPort": "${HTTP_PORT}"
         },
         "wildcardPolicy": "None"
       }
