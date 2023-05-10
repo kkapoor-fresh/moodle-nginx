@@ -100,7 +100,7 @@ jobs:
                 -p VOLUME_SIZE=10Gi \
                 -p MOODLE_DATA_PATH="/app/moodledata" \
                 -p MOODLE_DATA_MOUNT_PATH="/app" \
-                || echo "${WEB_APP_NAME} already exists in $BUILD_NAMESPACE";
+                || echo "${WEB_APP_NAME} already exists in $DEPLOY_NAMESPACE";
           oc -n ${DEPLOY_NAMESPACE} apply -f - \
           oc rollout latest dc/${WEB_APP_NAME} -n ${DEPLOY_NAMESPACE} \
             || echo "${WEB_APP_NAME} rollout cannot be completed in $DEPLOY_NAMESPACE";
