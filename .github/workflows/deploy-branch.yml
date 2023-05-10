@@ -147,6 +147,7 @@ jobs:
           echo "Current namespace is ${NAMESPACE}"
           oc -n ${BUILD_NAMESPACE} process -f openshift/web.json \
                 -p APP_NAME=web \
+                -p IMAGE_STREAM="nginx:latest" \
                 -p SITE_URL=${APP_HOST} \
                 -p MEMORY_LIMIT=512Mi \
                 -p MEMORY_REQUEST=128Mi \
@@ -154,12 +155,10 @@ jobs:
                 -p CPU_REQUEST=0.5 \
                 -p PROJECT_NAMESPACE=${DEPLOY_NAMESPACE} \
                 -p VOLUME_SIZE=10Gi \
-                -p HTTP_PORT=8081 \
                 -p MOODLE_DATA_PATH="/app/moodledata" \
                 -p MOODLE_DATA_MOUNT_PATH="/app" \
                 || echo "Web already exists in $BUILD_NAMESPACE";
-          oc -n ${BUILD_NAMESPACE} apply -f - \
-            || echo "Web cannot be applied in $BUILD_NAMESPACE";
+          oc -n ${DEPLOY_NAMESPACE} apply -f - \
           oc rollout latest dc/moodle -n ${BUILD_NAMESPACE} \
             || echo "Web rollout cannot be completed in $BUILD_NAMESPACE";
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.

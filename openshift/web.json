@@ -61,7 +61,7 @@
           "insecureEdgeTerminationPolicy": "Redirect"
         },
         "port": {
-          "targetPort": "${HTTP_PORT}"
+          "targetPort": 8081
         },
         "wildcardPolicy": "None"
       }
@@ -300,13 +300,6 @@
       "name": "SITE_URL",
       "required": true,
       "value": "moodle-e66ac2-dev.apps.silver.devops.gov.bc.ca"
-    },
-    {
-      "description": "HTTP Port",
-      "displayName": "PORT",
-      "name": "HTTP_PORT",
-      "required": true,
-      "value": 8081
     },
     {
       "description": "Image stream tag",
