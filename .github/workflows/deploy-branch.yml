@@ -85,11 +85,10 @@ jobs:
       # Deploy Web (Nginx)
       - name: Deploy Web Service
         run: |
-          test -n "${BUILD_NAMESPACE}"
           test -n "${DEPLOY_NAMESPACE}"
           test -n "${BRANCH}"
           echo "Current namespace is ${DEPLOY_NAMESPACE}"
-          oc -n ${BUILD_NAMESPACE} process -f openshift/web.json \
+          oc -n ${DEPLOY_NAMESPACE} process -f openshift/web.json \
                 -p APP_NAME=${WEB_APP_NAME} \
                 -p IMAGE_STREAM="nginx:latest" \
                 -p SITE_URL=${APP_HOST} \
@@ -103,8 +102,8 @@ jobs:
                 -p MOODLE_DATA_MOUNT_PATH="/app" \
                 || echo "${WEB_APP_NAME} already exists in $BUILD_NAMESPACE";
           oc -n ${DEPLOY_NAMESPACE} apply -f - \
-          oc rollout latest dc/${WEB_APP_NAME} -n ${BUILD_NAMESPACE} \
-            || echo "${WEB_APP_NAME} rollout cannot be completed in $BUILD_NAMESPACE";
+          oc rollout latest dc/${WEB_APP_NAME} -n ${DEPLOY_NAMESPACE} \
+            || echo "${WEB_APP_NAME} rollout cannot be completed in $DEPLOY_NAMESPACE";
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
           ATTEMPTS=0
           ROLLOUT_STATUS_CMD="oc rollout status dc/${WEB_APP_NAME} -n ${DEPLOY_NAMESPACE}"
