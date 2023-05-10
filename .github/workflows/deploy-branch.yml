@@ -41,6 +41,7 @@ jobs:
       APP: moodle
       APP_HOST: moodle-e66ac2-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
       DB_NAME: moodle
+      DB_USER: moodle
       WEB_APP_NAME: web
       PHP_APP_NAME: php
       DB_APP_NAME: database
@@ -54,15 +55,15 @@ jobs:
        # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
       - name: Log in to OpenShift
         run: |
-          oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
+          oc login --token=${{ secrets.DEPLOY_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       # Deploy Secrets
       - name: Deploy Secrets
         run: |
           oc project $DEPLOY_NAMESPACE \
-          oc create secret generic moodle-secrets \
-            --from-literal=database-name=moodle \
-            --from-literal=database-user=moodle \
+          oc create secret generic ${APP}-secrets \
+            --from-literal=database-name=${DB_NAME} \
+            --from-literal=database-user=${DB_USER} \
             --from-literal=database-password=${{ secrets.DB_PASSWORD }} \
             --from-literal=database-root-password=${{ secrets.DB_ROOT_PASSWORD }} \
             || echo "Secrets already exists in $DEPLOY_NAMESPACE";
