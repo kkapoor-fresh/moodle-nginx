@@ -44,7 +44,7 @@ jobs:
       WEB_APP_NAME: web
       PHP_APP_NAME: php
       DB_APP_NAME: database
-      CACHE_APP_NAME: redis_cache
+      CACHE_APP_NAME: redis
     steps:
       - name: Checkout Target Branch
         uses: actions/checkout@v1
@@ -69,11 +69,13 @@ jobs:
 
       # Deploy Redis Cache
       - name: Deploy Redis Caching
+        working-directory: "./openshift"
         run: |
           oc project $DEPLOY_NAMESPACE \
           helm repo add bitnami https://charts.bitnami.com/bitnami \
-          helm install redis bitnami/redis \
-          || echo "Redis already exists in $BUILD_NAMESPACE";
+          helm repo update \
+          helm install -f redis-values.yml ${CACHE_APP_NAME} bitnami/redis \
+          || echo "${CACHE_APP_NAME} already exists in $DEPLOY_NAMESPACE";
 
       # Deploy Database (MariaDB)
       - name: Deploy MariaDB
