@@ -103,7 +103,7 @@ jobs:
                 -p MOODLE_DATA_MOUNT_PATH="/app" \
                 || echo "${WEB_APP_NAME} already exists in $BUILD_NAMESPACE";
           oc -n ${DEPLOY_NAMESPACE} apply -f - \
-          oc rollout latest dc/moodle -n ${BUILD_NAMESPACE} \
+          oc rollout latest dc/${WEB_APP_NAME} -n ${BUILD_NAMESPACE} \
             || echo "${WEB_APP_NAME} rollout cannot be completed in $BUILD_NAMESPACE";
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
           ATTEMPTS=0
