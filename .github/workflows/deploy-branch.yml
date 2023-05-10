@@ -45,8 +45,6 @@ jobs:
       PHP_APP_NAME: php
       DB_APP_NAME: database
       CACHE_APP_NAME: redis_cache
-    needs:
-      - build
     steps:
       - name: Checkout Target Branch
         uses: actions/checkout@v1
