@@ -1,4 +1,5 @@
 app/*
+temp/*
 README.Moodle.DevOps.md
 .env*
 .ssh/*

@@ -55,68 +55,9 @@ jobs:
        # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
       - name: Log in to OpenShift
         run: |
-          oc login --token=${{ secrets.DEPLOY_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
+          oc login --token=${{ secrets.AUTH_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      # Deploy Secrets
-      - name: Deploy Secrets
-        run: |
-          oc project $DEPLOY_NAMESPACE \
-          oc create secret generic ${APP}-secrets \
-            --from-literal=database-name=${DB_NAME} \
-            --from-literal=database-user=${DB_USER} \
-            --from-literal=database-password=${{ secrets.DB_PASSWORD }} \
-            --from-literal=database-root-password=${{ secrets.DB_ROOT_PASSWORD }} \
-            || echo "Secrets already exists in $DEPLOY_NAMESPACE";
-
-      # Deploy Redis Cache
-      - name: Deploy Redis Caching
-        working-directory: "./openshift"
-        run: |
-          oc project $DEPLOY_NAMESPACE \
-          helm repo add bitnami https://charts.bitnami.com/bitnami \
-          helm repo update \
-          helm install -f redis-values.yml ${CACHE_APP_NAME} bitnami/redis \
-          || echo "${CACHE_APP_NAME} already exists in $DEPLOY_NAMESPACE";
-
-      # Deploy Database (MariaDB)
-      - name: Deploy MariaDB
-        working-directory: "./openshift"
-        run: |
-          oc create -f mariadb-sts-replication.yaml -n ${DEPLOY_NAMESPACE} \
-          || echo "MariaDB already exists in $DEPLOY_NAMESPACE";
-
-      # Deploy Web (Nginx)
-      - name: Deploy Web Service
-        run: |
-          test -n "${DEPLOY_NAMESPACE}"
-          test -n "${BRANCH}"
-          echo "Current namespace is ${DEPLOY_NAMESPACE}"
-          oc -n ${DEPLOY_NAMESPACE} process -f openshift/web.json \
-                -p APP_NAME=${WEB_APP_NAME} \
-                -p IMAGE_STREAM="nginx:latest" \
-                -p SITE_URL=${APP_HOST} \
-                -p MEMORY_LIMIT=512Mi \
-                -p MEMORY_REQUEST=128Mi \
-                -p CPU_LIMIT=1 \
-                -p CPU_REQUEST=0.5 \
-                -p PROJECT_NAMESPACE=${DEPLOY_NAMESPACE} \
-                -p VOLUME_SIZE=10Gi \
-                -p MOODLE_DATA_PATH="/app/moodledata" \
-                -p MOODLE_DATA_MOUNT_PATH="/app" \
-                || echo "${WEB_APP_NAME} already exists in $DEPLOY_NAMESPACE";
-          oc -n ${DEPLOY_NAMESPACE} apply -f - \
-          oc rollout latest dc/${WEB_APP_NAME} -n ${DEPLOY_NAMESPACE} \
-            || echo "${WEB_APP_NAME} rollout cannot be completed in $DEPLOY_NAMESPACE";
-          # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
-          ATTEMPTS=0
-          ROLLOUT_STATUS_CMD="oc rollout status dc/${WEB_APP_NAME} -n ${DEPLOY_NAMESPACE}"
-          until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
-            $ROLLOUT_STATUS_CMD
-            ATTEMPTS=$((attempts + 1))
-            sleep 10
-          done
-
-      # Deploy PHP-FPM (Moodle)
+      # Build PHP-FPM (Moodle)
       - name: Deploy PHP-FPM-Moodle
         run: |
           test -n "${DEPLOY_NAMESPACE}"
