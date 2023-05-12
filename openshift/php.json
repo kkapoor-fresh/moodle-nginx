@@ -282,14 +282,14 @@
       "displayName": "Mount Path",
       "name": "DATA_MOUNT_PATH",
       "required": true,
-      "value": "/app"
+      "value": "/app/moodledata"
     },
     {
       "description": "data PVC name",
       "displayName": "Data PVC",
       "name": "DATA_MOUNT_PVC_NAME",
       "required": true,
-      "value": "moodle-app-data"
+      "value": "moodledata"
     },
     {
       "description": "Database host name.",
