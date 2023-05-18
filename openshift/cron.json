@@ -96,8 +96,16 @@
                 "imagePullPolicy": "Always",
                 "volumeMounts": [
                   {
-                    "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
-                    "name": "${APP_NAME}data"
+                    "mountPath": "${MOODLE_DATA_PATH}",
+                    "name": "${DATA_MOUNT_PVC_NAME}"
+                  },
+                  {
+                    "mountPath": "${MOODLE_APP_DATA_PATH}",
+                    "name": "${APP_DATA_MOUNT_PVC_NAME}"
+                  },
+                  {
+                    "mountPath": "${MOODLE_BACKUP_DATA_PATH}",
+                    "name": "${BACKUP_DATA_MOUNT_PVC_NAME}"
                   },
                   {
                     "mountPath": "/tmp/file-backups",
@@ -183,15 +191,15 @@
             ],
             "volumes": [
               {
-                "name": "${APP_NAME}-data",
+                "name": "${DATA_MOUNT_PVC_NAME}",
                 "persistentVolumeClaim": {
-                  "claimName": "${APP_NAME}-data"
+                  "claimName": "${DATA_MOUNT_PVC_NAME}"
                 }
               },
               {
-                "name": "file-backup-data",
+                "name": "${APP_DATA_MOUNT_PVC_NAME}",
                 "persistentVolumeClaim": {
-                  "claimName": "file-backup-data"
+                  "claimName": "${APP_DATA_MOUNT_PVC_NAME}"
                 }
               },
               {
@@ -245,8 +253,37 @@
       "description": "Moodle data path.",
       "displayName": "Moodle Data Path",
       "name": "MOODLE_DATA_PATH",
-      "required": true,
-      "value": "/app/moodledata"
+      "value": "/var/moodledata"
+    },
+    {
+      "description": "Moodle app data path.",
+      "displayName": "Moodle App Data Path",
+      "name": "MOODLE_APP_DATA_PATH",
+      "value": "/var/www/html"
+    },
+    {
+      "description": "Moodle backup data path.",
+      "displayName": "Moodle Backup Data Path",
+      "name": "MOODLE_BACKUP_DATA_PATH",
+      "value": "/tmp/file-backups"
+    },
+    {
+      "description": "Moodle data. Saved user files, backups, etc.",
+      "displayName": "Data PVC",
+      "name": "DATA_MOUNT_PVC_NAME",
+      "value": "moodle-user-data"
+    },
+    {
+      "description": "Moodle app data. Shared between php, we and cron pods.",
+      "displayName": "Moodle App Data",
+      "name": "APP_DATA_MOUNT_PVC_NAME",
+      "value": "moodle-app-data"
+    },
+    {
+      "description": "Moodle file backups",
+      "displayName": "Backup Data PVC",
+      "name": "BACKUP_DATA_MOUNT_PVC_NAME",
+      "value": "moodle-backup-data"
     },
     {
       "description": "Image registry",
@@ -271,27 +308,6 @@
       "displayName": "Image Stream Tag",
       "required": true,
       "name": "IMAGE_STREAM_TAG"
-    },
-    {
-      "description": "Path where the persistent volume will be mounted",
-      "displayName": "Mount Path",
-      "name": "MOODLE_DATA_MOUNT_PATH",
-      "required": true,
-      "value": "/app/moodledata"
-    },
-    {
-      "description": "Database service name.",
-      "displayName": "DB Service Name",
-      "name": "DB_SERVICE_NAME",
-      "required": true,
-      "value": "${DB_SERVICE_NAME}"
-    },
-    {
-      "description": "Apache document root directory.",
-      "displayName": "Apache Root",
-      "name": "APACHE_DOCUMENT_ROOT",
-      "required": true,
-      "value": "/app/public"
     }
   ]
 }
