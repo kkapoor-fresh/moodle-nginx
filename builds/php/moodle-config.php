@@ -38,7 +38,7 @@ $moodle_dir = stripos($_SERVER['REQUEST_URI'], '/moodle') === 0 ? '/moodle' : ''
 $requested_site_url = $protocol.$_SERVER['HTTP_HOST'].$moodle_dir;
 
 $CFG->wwwroot   = $requested_site_url;
-$CFG->dataroot  = '/vendor/moodle/moodledata/persistent';
+$CFG->dataroot  = '/var/www/html/moodledata';
 $CFG->admin     = 'admin';
 // $CFG->alternateloginurl  = (isset($_ENV['ALTERNATE_LOGIN_URL'])) ? $_ENV['ALTERNATE_LOGIN_URL'] : '';
 

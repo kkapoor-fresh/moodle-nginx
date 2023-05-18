@@ -81,7 +81,7 @@
                 ],
                 "volumeMounts": [
                   {
-                    "mountPath": "${DATA_MOUNT_PATH}",
+                    "mountPath": "${MOODLE_DATA_PATH}",
                     "name": "${DATA_MOUNT_PVC_NAME}"
                   },
                   {
@@ -90,6 +90,17 @@
                     "subPath": ".env"
                   }
                 ],
+                "lifecycle": {
+                  "postStart": {
+                    "exec": {
+                      "command": [
+                        "/bin/sh",
+                        "-c",
+                        "cp -r /app/public/. /var/www/html"
+                      ]
+                    }
+                  }
+                },
                 "resources": {
                   "limits": {
                     "memory": "${MEMORY_LIMIT}",
@@ -244,18 +255,25 @@
   ],
   "parameters": [
     {
-      "description": "Application name.",
+      "description": "Application name",
       "displayName": "App Name",
       "name": "APP_NAME",
       "required": true,
       "value": "${APP_NAME}"
     },
     {
+      "description": "Site URL",
+      "displayName": "URL",
+      "name": "SITE_URL",
+      "required": true,
+      "value": "https://moodle-950003-prod.apps.silver.devops.gov.bc.ca/"
+    },
+    {
       "description": "Moodle data path.",
       "displayName": "Moodle Data Path",
       "name": "MOODLE_DATA_PATH",
       "required": true,
-      "value": "/app/moodledata"
+      "value": "/var/www/html"
     },
     {
       "description": "Image stream tag",
@@ -276,13 +294,6 @@
       "name": "MEMORY_REQUEST",
       "required": true,
       "value": "1Gi"
-    },
-    {
-      "description": "Path where the persistent volume will be mounted",
-      "displayName": "Mount Path",
-      "name": "DATA_MOUNT_PATH",
-      "required": true,
-      "value": "/app/moodledata"
     },
     {
       "description": "data PVC name",
@@ -322,13 +333,6 @@
       "description": "Name of the MySQL database accessed.",
       "displayName": "MySQL Database Name",
       "name": "DB_NAME",
-      "required": true,
-      "value": "moodle"
-    },
-    {
-      "description": "Username for MySQL user that will be used for accessing the database.",
-      "displayName": "MySQL Connection Username",
-      "name": "DB_USER",
       "required": true,
       "value": "moodle"
     }

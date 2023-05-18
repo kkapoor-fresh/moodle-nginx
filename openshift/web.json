@@ -70,7 +70,7 @@
       "apiVersion": "v1",
       "kind": "PersistentVolumeClaim",
       "metadata": {
-        "name": "moodle-app-data"
+        "name": "moodledata"
       },
       "spec": {
         "accessModes": [
@@ -131,7 +131,7 @@
         }
       },
       "spec": {
-        "replicas": 3,
+        "replicas": 1,
         "selector": {
           "deploymentconfig": "${APP_NAME}"
         },
@@ -178,11 +178,7 @@
                 "volumeMounts": [
                   {
                     "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
-                    "name": "moodle-app-data"
-                  },
-                  {
-                    "mountPath": "${MOODLE_CACHE_PATH}",
-                    "name": "moodle-cache-data"
+                    "name": "moodledata"
                   },
                   {
                     "mountPath": "/etc/nginx/conf.d",
@@ -191,6 +187,10 @@
                   {
                     "mountPath": "/var/run/",
                     "name": "moodle-web-run"
+                  },
+                  {
+                    "mountPath": "/var/cache/nginx",
+                    "name": "moodle-cache-data"
                   }
                 ],
                 "resources": {
@@ -217,9 +217,9 @@
             ],
             "volumes": [
               {
-                "name": "moodle-app-data",
+                "name": "moodledata",
                 "persistentVolumeClaim": {
-                  "claimName": "moodle-app-data"
+                  "claimName": "moodledata"
                 }
               },
               {
@@ -285,14 +285,7 @@
       "displayName": "Moodle Data Path",
       "name": "MOODLE_DATA_PATH",
       "required": true,
-      "value": "/app/moodledata"
-    },
-    {
-      "description": "Moodle cache path.",
-      "displayName": "Moodle cache Path",
-      "name": "MOODLE_CACHE_PATH",
-      "required": true,
-      "value": "/var/cache/nginx"
+      "value": "/var/www/html/moodledata"
     },
     {
       "description": "Website URL.",
@@ -347,7 +340,7 @@
       "displayName": "Mount Path",
       "name": "MOODLE_DATA_MOUNT_PATH",
       "required": true,
-      "value": "/app"
+      "value": "/var/www/html"
     }
   ]
 }
