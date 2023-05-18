@@ -37,7 +37,7 @@
       "apiVersion": "v1",
       "kind": "PersistentVolumeClaim",
       "metadata": {
-        "name": "moodledata"
+        "name": "moodle-user-data"
       },
       "spec": {
         "accessModes": [
@@ -102,6 +102,10 @@
                     "name": "${DATA_MOUNT_PVC_NAME}"
                   },
                   {
+                    "mountPath": "${MOODLE_APP_DATA_PATH}",
+                    "name": "${APP_DATA_MOUNT_PVC_NAME}"
+                  },
+                  {
                     "name": "env-data",
                     "mountPath": "/.env",
                     "subPath": ".env"
@@ -144,6 +148,10 @@
                   {
                     "name": "MOODLE_DATA_PATH",
                     "value": "${MOODLE_DATA_PATH}"
+                  },
+                  {
+                    "name": "MOODLE_APP_DATA_PATH",
+                    "value": "${MOODLE_APP_DATA_PATH}"
                   },
                   {
                     "name": "DB_HOST",
@@ -275,21 +283,24 @@
       "description": "Application name",
       "displayName": "App Name",
       "name": "APP_NAME",
-      "required": true,
-      "value": "${APP_NAME}"
+      "value": "Moodle"
     },
     {
       "description": "Site URL",
       "displayName": "URL",
       "name": "SITE_URL",
-      "required": true,
       "value": "https://moodle-950003-prod.apps.silver.devops.gov.bc.ca/"
     },
     {
       "description": "Moodle data path.",
       "displayName": "Moodle Data Path",
       "name": "MOODLE_DATA_PATH",
-      "required": true,
+      "value": "/var/moodledata"
+    },
+    {
+      "description": "Moodle app data path.",
+      "displayName": "Moodle App Data Path",
+      "name": "MOODLE_APP_DATA_PATH",
       "value": "/var/www/html"
     },
     {
@@ -302,42 +313,42 @@
       "description": "Maximum amount of memory the container can use.",
       "displayName": "Memory Limit",
       "name": "MEMORY_LIMIT",
-      "required": true,
       "value": "1Gi"
     },
     {
       "description": "Maximum amount of memory the container can use.",
       "displayName": "Memory Request",
       "name": "MEMORY_REQUEST",
-      "required": true,
       "value": "1Gi"
     },
     {
-      "description": "data PVC name",
+      "description": "Moodle data. Saved user files, backups, etc.",
       "displayName": "Data PVC",
       "name": "DATA_MOUNT_PVC_NAME",
-      "required": true,
-      "value": "moodledata"
+      "value": "moodle-user-data"
+    },
+    {
+      "description": "Moodle app data. Shared between php, we and cron pods.",
+      "displayName": "Moodle App Data",
+      "name": "APP_DATA_MOUNT_PVC_NAME",
+      "value": "moodle-app-data"
     },
     {
       "description": "Database host name.",
       "displayName": "DB Host",
       "name": "DB_HOST",
-      "required": true,
       "value": "mysql"
     },
     {
       "description": "Database secondary host name.",
       "displayName": "DB Secondary Host",
       "name": "DB_SECONDARY_NAME",
-      "required": true,
       "value": "mysql-read"
     },
     {
       "description": "Database Port opened for connections from other containers.",
       "displayName": "DB Port",
       "name": "DB_PORT",
-      "required": true,
       "value": "3306"
     },
     {
@@ -350,14 +361,12 @@
       "description": "Name of the MySQL database accessed.",
       "displayName": "MySQL Database Name",
       "name": "DB_NAME",
-      "required": true,
       "value": "moodle"
     },
     {
       "description": "Volume space available for Moodle application, e.g. 512Mi, 2Gi.",
       "displayName": "Moodle Volume Capacity",
       "name": "VOLUME_SIZE",
-      "required": true,
       "value": "10Gi"
     }
   ]

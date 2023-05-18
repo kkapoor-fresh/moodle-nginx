@@ -160,8 +160,12 @@
                 ],
                 "volumeMounts": [
                   {
-                    "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
-                    "name": "moodledata"
+                    "mountPath": "${MOODLE_DATA_PATH}",
+                    "name": "${DATA_MOUNT_PVC_NAME}"
+                  },
+                  {
+                    "mountPath": "${MOODLE_APP_DATA_PATH}",
+                    "name": "${APP_DATA_MOUNT_PVC_NAME}"
                   },
                   {
                     "mountPath": "/etc/nginx/conf.d",
@@ -196,10 +200,14 @@
             ],
             "volumes": [
               {
-                "name": "moodledata",
+                "name": "${DATA_MOUNT_PVC_NAME}",
                 "persistentVolumeClaim": {
-                  "claimName": "moodledata"
+                  "claimName": "${DATA_MOUNT_PVC_NAME}"
                 }
+              },
+              {
+                "mountPath": "${MOODLE_APP_DATA_PATH}",
+                "name": "${APP_DATA_MOUNT_PVC_NAME}"
               },
               {
                 "name": "moodle-cache-data",
@@ -254,11 +262,32 @@
       "value": "e66ac2-dev"
     },
     {
+      "description": "Moodle data. Saved user files, backups, etc.",
+      "displayName": "Data PVC",
+      "name": "DATA_MOUNT_PVC_NAME",
+      "required": true,
+      "value": "moodle-user-data"
+    },
+    {
+      "description": "Moodle app data. Shared between php, we and cron pods.",
+      "displayName": "Moodle App Data",
+      "name": "APP_DATA_MOUNT_PVC_NAME",
+      "required": true,
+      "value": "moodle-app-data"
+    },
+    {
       "description": "Moodle data path.",
       "displayName": "Moodle Data Path",
       "name": "MOODLE_DATA_PATH",
       "required": true,
-      "value": "/var/www/html/moodledata"
+      "value": "/var/moodledata"
+    },
+    {
+      "description": "Moodle app data path.",
+      "displayName": "Moodle App Data Path",
+      "name": "MOODLE_APP_DATA_PATH",
+      "required": true,
+      "value": "/var/www/html"
     },
     {
       "description": "Website URL.",
@@ -307,13 +336,6 @@
       "name": "VOLUME_SIZE",
       "required": true,
       "value": "10Gi"
-    },
-    {
-      "description": "Path where the persistent volume will be mounted",
-      "displayName": "Mount Path",
-      "name": "MOODLE_DATA_MOUNT_PATH",
-      "required": true,
-      "value": "/var/www/html"
     }
   ]
 }
