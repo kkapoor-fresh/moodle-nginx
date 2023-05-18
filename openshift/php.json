@@ -37,7 +37,24 @@
       "apiVersion": "v1",
       "kind": "PersistentVolumeClaim",
       "metadata": {
-        "name": "moodle-user-data"
+        "name": "${DATA_MOUNT_PVC_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "name": "${APP_DATA_MOUNT_PVC_NAME}"
       },
       "spec": {
         "accessModes": [
@@ -244,6 +261,12 @@
                 "name": "${DATA_MOUNT_PVC_NAME}",
                 "persistentVolumeClaim": {
                   "claimName": "${DATA_MOUNT_PVC_NAME}"
+                }
+              },
+              {
+                "name": "${APP_DATA_MOUNT_PVC_NAME}",
+                "persistentVolumeClaim": {
+                  "claimName": "${APP_DATA_MOUNT_PVC_NAME}"
                 }
               },
               {
