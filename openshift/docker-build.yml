@@ -60,7 +60,7 @@ parameters:
   - name: SOURCE_CONTEXT_DIR
     value: .
   - name: DOCKERFILE
-    required: true
+    value: "Dockerfile"
   - name: SOURCE_REPOSITORY_URL
     value: https://github.com/bcgov/moodle-nginx.git
   - name: TAG
@@ -69,7 +69,7 @@ parameters:
   - name: BASE_IMAGE_NAME
     required: true
   - name: BASE_IMAGE_TAG
-    required: true
+    value: "prod"
   - name: CPU_LIMIT
     value: "1"
   - name: CPU_REQUEST

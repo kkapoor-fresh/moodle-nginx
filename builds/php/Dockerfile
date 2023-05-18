@@ -1,5 +1,5 @@
 # FROM artifacts.developer.gov.bc.ca/docker-remote/php:7.4-fpm
-FROM php:8.1-fpm
+FROM php:7.4-fpm
 
 # Config arguments
 ARG PHP_FPM_PORT=9000
