@@ -75,7 +75,7 @@
           "template.alpha.openshift.io/wait-for-ready": "true"
         },
         "name": "${APP_NAME}",
-        "namespace": "${BUILD_NAMESPACE}",
+        "namespace": "${DEPLOY_NAMESPACE}",
         "labels": {
           "service": "${APP_NAME}"
         }
@@ -142,11 +142,11 @@
                 "resources": {
                   "limits": {
                     "memory": "${MEMORY_LIMIT}",
-                    "cpu": "1500m"
+                    "cpu": "${CPU_LIMIT}"
                   },
                   "requests": {
-                    "memory": "1Gi",
-                    "cpu": "1000m"
+                    "memory": "${MEMORY_REQUEST}",
+                    "cpu": "${CPU_REQUEST}"
                   }
                 },
                 "env": [
@@ -157,101 +157,6 @@
                   {
                     "name": "SITE_URL",
                     "value": "${SITE_URL}"
-                  },
-                  {
-                    "name": "MEMORY_LIMIT",
-                    "value": "${MEMORY_LIMIT}"
-                  },
-                  {
-                    "name": "MOODLE_DATA_PATH",
-                    "value": "${MOODLE_DATA_PATH}"
-                  },
-                  {
-                    "name": "MOODLE_APP_DATA_PATH",
-                    "value": "${MOODLE_APP_DATA_PATH}"
-                  },
-                  {
-                    "name": "DB_HOST",
-                    "value": "${DB_HOST}"
-                  },
-		              {
-                    "name": "DB_SECONDARY_NAME",
-                    "value": "${DB_SECONDARY_NAME}"
-                  },
-
-                  {
-                    "name": "DB_PORT",
-                    "value": "${DB_PORT}"
-                  },
-                  {
-                    "name": "BUILD_NAMESPACE",
-                    "value": "${BUILD_NAMESPACE}"
-                  },
-                  {
-                    "name": "DB_NAME",
-                    "value": "${DB_NAME}"
-                  },
-                  {
-                    "name": "DB_USER",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "moodle-secrets",
-                        "key": "database-user"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DB_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "moodle-secrets",
-                        "key": "database-password"
-                      }
-                    }
-                  },
-                  {
-                    "name": "UPSTREAM_URI",
-                    "value": "http://moodle:8080"
-                  },
-                  {
-                    "name": "HOST_NAME",
-                    "value": "moodle-950003-dev.apps.silver.devops.gov.bc.ca"
-                  },
-                  {
-                    "name": "MYSQL_USER",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "key": "database-user",
-                        "name": "moodle-secrets"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MYSQL_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "key": "database-password",
-                        "name": "moodle-secrets"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MYSQL_ROOT_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "key": "database-root-password",
-                        "name": "moodle-secrets"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MYSQL_DATABASE",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "key": "database-name",
-                        "name": "moodle-secrets"
-                      }
-                    }
                   }
                 ]
               }
@@ -327,8 +232,8 @@
       "value": "/var/www/html"
     },
     {
-      "description": "Image stream tag",
-      "displayName": "Image Stream Tag",
+      "description": "Image stream",
+      "displayName": "Image Stream",
       "required": true,
       "name": "IMAGE_STREAM"
     },
@@ -343,6 +248,18 @@
       "displayName": "Memory Request",
       "name": "MEMORY_REQUEST",
       "value": "1Gi"
+    },
+    {
+      "description": "Maximum CPU",
+      "displayName": "CPU Limit",
+      "name": "CPU_LIMIT",
+      "value": "2"
+    },
+    {
+      "description": "Requested CPU",
+      "displayName": "CPU Request",
+      "name": "CPU_REQUEST",
+      "value": "0.5"
     },
     {
       "description": "Moodle data. Saved user files, backups, etc.",
@@ -377,7 +294,7 @@
     {
       "description": "The OpenShift Namespace where the ImageStream resides.",
       "displayName": "Namespace",
-      "name": "BUILD_NAMESPACE",
+      "name": "DEPLOY_NAMESPACE",
       "required": true
     },
     {
@@ -390,7 +307,7 @@
       "description": "Volume space available for Moodle application, e.g. 512Mi, 2Gi.",
       "displayName": "Moodle Volume Capacity",
       "name": "VOLUME_SIZE",
-      "value": "10Gi"
+      "value": "5Gi"
     }
   ]
 }
