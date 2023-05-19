@@ -15,4 +15,4 @@ RUN touch /var/log/schedule.log
 RUN chmod 0777 /var/log/schedule.log
 
 # Setup and run cron
-RUN (crontab -l -u root; echo "* * * * * su -c '/usr/local/bin/php /app/public/admin/cli/cron.php >&1'") | crontab
+RUN (crontab -l -u root; echo "* * * * * su -c '/usr/local/bin/php /var/www/html/admin/cli/cron.php >&1'") | crontab
