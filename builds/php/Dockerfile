@@ -7,14 +7,14 @@ ARG PHP_FPM_PORT=9000
 ARG DB_PORT=3306
 ARG ENV_FILE=".env"
 ARG CRONTAB="FALSE"
-ARG DB_HOST="mysql"
-ARG DB_HOST_2="mysql"
+ARG DB_HOST="mariadb"
+ARG DB_HOST_2="mariadb"
 ARG DB_NAME="moodle"
 ARG DB_PASSWORD=""
 ARG DB_USER="moodle"
 
 # Moodle App directory
-ENV MOODLE_APP_DIR /app/public
+ENV MOODLE_APP_DIR /var/www/html
 ENV CONF_FILE $MOODLE_APP_DIR/config.php
 ENV PHP_FPM_DIR /usr/local/etc/php-fpm.d
 ENV PHP_INI_FILE $ETC_DIR/php/conf.d/moodlephp.ini

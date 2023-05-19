@@ -39,7 +39,7 @@
       "kind": "PersistentVolumeClaim",
       "apiVersion": "v1",
       "metadata": {
-        "name": "file-backup-data"
+        "name": "${BACKUP_DATA_MOUNT_PVC_NAME}"
       },
       "spec": {
         "accessModes": [
@@ -90,7 +90,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${IMAGE_STREAM_TAG}",
+                "image": "${IMAGE_STREAM}",
                 "name": "${APP_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
@@ -108,10 +108,6 @@
                     "name": "${BACKUP_DATA_MOUNT_PVC_NAME}"
                   },
                   {
-                    "mountPath": "/tmp/file-backups",
-                    "name": "file-backup-data"
-                  },
-                  {
                     "name": "env-data",
                     "mountPath": "/.env",
                     "subPath": ".env"
@@ -119,12 +115,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "memory": "${MOODLE_MEMORY_LIMIT}",
-                    "cpu": "1500m"
+                    "memory": "${MEMORY_LIMIT}",
+                    "cpu": "${CPU_LIMIT}"
                   },
                   "requests": {
-                    "memory": "4Gi",
-                    "cpu": "1000m"
+                    "memory": "${MEMORY_REQUEST}",
+                    "cpu": "${CPU_REQUEST}"
                   }
                 },
                 "env": [
@@ -307,7 +303,31 @@
       "description": "Image stream tag",
       "displayName": "Image Stream Tag",
       "required": true,
-      "name": "IMAGE_STREAM_TAG"
+      "name": "IMAGE_STREAM"
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Limit",
+      "name": "MEMORY_LIMIT",
+      "value": "2Gi"
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Request",
+      "name": "MEMORY_REQUEST",
+      "value": "1Gi"
+    },
+    {
+      "description": "Maximum CPU",
+      "displayName": "CPU Limit",
+      "name": "CPU_LIMIT",
+      "value": "2"
+    },
+    {
+      "description": "Requested CPU",
+      "displayName": "CPU Request",
+      "name": "CPU_REQUEST",
+      "value": "0.5"
     }
   ]
 }
