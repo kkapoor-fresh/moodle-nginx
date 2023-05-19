@@ -228,10 +228,6 @@
                   {
                     "name": "APP_NAME",
                     "value": "${APP_NAME}"
-                  },
-                  {
-                    "name": "SITE_URL",
-                    "value": "${SITE_URL}"
                   }
                 ]
               }

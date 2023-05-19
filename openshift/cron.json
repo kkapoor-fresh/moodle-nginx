@@ -2,7 +2,7 @@
   "apiVersion": "template.openshift.io/v1",
   "kind": "Template",
   "labels": {
-    "template": "${APP_NAME}"
+    "template": "${POD_NAME}"
   },
   "message": "Moodle cron job",
   "metadata": {
@@ -10,9 +10,9 @@
       "description": "Moodle cron job runner",
       "openshift.io/display-name": "Moodle",
       "openshift.io/long-description": "This template provides a Moodle buuld consisting of pods for: nginx, php, mysql, redis.",
-      "tags": "application,${APP_NAME}"
+      "tags": "application,${POD_NAME}"
     },
-    "name": "${APP_NAME}"
+    "name": "${POD_NAME}"
   },
   "objects": [
     {
@@ -60,16 +60,16 @@
         "annotations": {
           "template.alpha.openshift.io/wait-for-ready": "true"
         },
-        "name": "${APP_NAME}",
+        "name": "${POD_NAME}",
         "namespace": "${DEPLOY_NAMESPACE}",
         "labels": {
-          "service": "${APP_NAME}"
+          "service": "${POD_NAME}"
         }
       },
       "spec": {
         "replicas": 1,
         "selector": {
-          "deploymentconfig": "${APP_NAME}"
+          "deploymentconfig": "${POD_NAME}"
         },
         "strategy": {
           "type": "Rolling",
@@ -84,14 +84,14 @@
         "template": {
           "metadata": {
             "labels": {
-              "deploymentconfig": "${APP_NAME}"
+              "deploymentconfig": "${POD_NAME}"
             }
           },
           "spec": {
             "containers": [
               {
                 "image": "${IMAGE_STREAM}",
-                "name": "${APP_NAME}",
+                "name": "${POD_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
                 "volumeMounts": [
@@ -205,9 +205,9 @@
                 }
               },
               {
-                "name": "${APP_NAME}-config",
+                "name": "${POD_NAME}-config",
                 "configMap": {
-                  "name": "${APP_NAME}-config",
+                  "name": "${POD_NAME}-config",
                   "defaultMode": 420
                 }
               },
@@ -241,8 +241,13 @@
       "description": "Application name.",
       "displayName": "App Name",
       "name": "APP_NAME",
-      "required": true,
-      "value": "${APP_NAME}"
+      "value": "moodle"
+    },
+    {
+      "description": "Pod name.",
+      "displayName": "Pod Name",
+      "name": "POD_NAME",
+      "value": "cron"
     },
     {
       "description": "Website name.",
