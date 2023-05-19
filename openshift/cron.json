@@ -199,6 +199,12 @@
                 }
               },
               {
+                "name": "${BACKUP_DATA_MOUNT_PVC_NAME}",
+                "persistentVolumeClaim": {
+                  "claimName": "${BACKUP_DATA_MOUNT_PVC_NAME}"
+                }
+              },
+              {
                 "name": "${APP_NAME}-config",
                 "configMap": {
                   "name": "${APP_NAME}-config",
@@ -261,7 +267,7 @@
       "description": "Moodle backup data path.",
       "displayName": "Moodle Backup Data Path",
       "name": "MOODLE_BACKUP_DATA_PATH",
-      "value": "/tmp/file-backups"
+      "value": "/tmp/backups"
     },
     {
       "description": "Moodle data. Saved user files, backups, etc.",
