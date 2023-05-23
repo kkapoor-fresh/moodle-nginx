@@ -13,9 +13,12 @@ ARG DB_NAME="moodle"
 ARG DB_PASSWORD=""
 ARG DB_USER="moodle"
 
-# Moodle App directory
-ENV MOODLE_APP_DIR /app/public
-ENV CONF_FILE $MOODLE_APP_DIR/config.php
+# Moodle App directory.
+# Build dir is used to aid in sharing app with other pods.
+# Build then copy to final (PVC) destination upon deployment in OpenShift.
+ENV MOODLE_BUILD_DIR /app/public
+ENV MOODLE_APP_DIR /var/www/html
+ENV CONF_FILE $MOODLE_BUILD_DIR/config.php
 ENV PHP_FPM_DIR /usr/local/etc/php-fpm.d
 ENV PHP_INI_FILE $ETC_DIR/php/conf.d/moodlephp.ini
 
@@ -39,26 +42,26 @@ RUN docker-php-ext-enable redis
 COPY ./moodlephp.ini $PHP_INI_FILE
 COPY ./moodlephpfpm.conf $PHP_FPM_DIR
 
-RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_APP_DIR
+RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_BUILD_DIR
 
-RUN mkdir -p $MOODLE_APP_DIR/admin/tool/trigger && \
-    mkdir -p $MOODLE_APP_DIR/admin/tool/dataflows && \
-    mkdir -p $MOODLE_APP_DIR/mod/facetoface && \
-    mkdir -p $MOODLE_APP_DIR/mod/hvp  && \
-    mkdir -p $MOODLE_APP_DIR/course/format/topcoll  && \
-    mkdir -p $MOODLE_APP_DIR/mod/certificate  && \
-    mkdir -p $MOODLE_APP_DIR/mod/customcert  && \
-    chown -R www-data:www-data $MOODLE_APP_DIR/admin/tool/ && \
-    chown -R www-data:www-data $MOODLE_APP_DIR/mod/ && \
-    chown -R www-data:www-data $MOODLE_APP_DIR/course/format/
+RUN mkdir -p $MOODLE_BUILD_DIR/admin/tool/trigger && \
+    mkdir -p $MOODLE_BUILD_DIR/admin/tool/dataflows && \
+    mkdir -p $MOODLE_BUILD_DIR/mod/facetoface && \
+    mkdir -p $MOODLE_BUILD_DIR/mod/hvp  && \
+    mkdir -p $MOODLE_BUILD_DIR/course/format/topcoll  && \
+    mkdir -p $MOODLE_BUILD_DIR/mod/certificate  && \
+    mkdir -p $MOODLE_BUILD_DIR/mod/customcert  && \
+    chown -R www-data:www-data $MOODLE_BUILD_DIR/admin/tool/ && \
+    chown -R www-data:www-data $MOODLE_BUILD_DIR/mod/ && \
+    chown -R www-data:www-data $MOODLE_BUILD_DIR/course/format/
 
-RUN git clone --recurse-submodules --jobs 8 https://github.com/catalyst/moodle-tool_trigger $MOODLE_APP_DIR/admin/tool/trigger && \
-    git clone --recurse-submodules --jobs 8 --branch $DATAFLOWS_BRANCH_VERSION --single-branch https://github.com/catalyst/moodle-tool_dataflows.git $MOODLE_APP_DIR/admin/tool/dataflows && \
-    git clone --recurse-submodules --jobs 8 --branch $F2F_BRANCH_VERSION --single-branch https://github.com/catalyst/moodle-mod_facetoface $MOODLE_APP_DIR/mod/facetoface && \
-    git clone --recurse-submodules --jobs 8 --branch $HVP_BRANCH_VERSION --single-branch https://github.com/h5p/moodle-mod_hvp $MOODLE_APP_DIR/mod/hvp && \
-    git clone --recurse-submodules --jobs 8 --branch $FORMAT_BRANCH_VERSION --single-branch https://github.com/gjb2048/moodle-format_topcoll $MOODLE_APP_DIR/course/format/topcoll && \
-    git clone --recurse-submodules --jobs 8 --branch $CERTIFICATE_BRANCH_VERSION --single-branch https://github.com/mdjnelson/moodle-mod_certificate $MOODLE_APP_DIR/mod/certificate && \
-    git clone --recurse-submodules --jobs 8 --branch $CUSTOMCERT_BRANCH_VERSION --single-branch https://github.com/mdjnelson/moodle-mod_customcert $MOODLE_APP_DIR/mod/customcert
+RUN git clone --recurse-submodules --jobs 8 https://github.com/catalyst/moodle-tool_trigger $MOODLE_BUILD_DIR/admin/tool/trigger && \
+    git clone --recurse-submodules --jobs 8 --branch $DATAFLOWS_BRANCH_VERSION --single-branch https://github.com/catalyst/moodle-tool_dataflows.git $MOODLE_BUILD_DIR/admin/tool/dataflows && \
+    git clone --recurse-submodules --jobs 8 --branch $F2F_BRANCH_VERSION --single-branch https://github.com/catalyst/moodle-mod_facetoface $MOODLE_BUILD_DIR/mod/facetoface && \
+    git clone --recurse-submodules --jobs 8 --branch $HVP_BRANCH_VERSION --single-branch https://github.com/h5p/moodle-mod_hvp $MOODLE_BUILD_DIR/mod/hvp && \
+    git clone --recurse-submodules --jobs 8 --branch $FORMAT_BRANCH_VERSION --single-branch https://github.com/gjb2048/moodle-format_topcoll $MOODLE_BUILD_DIR/course/format/topcoll && \
+    git clone --recurse-submodules --jobs 8 --branch $CERTIFICATE_BRANCH_VERSION --single-branch https://github.com/mdjnelson/moodle-mod_certificate $MOODLE_BUILD_DIR/mod/certificate && \
+    git clone --recurse-submodules --jobs 8 --branch $CUSTOMCERT_BRANCH_VERSION --single-branch https://github.com/mdjnelson/moodle-mod_customcert $MOODLE_BUILD_DIR/mod/customcert
 
 # Copy Moodle config
 COPY --chown=www-data:www-data ./moodle-config.php $CONF_FILE
@@ -71,5 +74,5 @@ RUN sed -i "s|DB_PORT|${DB_PORT}|" $CONF_FILE  && \
   sed -i "s|DB_NAME|${DB_NAME}|" $CONF_FILE  && \
   sed -i "s|DB_USER|${DB_USER}|" $CONF_FILE  && \
   sed -i "s|DB_PASSWORD|${DB_PASSWORD}|" $CONF_FILE  && \
-  sed -i "s|MOODLE_APP_DIR|${MOODLE_APP_DIR}|" $CONF_FILE  && \
+  sed -i "s|MOODLE_BUILD_DIR|${MOODLE_APP_DIR}|" $CONF_FILE  && \
   sed -i "s|SITE_URL|${SITE_URL}|" $CONF_FILE

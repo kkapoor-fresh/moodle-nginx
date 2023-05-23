@@ -90,4 +90,4 @@ parameters:
   - name: DB_HOST
     value: "mariadb-sts-0.mariadb"
   - name: DB_PASSWORD
-    value: "128Mi"
+    value: "empty"
