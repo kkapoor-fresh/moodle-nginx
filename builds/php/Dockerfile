@@ -74,5 +74,5 @@ RUN sed -i "s|DB_PORT|${DB_PORT}|" $CONF_FILE  && \
   sed -i "s|DB_NAME|${DB_NAME}|" $CONF_FILE  && \
   sed -i "s|DB_USER|${DB_USER}|" $CONF_FILE  && \
   sed -i "s|DB_PASSWORD|${DB_PASSWORD}|" $CONF_FILE  && \
-  sed -i "s|MOODLE_BUILD_DIR|${MOODLE_APP_DIR}|" $CONF_FILE  && \
+  sed -i "s|MOODLE_APP_DIR|${MOODLE_APP_DIR}|" $CONF_FILE  && \
   sed -i "s|SITE_URL|${SITE_URL}|" $CONF_FILE
