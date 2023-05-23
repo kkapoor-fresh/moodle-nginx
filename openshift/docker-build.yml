@@ -54,6 +54,15 @@ objects:
       strategy:
         dockerStrategy:
           dockerfilePath: "${DOCKERFILE}"
+          buildArgs:
+          - name: "DB_HOST"
+            value: "${DB_HOST}"
+          - name: "DB_NAME"
+            value: "moodle"
+          - name: "DB_USER"
+            value: "moodle"
+          - name: "DB_PASSWORD"
+            value: "${DB_PASSWORD}"
         type: Docker
 parameters:
   - name: SUFFIX
@@ -77,4 +86,8 @@ parameters:
   - name: MEMORY_LIMIT
     value: "2Gi"
   - name: MEMORY_REQUEST
+    value: "128Mi"
+  - name: DB_HOST
+    value: "mariadb-sts-0.mariadb"
+  - name: DB_PASSWORD
     value: "128Mi"
