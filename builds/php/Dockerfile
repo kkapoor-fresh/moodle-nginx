@@ -14,7 +14,7 @@ ARG DB_PASSWORD=""
 ARG DB_USER="moodle"
 
 # Moodle App directory
-ENV MOODLE_APP_DIR /var/www/html
+ENV MOODLE_APP_DIR /app/public
 ENV CONF_FILE $MOODLE_APP_DIR/config.php
 ENV PHP_FPM_DIR /usr/local/etc/php-fpm.d
 ENV PHP_INI_FILE $ETC_DIR/php/conf.d/moodlephp.ini
