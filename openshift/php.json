@@ -134,7 +134,7 @@
                       "command": [
                         "/bin/sh",
                         "-c",
-                        "cp -r /app/public/. /var/www/html"
+                        "cp -ru /app/public/. /var/www/html 2>/dev/null || :"
                       ]
                     }
                   }
@@ -253,7 +253,7 @@
       "description": "Maximum CPU",
       "displayName": "CPU Limit",
       "name": "CPU_LIMIT",
-      "value": "2"
+      "value": "1"
     },
     {
       "description": "Requested CPU",
