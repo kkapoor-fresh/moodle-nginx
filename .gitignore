@@ -5,3 +5,4 @@ README.Moodle.DevOps.md
 .ssh/*
 *tenant-gitops*
 .dccache
+var/*

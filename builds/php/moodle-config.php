@@ -9,7 +9,7 @@ unset($CFG);
 global $CFG;
 $CFG = new stdClass();
 
-$CFG->dbtype    = 'mysqli';
+$CFG->dbtype    = 'mariadb';
 $CFG->dblibrary = 'native';
 $CFG->dbhost    = 'DB_HOST';
 $CFG->dbname    = 'DB_NAME';
@@ -33,8 +33,8 @@ $CFG->dboptions =  array (
 //   'latency' => '2'
 // );
 
-$protocol = stripos($_SERVER['SERVER_PROTOCOL'], 'https') === 0 ? 'https://' : 'http://';
-$moodle_dir = stripos($_SERVER['REQUEST_URI'], '/moodle') === 0 ? '/moodle' : ''; // for local dev in /moodle folder
+$protocol = stripos($_SERVER['SITE_URL'], 'https') === 0 ? 'https://' : 'http://';
+$moodle_dir = stripos($_SERVER['SITE_URL'], '/moodle') === 0 ? '/moodle' : ''; // for local dev in /moodle folder
 $requested_site_url = $protocol.$_SERVER['HTTP_HOST'].$moodle_dir;
 
 $CFG->wwwroot   = $requested_site_url;

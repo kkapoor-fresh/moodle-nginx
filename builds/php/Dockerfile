@@ -1,6 +1,6 @@
 # FROM artifacts.developer.gov.bc.ca/docker-remote/php:7.4-fpm
 # PHP 8.1 is required for PECL
-FROM php:8.1-fpm
+FROM php:8.0-fpm
 
 # Config arguments
 ARG PHP_FPM_PORT=9000
