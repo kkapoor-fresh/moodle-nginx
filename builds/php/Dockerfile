@@ -31,13 +31,14 @@ ENV CERTIFICATE_BRANCH_VERSION MOODLE_31_STABLE
 ENV CUSTOMCERT_BRANCH_VERSION MOODLE_311_STABLE
 ENV DATAFLOWS_BRANCH_VERSION MOODLE_35_STABLE
 
-RUN apt-get update && apt-get install -y git zlib1g-dev libpng-dev libxml2-dev libzip-dev libxslt-dev libldap-dev
+RUN apt-get update && apt-get install -y mariadb-client-10.5 rsync git zlib1g-dev libpng-dev libxml2-dev libzip-dev libxslt-dev libldap-dev
 RUN pecl install channel://pecl.php.net/xmlrpc-1.0.0RC3
 RUN docker-php-ext-enable xmlrpc
 RUN docker-php-ext-install pdo pdo_mysql mysqli gd soap intl zip xsl opcache ldap
 RUN pecl install -o -f redis
 RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
+RUN apt-get update
 
 COPY ./moodlephp.ini $PHP_INI_FILE
 COPY ./moodlephpfpm.conf $PHP_FPM_DIR
