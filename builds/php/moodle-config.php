@@ -48,12 +48,12 @@ $CFG->sslproxy = ( stristr($CFG->wwwroot, "gov.bc.ca") || stristr($CFG->wwwroot,
 
 $CFG->getremoteaddrconf = 0;
 
-require_once(__DIR__ . '/lib/setup.php');
-
 if (isset($_REQUEST['debug'])) {
-    echo '<pre>',print_r($_SERVER),'</pre>';
-    echo '<pre>',print_r($CFG),'</pre>';
+  echo '<pre>',print_r($_SERVER),'</pre>';
+  echo '<pre>',print_r($CFG),'</pre>';
 }
+
+require_once(__DIR__ . '/lib/setup.php');
 
 // There is no php closing tag in this file,
 // it is intentional because it prevents trailing whitespace problems!

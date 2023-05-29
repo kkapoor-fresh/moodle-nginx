@@ -14,7 +14,7 @@ services:
         volumes:
             - ./app:/app:delegated
             - ./var/www/html:/var/www/html:delegated
-        # command: bash -c "cp -ru /app/public/. /var/www/html && chown -R www-data:www-data /var/www/html/config.php"
+        # command: bash -c "cp -ru /app/public/. /var/www/html 2>/dev/null || : && chown -R www-data:www-data /var/www/html/config.php"
     cron:
         build:
             context: .
