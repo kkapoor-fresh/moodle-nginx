@@ -12,15 +12,16 @@ ARG DB_HOST_2="mariadb"
 ARG DB_NAME="moodle"
 ARG DB_PASSWORD=""
 ARG DB_USER="moodle"
+ARG ETC_DIR="/usr/local/etc"
 
 # Moodle App directory.
 # Build dir is used to aid in sharing app with other pods.
 # Build then copy to final (PVC) destination upon deployment in OpenShift.
 ENV MOODLE_BUILD_DIR /app/public
 ENV MOODLE_APP_DIR /var/www/html
-ENV CONF_FILE $MOODLE_BUILD_DIR/config.php
+ENV CONF_FILE $MOODLE_APP_DIR/config.php
 ENV PHP_FPM_DIR /usr/local/etc/php-fpm.d
-ENV PHP_INI_FILE $ETC_DIR/php/conf.d/moodlephp.ini
+ENV PHP_INI_FILE $ETC_DIR/conf.d/moodle-php.ini
 
 # Version control for Moodle and plugins
 ENV MOODLE_BRANCH_VERSION MOODLE_311_STABLE
@@ -40,7 +41,7 @@ RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
 RUN apt-get update
 
-COPY ./moodlephp.ini $PHP_INI_FILE
+COPY ./moodle-php.ini $PHP_INI_FILE
 COPY ./moodlephpfpm.conf $PHP_FPM_DIR
 
 RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_BUILD_DIR

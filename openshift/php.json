@@ -126,6 +126,11 @@
                     "name": "env-data",
                     "mountPath": "/.env",
                     "subPath": ".env"
+                  },
+                  {
+                    "name": "php-config",
+                    "mountPath": "/php/conf.d/moodle-php.ini",
+                    "subPath": "moodle-php.ini"
                   }
                 ],
                 "lifecycle": {
@@ -191,6 +196,13 @@
                       "path": ".env"
                     }
                   ]
+                }
+              },
+              {
+                "name": "php-config",
+                "configMap": {
+                  "name": "php-config",
+                  "defaultMode": 420
                 }
               }
             ]
