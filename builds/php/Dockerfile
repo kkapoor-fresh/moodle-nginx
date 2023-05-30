@@ -12,7 +12,7 @@ ARG DB_HOST_2="mariadb"
 ARG DB_NAME="moodle"
 ARG DB_PASSWORD=""
 ARG DB_USER="moodle"
-ARG ETC_DIR="/usr/local/etc/php"
+ARG ETC_DIR="/usr/local/etc"
 
 # Moodle App directory.
 # Build dir is used to aid in sharing app with other pods.
@@ -20,8 +20,8 @@ ARG ETC_DIR="/usr/local/etc/php"
 ENV MOODLE_BUILD_DIR /app/public
 ENV MOODLE_APP_DIR /var/www/html
 ENV CONF_FILE $MOODLE_APP_DIR/config.php
-ENV PHP_FPM_DIR /usr/local/etc/php-fpm.d
-ENV PHP_INI_FILE $ETC_DIR/conf.d/moodle-php.ini
+ENV PHP_FPM_DIR $ETC_DIR/php-fpm.d
+ENV PHP_INI_FILE $ETC_DIR/php/conf.d/moodle-php.ini
 
 # Version control for Moodle and plugins
 ENV MOODLE_BRANCH_VERSION MOODLE_311_STABLE
