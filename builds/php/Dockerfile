@@ -12,7 +12,7 @@ ARG DB_HOST_2="mariadb"
 ARG DB_NAME="moodle"
 ARG DB_PASSWORD=""
 ARG DB_USER="moodle"
-ARG ETC_DIR="/usr/local/etc"
+ARG ETC_DIR="/usr/local/etc/php"
 
 # Moodle App directory.
 # Build dir is used to aid in sharing app with other pods.
