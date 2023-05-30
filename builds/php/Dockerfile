@@ -41,8 +41,8 @@ RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
 RUN apt-get update
 
-COPY ./moodle-php.ini $PHP_INI_FILE
-COPY ./moodlephpfpm.conf $PHP_FPM_DIR
+COPY ./php.ini $PHP_INI_FILE
+COPY ./php-fpm.conf $PHP_FPM_DIR
 
 RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_BUILD_DIR
 
