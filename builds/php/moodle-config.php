@@ -17,6 +17,7 @@ $CFG->dbuser    = 'DB_USER';
 $CFG->dbpass    = 'DB_PASSWORD';
 $CFG->moodleappdir    = 'MOODLE_APP_DIR';
 $CFG->prefix    = '';
+$CFG->tool_generator_users_password = 'moodle-gen-PWd';
 
 $CFG->dboptions =  array (
   'dbpersist' => 0,
