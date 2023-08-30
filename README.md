@@ -29,14 +29,12 @@ Network host names are the same as the service names (e.g. just 'redis')
 * Stop any local instances of web server and mysql
 * Make sure you have the docker-compose command installed
 * Clone this repo somewhere suitable (everything else is relative to this folder)
-* Creat subdirectories app/moodledata app/public.
-* Clone/copy Moodle into app/public (not as a subdir, public itself)
-* Copy config.php from here to that directory - modify as required
-* app/moodledata should be chmod 0777
-* docker-compose up --build -d
-* If I haven't missed anything, you should be able to access/install Moodle at localhost
-* MySQL should be accessible by your favourite client also at localhost
-
-# Build / run Moodle
-docker-compose build --no-cache
-docker-compose -p moodle up -d --env-file ./.env.dev
+* Create subdirectories for Moodle installation (for local development with docker-compose):
+    ./temp/var/www/html
+    ./temp/var/www/moodledata
+* Use example.env file to create a custom .env file for the docker-compose build
+* Build / run Moodle
+    $ docker-compose build --no-cache
+    $ docker-compose -p moodle up -d --env-file ./.env.dev
+* Rebuild single service (php), without affecting dependencies
+    $ docker-compose up --build --force-recreate --no-deps -d php

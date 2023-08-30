@@ -41,8 +41,6 @@ jobs:
 
 
 
-
-
 jobs:
   #Print variables for logging and debugging purposes
   checkEnv:
@@ -69,6 +67,13 @@ jobs:
       BRANCH: ${{ github.ref_name }}
       BUILD_TAG: ${{ github.ref_name }}
       APP: moodle
+      DB_NAME: moodle
+      DB_USER: moodle
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      WEB_APP_NAME: web
+      PHP_APP_NAME: php
+      DB_APP_NAME: db
+      CACHE_APP_NAME: redis
       DB_BACKUP_APP: db-backup
     steps:
       # Checkout the PR branch
@@ -97,7 +102,7 @@ jobs:
                 -p TAG=${BUILD_TAG} \
                 -p SOURCE_REPOSITORY_REF=${BRANCH} \
                 -p BASE_IMAGE_NAME="ngnix" \
-                -p BASE_IMAGE_TAG="8.0-fpm" \
+                -p BASE_IMAGE_TAG="latest" \
                 -p SITE_URL="https://moodle-e66ac2-${BUILD_TAG}.apps.silver.devops.gov.bc.ca" \
                 -p BASE_IMAGE_REPO="aro.jfrog.io/moodle/" \
                 -p GITHUB_AUTH_TOKEN=${{ secrets.AUTH_TOKEN }} \
@@ -123,7 +128,6 @@ jobs:
       APP: moodle
       APP_HOST: moodle-e66ac2-dev.apps.silver.devops.gov.bc.ca
       DB_HOST: mysql
-      DB_HOST_2: mysql-read
       DB_BACKUP_APP: db-backup
       DB_NAME: moodle
     needs:
@@ -149,7 +153,6 @@ jobs:
                 -p APP_NAME=${APP} \
                 -p SITE_URL=${APP_HOST} \
                 -p DB_HOST=${DB_HOST} \
-                -p DB_HOST_2=${DB_HOST_2} \
                 -p MEMORY_LIMIT=1Gi \
                 -p MEMORY_REQUEST=256Mi \
                 -p CPU_LIMIT=2 \

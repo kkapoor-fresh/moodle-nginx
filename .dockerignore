@@ -1,2 +1,9 @@
-./app
-.env*
+# ./app
+# .env*
+
+/ArgoCD/*
+/dataflows/*
+/docs/*
+/helm/*
+/openshift/*
+/temp/*

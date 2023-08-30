@@ -1,0 +1,10 @@
+/app/*
+/var/www/html/*
+
+/ArgoCD/*
+/builds/*
+/dataflows/*
+/docs/*
+/helm/*
+/openshift/*
+/temp/*

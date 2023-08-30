@@ -7,29 +7,27 @@ data:
 
   primary.cnf: |
     [mariadb]
-    log-bin                         # enable binary loging
-    # We are going to create server_id in initContainer
-    # server_id=3000                  # used to uniquely identify the server
-    log-basename=my-mariadb         # used to be independent of to hostname changes (otherwise is in datadir/mysql)
-    #binlog-format=MIXED            #default
+    log-bin                         # enable binary logging
+    log-basename=mariadb         # used to be independent of hostname changes (otherwise is in datadir/mysql)
+    max_allowed_packet=1073741824
 
   replica.cnf: |
     [mariadb]
-    # We are going to create server_id in initContainer
-    # server_id=3001                  # used to uniquely identify the server
-    log-basename=my-mariadb         # used to be independent of to hostname changes (otherwise is in datadir/mysql)
-    #binlog-format=MIXED            #default
+    log-basename=mariadb         # used to be independent of hostname changes (otherwise is in datadir/mysql)
+    max_allowed_packet=1073741824
+    slave-skip-errors=1396
 
   primary.sql: |
     CREATE USER 'repluser'@'%' IDENTIFIED BY 'replsecret';
     GRANT REPLICATION REPLICA ON *.* TO 'repluser'@'%';
-    CREATE DATABASE primary_db;
+    CREATE DATABASE moodle;
 
   secondary.sql: |
-    # we have to know name of sts (`mariadb-sts`) and
-    # service `mariadb` in advance as an FQDN
+    # We have to know name of sts (`mariadb-sts`) and
+    # service `mariadb-service` in advance as an FQDN.
+    # No need to use master_port
     CHANGE MASTER TO
-    MASTER_HOST='mariadb-sts-0.mariadb.default.svc.cluster.local',
+    MASTER_HOST='mariadb-sts-0.mariadb-service.default.svc.cluster.local',
     MASTER_USER='repluser',
     MASTER_PASSWORD='replsecret',
     MASTER_CONNECT_RETRY=10;
@@ -58,7 +56,7 @@ metadata:
   name: mariadb-sts
 spec:
   serviceName: "mariadb"
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: mariadb
@@ -117,11 +115,10 @@ spec:
           name: mariadb-port
         env:
         # Using Secrets
-        - name: MARIADB_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: moodle-secrets
-              key: database-root-password
+        - name: MARIADB_ALLOW_EMPTY_ROOT_PASSWORD
+          value: "yes"
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
         - name: MARIADB_DATABASE
           valueFrom:
             secretKeyRef:
@@ -153,15 +150,6 @@ spec:
           mountPath: /etc/mysql/conf.d/
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
-        livenessProbe:
-          exec:
-            command:
-            - /usr/local/bin/healthcheck.sh
-            - --su=mysql
-            - --connect
-            - --innodb_initialized
-          initialDelaySeconds: 20
-          periodSeconds: 25
       volumes:
       - name: mariadb-config-map
         configMap:
@@ -179,7 +167,7 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 5Gi
+          storage: 8Gi
 # Delete the
 # pvc's  for i in 0 1 2; do kubectl delete pvc datadir-mariadb-sts-$i; done
 # https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/

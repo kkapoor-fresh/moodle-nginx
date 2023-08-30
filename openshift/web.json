@@ -70,7 +70,24 @@
       "apiVersion": "v1",
       "kind": "PersistentVolumeClaim",
       "metadata": {
-        "name": "moodle-app-data"
+        "name": "${DATA_MOUNT_PVC_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_SIZE}"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "name": "${APP_DATA_MOUNT_PVC_NAME}"
       },
       "spec": {
         "accessModes": [
@@ -104,7 +121,7 @@
       "apiVersion": "v1",
       "kind": "PersistentVolumeClaim",
       "metadata": {
-        "name": "moodle-web-run"
+        "name": "${MOODLE_WEB_RUN_MOUNT_PVC_NAME}"
       },
       "spec": {
         "accessModes": [
@@ -177,20 +194,24 @@
                 ],
                 "volumeMounts": [
                   {
-                    "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
-                    "name": "moodle-app-data"
+                    "mountPath": "${MOODLE_DATA_PATH}",
+                    "name": "${DATA_MOUNT_PVC_NAME}"
                   },
                   {
-                    "mountPath": "${MOODLE_CACHE_PATH}",
-                    "name": "moodle-cache-data"
+                    "mountPath": "${MOODLE_APP_DATA_PATH}",
+                    "name": "${APP_DATA_MOUNT_PVC_NAME}"
+                  },
+                  {
+                    "mountPath": "${MOODLE_WEB_RUN_DATA_PATH}",
+                    "name": "${MOODLE_WEB_RUN_MOUNT_PVC_NAME}"
                   },
                   {
                     "mountPath": "/etc/nginx/conf.d",
                     "name": "${APP_NAME}-config"
                   },
                   {
-                    "mountPath": "/var/run/",
-                    "name": "moodle-web-run"
+                    "mountPath": "/var/cache/nginx",
+                    "name": "moodle-cache-data"
                   }
                 ],
                 "resources": {
@@ -207,31 +228,33 @@
                   {
                     "name": "APP_NAME",
                     "value": "${APP_NAME}"
-                  },
-                  {
-                    "name": "SITE_URL",
-                    "value": "${SITE_URL}"
                   }
                 ]
               }
             ],
             "volumes": [
               {
-                "name": "moodle-app-data",
+                "name": "${DATA_MOUNT_PVC_NAME}",
                 "persistentVolumeClaim": {
-                  "claimName": "moodle-app-data"
+                  "claimName": "${DATA_MOUNT_PVC_NAME}"
+                }
+              },
+              {
+                "name": "${APP_DATA_MOUNT_PVC_NAME}",
+                "persistentVolumeClaim": {
+                  "claimName": "${APP_DATA_MOUNT_PVC_NAME}"
+                }
+              },
+              {
+                "name": "${MOODLE_WEB_RUN_MOUNT_PVC_NAME}",
+                "persistentVolumeClaim": {
+                  "claimName": "${MOODLE_WEB_RUN_MOUNT_PVC_NAME}"
                 }
               },
               {
                 "name": "moodle-cache-data",
                 "persistentVolumeClaim": {
                   "claimName": "moodle-cache-data"
-                }
-              },
-              {
-                "name": "moodle-web-run",
-                "persistentVolumeClaim": {
-                  "claimName": "moodle-web-run"
                 }
               },
               {
@@ -281,20 +304,33 @@
       "value": "e66ac2-dev"
     },
     {
+      "description": "Moodle data. Saved user files, backups, etc.",
+      "displayName": "Data PVC",
+      "name": "DATA_MOUNT_PVC_NAME",
+      "required": true,
+      "value": "moodle-user-data"
+    },
+    {
+      "description": "Moodle app data. Shared between php, we and cron pods.",
+      "displayName": "Moodle App Data",
+      "name": "APP_DATA_MOUNT_PVC_NAME",
+      "required": true,
+      "value": "moodle-app-data"
+    },
+    {
       "description": "Moodle data path.",
       "displayName": "Moodle Data Path",
       "name": "MOODLE_DATA_PATH",
       "required": true,
-      "value": "/app/moodledata"
+      "value": "/var/www/moodledata"
     },
     {
-      "description": "Moodle cache path.",
-      "displayName": "Moodle cache Path",
-      "name": "MOODLE_CACHE_PATH",
+      "description": "Moodle app data path.",
+      "displayName": "Moodle App Data Path",
+      "name": "MOODLE_APP_DATA_PATH",
       "required": true,
-      "value": "/var/cache/nginx"
+      "value": "/var/www/html"
     },
-
     {
       "description": "Website URL.",
       "displayName": "URL",
@@ -313,50 +349,35 @@
       "displayName": "CPU Request",
       "name": "CPU_REQUEST",
       "required": true,
-      "value": "100m"
+      "value": "50m"
     },
     {
       "description": "Maximum amount of CPU the container can use.",
       "displayName": "CPU Limit",
       "name": "CPU_LIMIT",
       "required": true,
-      "value": "1000m"
+      "value": "500m"
     },
     {
       "description": "Request amount of memory for the container.",
       "displayName": "Memory Request",
       "name": "MEMORY_REQUEST",
       "required": true,
-      "value": "256Mi"
+      "value": "40Mi"
     },
     {
       "description": "Maximum amount of memory the container can use.",
       "displayName": "Memory Limit",
       "name": "MEMORY_LIMIT",
       "required": true,
-      "value": "1Gi"
+      "value": "128Mi"
     },
     {
       "description": "Volume space available for Moodle application, e.g. 512Mi, 2Gi.",
       "displayName": "Moodle Volume Capacity",
       "name": "VOLUME_SIZE",
       "required": true,
-      "value": "10Gi"
-    },
-    {
-      "description": "Path where the persistent volume will be mounted",
-      "displayName": "Mount Path",
-      "name": "MOODLE_DATA_MOUNT_PATH",
-      "required": true,
-      "value": "/app"
-    },
-
-    {
-      "description": "Server document root.",
-      "displayName": "Server Root",
-      "name": "DOCUMENT_ROOT",
-      "required": true,
-      "value": "/app/public"
+      "value": "5Gi"
     }
   ]
 }
