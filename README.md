@@ -1,7 +1,6 @@
 # Moodle with Nginx, PHP-FPM, MariaDB and Redis for docker-compose and OpenShift
 
-[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md) - ```[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](<Redirect-URL>)```\
-The project is in the early stages of development. The codebase will be changing frequently.
+[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md) - The project is in the early stages of development. The codebase will be changing frequently.
 
 ## Explanation
 
