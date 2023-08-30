@@ -1,7 +1,8 @@
-# ./app
-# .env*
+/app/*
+/var/www/html/*
 
 /ArgoCD/*
+/builds/*
 /dataflows/*
 /docs/*
 /helm/*

@@ -15,31 +15,38 @@ $CFG->dbhost    = 'DB_HOST';
 $CFG->dbname    = 'DB_NAME';
 $CFG->dbuser    = 'DB_USER';
 $CFG->dbpass    = 'DB_PASSWORD';
-$CFG->moodleappdir    = 'MOODLE_APP_DIR';
+$CFG->moodleappdir    = '/var/www/html';
 $CFG->prefix    = '';
 $CFG->tool_generator_users_password = 'moodle-gen-PWd';
 
+$CFG->session_redis_host = 'redis';
+$CFG->session_handler_class = '\core\session\redis';
+$CFG->session_redis_port = 6379; // Optional if TCP. For socket use -1
+$CFG->session_redis_database = 0; // Optional, default is db 0.
+// $CFG->session_redis_prefix = 'sess_'; // Optional, default is don't set one.
+$CFG->session_redis_acquire_lock_timeout = 120;
+$CFG->session_redis_lock_expire = 7200;
+$CFG->session_redis_serializer_use_igbinary = true;
+
 $CFG->dboptions =  array (
   'dbpersist' => 0,
-  'dbport' => 'DB_PORT',
+  'dbport' => '3306',
   'dbsocket' => '',
   'dbcollation' => 'utf8mb4_unicode_ci',
 );
 
-// $CFG->dboptions['readonly'] = array (
-//   'instance' => [
-//       'dbhost' => 'DB_HOST_2',
-//       'dbport' => 'DB_PORT'
-//     ],
-//   'latency' => '2'
-// );
+if (php_sapi_name() == "cli") {
+    $CFG->wwwroot = '/var/www/moodledata';
+} else {
+    $protocol = (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+        && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https://' : 'http://';
+    $moodle_dir = stripos($_SERVER['REQUEST_URI'], '/moodle') === 0 ? '/moodle' : ''; // for local dev in /moodle folder
+    $requested_site_url = $protocol.$_SERVER['HTTP_HOST'].$moodle_dir;
 
-$protocol = (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https://' : 'http://';
-$moodle_dir = stripos($_SERVER['REQUEST_URI'], '/moodle') === 0 ? '/moodle' : ''; // for local dev in /moodle folder
-$requested_site_url = $protocol.$_SERVER['HTTP_HOST'].$moodle_dir;
+    $CFG->wwwroot = $requested_site_url;
+}
 
-$CFG->wwwroot   = $requested_site_url;
-$CFG->dataroot  = '/var/moodledata';
+$CFG->dataroot  = '/var/www/moodledata';
 $CFG->admin     = 'admin';
 // $CFG->alternateloginurl  = (isset($_ENV['ALTERNATE_LOGIN_URL'])) ? $_ENV['ALTERNATE_LOGIN_URL'] : '';
 

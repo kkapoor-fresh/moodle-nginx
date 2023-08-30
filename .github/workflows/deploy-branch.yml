@@ -34,7 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BUILD_ID: ${{ github.event.number }}
-      CRON_PASSWORD: ${{ secrets.CRON_PASSWORD }}
       DEPLOY_NAMESPACE: e66ac2-${{ github.ref_name }}
       BUILD_NAMESPACE: e66ac2-tools
       BRANCH: ${{ github.ref_name }}
@@ -42,9 +41,10 @@ jobs:
       APP_HOST: moodle-e66ac2-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
       DB_NAME: moodle
       DB_USER: moodle
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       WEB_APP_NAME: web
       PHP_APP_NAME: php
-      DB_APP_NAME: database
+      DB_APP_NAME: db
       CACHE_APP_NAME: redis
     steps:
       - name: Checkout Target Branch
@@ -58,7 +58,7 @@ jobs:
           oc login --token=${{ secrets.AUTH_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       # Build PHP-FPM (Moodle)
-      - name: Deploy PHP-FPM-Moodle
+      - name: Deploy Moodle-PHP-FPM
         run: |
           test -n "${DEPLOY_NAMESPACE}"
           test -n "${BUILD_NAMESPACE}"
@@ -75,7 +75,7 @@ jobs:
                 -p VOLUME_SIZE=10Gi \
                 -p HTTP_PORT=8080 \
                 -p DB_PORT=3306 \
-                -p APACHE_DOCUMENT_ROOT="/app/public" \
+                -p APACHE_DOCUMENT_ROOT="/var/www/html" \
                 -p MOODLE_DATA_PATH="/app/moodledata" \
                 -p DATA_MOUNT_PATH="/app" \
                 -p BUILD_NAMESPACE="${BUILD_NAMESPACE}" \
