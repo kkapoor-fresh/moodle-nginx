@@ -4,10 +4,10 @@
 
 This directory contains the docker setup to run an instance of Moodle 3.11. A number of containers are created as follows
 
-* PHP 7.4-fpm for Moodle app and cron
-* nginx as the web server
-* redis for cache
-* mariadb for database
+* PHP-FPM for Moodle app and cron
+* Nginx as the web server
+* Mariadb Galera database
+* Redis cache
 
 The main configuration is setup in the file docker-compose.yml. Each service is a container and the compose file gives the
 various configuration details for that service. The volumes directives map paths inside the containers to local paths. Note that
