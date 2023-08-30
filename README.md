@@ -1,6 +1,6 @@
-# docker_moodle11
+# Moodle with Nginx, PHP-FPM, MariaDB and Redis for docker-compose and OpenShift
 
-== Explanation ==
+## Explanation
 
 This directory contains the docker setup to run an instance of Moodle 3.11. A number of containers are created as follows
 
@@ -23,18 +23,17 @@ without worrying about the containers.
 
 Network host names are the same as the service names (e.g. just 'redis')
 
-== To set up locally ==
+## Local server setup
 
-* Install Docker daemon and get running
-* Stop any local instances of web server and mysql
+* Install and run Docker daemon
 * Make sure you have the docker-compose command installed
 * Clone this repo somewhere suitable (everything else is relative to this folder)
 * Create subdirectories for Moodle installation (for local development with docker-compose):
-    ./temp/var/www/html
-    ./temp/var/www/moodledata
+  /temp/var/www/html
+  /temp/var/www/moodledata
 * Use example.env file to create a custom .env file for the docker-compose build
 * Build / run Moodle
-    $ docker-compose build --no-cache
-    $ docker-compose -p moodle up -d --env-file ./.env.dev
+  docker-compose build --no-cache
+  docker-compose -p moodle up -d --env-file ./.env.dev
 * Rebuild single service (php), without affecting dependencies
-    $ docker-compose up --build --force-recreate --no-deps -d php
+  docker-compose up --build --force-recreate --no-deps -d php
