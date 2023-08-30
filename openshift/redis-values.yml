@@ -73,7 +73,7 @@ sentinel:
     # pullSecrets:
     #   - myRegistryKeySecretName
   masterSet: mymaster
-  initialCheckTimeout: 5
+  initialCheckTimeout: 15
   quorum: 2
   downAfterMilliseconds: 60000
   failoverTimeout: 18000
@@ -93,14 +93,14 @@ sentinel:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 5
+    initialDelaySeconds: 25
     periodSeconds: 5
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 5
   readinessProbe:
     enabled: true
-    initialDelaySeconds: 5
+    initialDelaySeconds: 25
     periodSeconds: 5
     timeoutSeconds: 1
     successThreshold: 1

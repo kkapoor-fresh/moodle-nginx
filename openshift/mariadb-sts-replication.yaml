@@ -7,18 +7,15 @@ data:
 
   primary.cnf: |
     [mariadb]
-    log-bin                         # enable binary loging
-    # We are going to create server_id in initContainer
-    # server_id=3000                  # used to uniquely identify the server
-    log-basename=my-mariadb         # used to be independent of to hostname changes (otherwise is in datadir/mysql)
-    #binlog-format=MIXED            #default
+    log-bin                         # enable binary logging
+    log-basename=mariadb         # used to be independent of hostname changes (otherwise is in datadir/mysql)
+    max_allowed_packet=1073741824
 
   replica.cnf: |
     [mariadb]
-    # We are going to create server_id in initContainer
-    # server_id=3001                  # used to uniquely identify the server
-    log-basename=my-mariadb         # used to be independent of to hostname changes (otherwise is in datadir/mysql)
-    #binlog-format=MIXED            #default
+    log-basename=mariadb         # used to be independent of hostname changes (otherwise is in datadir/mysql)
+    max_allowed_packet=1073741824
+    slave-skip-errors=1396
 
   primary.sql: |
     CREATE USER 'repluser'@'%' IDENTIFIED BY 'replsecret';
@@ -26,10 +23,11 @@ data:
     CREATE DATABASE moodle;
 
   secondary.sql: |
-    # we have to know name of sts (`mariadb-sts`) and
-    # service `mariadb` in advance as an FQDN
+    # We have to know name of sts (`mariadb-sts`) and
+    # service `mariadb-service` in advance as an FQDN.
+    # No need to use master_port
     CHANGE MASTER TO
-    MASTER_HOST='mariadb-sts-0.mariadb',
+    MASTER_HOST='mariadb-sts-0.mariadb-service.default.svc.cluster.local',
     MASTER_USER='repluser',
     MASTER_PASSWORD='replsecret',
     MASTER_CONNECT_RETRY=10;

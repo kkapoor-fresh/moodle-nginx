@@ -7,16 +7,19 @@ data:
   primary.cnf: |
     [mariadb]
     log-bin                         # enable binary logging
-    log-basename=my-mariadb         # used to be independent of hostname changes (otherwise is in datadir/mysql)
+    log-basename=mariadb         # used to be independent of hostname changes (otherwise is in datadir/mysql)
+    max_allowed_packet=1073741824
 
   replica.cnf: |
     [mariadb]
-    log-basename=my-mariadb         # used to be independent of hostname changes (otherwise is in datadir/mysql)
+    log-basename=mariadb         # used to be independent of hostname changes (otherwise is in datadir/mysql)
+    max_allowed_packet=1073741824
+    slave-skip-errors=1396
 
   primary.sql: |
     CREATE USER 'repluser'@'%' IDENTIFIED BY 'replsecret';
     GRANT REPLICATION REPLICA ON *.* TO 'repluser'@'%';
-    CREATE DATABASE primary_db;
+    CREATE DATABASE moodle;
 
   secondary.sql: |
     # We have to know name of sts (`mariadb-sts`) and

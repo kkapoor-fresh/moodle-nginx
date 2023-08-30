@@ -322,7 +322,7 @@
       "displayName": "Moodle Data Path",
       "name": "MOODLE_DATA_PATH",
       "required": true,
-      "value": "/var/moodledata"
+      "value": "/var/www/moodledata"
     },
     {
       "description": "Moodle app data path.",
@@ -330,20 +330,6 @@
       "name": "MOODLE_APP_DATA_PATH",
       "required": true,
       "value": "/var/www/html"
-    },
-    {
-      "description": "Moodle web run data. Shared between php, we and cron pods.",
-      "displayName": "Moodle Web Run Data",
-      "name": "MOODLE_WEB_RUN_MOUNT_PVC_NAME",
-      "required": true,
-      "value": "moodle-web-run-data"
-    },
-    {
-      "description": "Moodle Web Run data path.",
-      "displayName": "Moodle Web Run App Data Path",
-      "name": "MOODLE_WEB_RUN_DATA_PATH",
-      "required": true,
-      "value": "/var/run"
     },
     {
       "description": "Website URL.",
@@ -363,28 +349,28 @@
       "displayName": "CPU Request",
       "name": "CPU_REQUEST",
       "required": true,
-      "value": "100m"
+      "value": "50m"
     },
     {
       "description": "Maximum amount of CPU the container can use.",
       "displayName": "CPU Limit",
       "name": "CPU_LIMIT",
       "required": true,
-      "value": "1000m"
+      "value": "500m"
     },
     {
       "description": "Request amount of memory for the container.",
       "displayName": "Memory Request",
       "name": "MEMORY_REQUEST",
       "required": true,
-      "value": "256Mi"
+      "value": "40Mi"
     },
     {
       "description": "Maximum amount of memory the container can use.",
       "displayName": "Memory Limit",
       "name": "MEMORY_LIMIT",
       "required": true,
-      "value": "1Gi"
+      "value": "128Mi"
     },
     {
       "description": "Volume space available for Moodle application, e.g. 512Mi, 2Gi.",
