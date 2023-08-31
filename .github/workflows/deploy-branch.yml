@@ -2,6 +2,15 @@
 # Builds and Deploys merged PR's to persistent pods/services/routes/etc in the OpenShift Dev environment.
 name: Deploy on Openshift
 
+env:
+  PROJECT: e66ac2
+  APP: moodle
+  DB_BACKUP_APP: db-backup
+  BUILD_ID: ${{ github.event.number }}
+  BRANCH: ${{ github.ref_name }}
+  APP_HOST: moodle-${{ github.ref_name }}-${{ env.PROJECT }}.apps.silver.devops.gov.bc.ca
+  DB_HOST: db-0.mysql
+
 on:
   push:
     branches:
@@ -30,14 +39,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
     env:
-      BUILD_ID: ${{ github.event.number }}
-      PROJECT: e66ac2
-      BUILD_NAMESPACE: ${PROJECT}-tools
-      DEPLOY_NAMESPACE: ${PROJECT}-${{ github.ref_name }}
-      BRANCH: ${{ github.ref_name }}
-      BUILD_TAG: ${{ github.ref_name }}
-      APP: moodle
-      DB_BACKUP_APP: db-backup
+      BUILD_NAMESPACE: $PROJECT-tools
+      DEPLOY_NAMESPACE: $PROJECT-$BRANCH
     steps:
       # Checkout the PR branch
       - name: Print env
@@ -58,29 +61,23 @@ jobs:
       - name: Build App images
         working-directory: "./openshift"
         run: |
-          test -n "${BRANCH}"
+          test -n "$BRANCH"
           test -n "${BUILD_NAMESPACE}"
-          echo "BUILIDING ${APP} with tag: ${BUILD_TAG}"
+          echo "BUILIDING ${APP} with tag: $BRANCH"
             oc -n ${BUILD_NAMESPACE} process -f docker-build.yml \
-            -p DEPLOY_NAMESPACE=${DEPLOY_NAMESPACE} \
+            -p DEPLOY_NAMESPACE=$DEPLOY_NAMESPACE \
             -p APP_NAME=${APP} | oc -n ${BUILD_NAMESPACE} apply -f -
           oc -n ${BUILD_NAMESPACE} start-build bc/${APP} --no-cache --wait
 
-  # Deploy App images in Dev
-  deployDev:
-    name: Deploy APP to Dev environment
+  # Deploy App
+  deploy:
+    name: Deploy APP
     runs-on: ubuntu-latest
-    if: github.ref_name == 'dev'
+    if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
     env:
-      BUILD_ID: ${{ github.event.number }}
-      PROJECT: e66ac2
-      DEPLOY_NAMESPACE: ${PROJECT}-${{ github.ref_name }}
-      BUILD_NAMESPACE: ${PROJECT}-tools
-      BRANCH: ${{ github.ref_name }}
-      APP: moodle
-      APP_HOST: moodle-e66ac2-dev.apps.silver.devops.gov.bc.ca
-      DB_BACKUP_APP: db-backup
-      DB_NAME: moodle
+      DEPLOY_NAMESPACE: $PROJECT-$BRANCH
+      BUILD_NAMESPACE: $PROJECT-tools
+      IMAGE_NAME: $APP-$BRANCH
     needs:
       - build
     steps:
@@ -96,47 +93,27 @@ jobs:
 
       - name: Deploy APP
         run: |
-          test -n "${DEPLOY_NAMESPACE}"
-          test -n "${BUILD_NAMESPACE}"
-          test -n "${BRANCH}"
-          echo "Current namespace is ${DEPLOY_NAMESPACE}"
-          oc -n ${DEPLOY_NAMESPACE} process -f openshift/moodle-dc-persistent-template.json \
+          test -n "$DEPLOY_NAMESPACE"
+          test -n "$BRANCH"
+          echo "Current namespace is $DEPLOY_NAMESPACE"
+          oc -n $DEPLOY_NAMESPACE process -f openshift/moodle-dc-persistent-template.json \
                 -p APP_NAME=${APP} \
-                -p SITE_URL=${APP_HOST} \
-                -p DB_HOST=mysql-0.mysql \
-                -p DB_SECONDARY_NAME=mysql-read \
-                -p MOODLE_MEMORY_LIMIT=6Gi \
-                -p DEPLOY_NAMESPACE=${DEPLOY_NAMESPACE}\
-                -p DB_SERVICE_NAME=mysql-0.mysql \
-                -p MOODLE_VOLUME_CAPACITY=10Gi \
-                -p BACKUP_VOLUME_SIZE=25Gi \
-                -p DB_NAME=moodle \
-                -p DB_USER=moodle \
-                -p HTTP_PORT=8080 \
-                -p DB_PORT=3306 \
-                -p APACHE_DOCUMENT_ROOT="/vendor/moodle/moodle" \
-                -p SITE_NAME=Moodle \
+                -p SITE_URL=$APP_HOST \
+                -p DB_SERVICE_NAME=$DB_HOST \
                 -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-                -p GIT_PROJECT=moodle \
-                -p MOODLE_DATA_PATH="/vendor/moodle/moodledata/persistent" \
-                -p MOODLE_DATA_MOUNT_PATH="/vendor/moodle/moodledata/persistent" \
-                -p BUILD_NAMESPACE="e66ac2-tools" \
-                -p IMAGE_STREAM_TAG="moodle:test" \
-                -p GIT_URL="https://github.com/moodle/moodle.git" \
-                -p GIT_TAG=openshift \
-                -p GITHUB_AUTH_TOKEN="${{ secrets.AUTH_TOKEN }}" \
-                -p CRON_PASSWORD="${{ secrets.CRON_PASSWORD }}" | \
-          oc -n ${NAMESPACE} apply -f -
-          oc rollout latest dc/moodle -n ${NAMESPACE}
+                -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
+                -p IMAGE_STREAM_TAG=$IMAGE_NAME | \
+          oc -n $BUILD_NAMESPACE apply -f -
+          oc rollout latest dc/moodle -n $BUILD_NAMESPACE
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
           ATTEMPTS=0
-          ROLLOUT_STATUS_CMD="oc rollout status dc/moodle -n ${NAMESPACE}"
+          ROLLOUT_STATUS_CMD="oc rollout status dc/moodle -n $BUILD_NAMESPACE"
           until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
             $ROLLOUT_STATUS_CMD
             ATTEMPTS=$((attempts + 1))
             sleep 10
           done
-          oc project ${NAMESPACE}
+          oc project $BUILD_NAMESPACE
           echo "Listing pods.."
           oc get pods|grep moodle
           sleep 30
@@ -151,8 +128,8 @@ jobs:
               cat <<- EOF > .env
               DB_PASSWORD=${{ secrets.DB_PASSWORD }}
               SSL_PROXY=true
-              SITE_URL=https://moodle-e66ac2-test.apps.silver.devops.gov.bc.ca
-              DB_HOST=mysql-0.mysql
+              SITE_URL=$APP_HOST
+              DB_HOST=$DB_HOST
               `EOF` "
           done
           export ROUTE="$(oc get route moodle -o jsonpath='{.spec.host}')"
