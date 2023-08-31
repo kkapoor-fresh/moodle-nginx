@@ -55,7 +55,7 @@ jobs:
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      - name: Log in to OpenShift
+      - name: Log in to OpenShift (tools)
         run: |
           oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
 
@@ -97,9 +97,11 @@ jobs:
        # Log in to OpenShift.
        # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
        # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      - name: Log in to OpenShift
+      - name: Log in to OpenShift ( ${{ github.ref_name }} )
         run: |
-          oc login --token=${{ secrets.AUTH_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
+          oc login --token=${{ format('AUTH_TOKEN_{0}', github.ref_name) }} --server=https://api.silver.devops.gov.bc.ca:6443
+
+# oc login --token=${{ secrets.AUTH_TOKEN_DEV }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       # Build PHP-FPM (Moodle)
       - name: Deploy Moodle-PHP-FPM
