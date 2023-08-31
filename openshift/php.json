@@ -119,7 +119,7 @@
                     "name": "${DATA_MOUNT_PVC_NAME}"
                   },
                   {
-                    "mountPath": "${MOODLE_APP_DATA_PATH}",
+                    "mountPath": "${APP_DATA_PATH}",
                     "name": "${APP_DATA_MOUNT_PVC_NAME}"
                   },
                   {
@@ -258,14 +258,15 @@
     {
       "description": "Moodle app data path.",
       "displayName": "Moodle App Data Path",
-      "name": "MOODLE_APP_DATA_PATH",
+      "name": "APP_DATA_PATH",
       "value": "/var/www/html"
     },
     {
       "description": "Image stream",
       "displayName": "Image Stream",
       "required": true,
-      "name": "IMAGE_STREAM"
+      "name": "IMAGE_STREAM",
+      "value": "php:8.0-fpm"
     },
     {
       "description": "Maximum amount of memory the container can use.",
@@ -307,13 +308,7 @@
       "description": "Database host name.",
       "displayName": "DB Host",
       "name": "DB_HOST",
-      "value": "mysql"
-    },
-    {
-      "description": "Database secondary host name.",
-      "displayName": "DB Secondary Host",
-      "name": "DB_SECONDARY_NAME",
-      "value": "mysql-read"
+      "value": "db"
     },
     {
       "description": "Database Port opened for connections from other containers.",

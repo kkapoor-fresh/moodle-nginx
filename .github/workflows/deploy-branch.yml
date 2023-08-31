@@ -28,6 +28,47 @@ jobs:
           echo OC CLI Version: $(oc version)
           echo Git Branch name: ${{ github.ref_name }}
 
+  #Build the app
+
+  build:
+    name: Build APP
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
+    env:
+      BUILD_ID: ${{ github.event.number }}
+      BUILD_NAMESPACE: 950003-tools
+      BRANCH: ${{ github.ref_name }}
+      BUILD_TAG: ${{ github.ref_name }}
+      APP: moodle
+      DB_BACKUP_APP: db-backup
+    steps:
+      # Checkout the PR branch
+      - name: Print env
+        run: |
+          echo BUILD ID: $BUILD_ID
+          echo BUILD NAMESPACE: $BUILD_NAMESPACE
+          echo BRANCH: $BRANCH
+      - name: Checkout Target Branch
+        uses: actions/checkout@v1
+      # Log in to OpenShift.
+      # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
+      # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
+      - name: Log in to OpenShift
+        run: |
+          oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
+
+      # Build the app images
+      - name: Build App image
+        working-directory: "./openshift"
+        run: |
+          test -n "${BRANCH}"
+          test -n "${BUILD_NAMESPACE}"
+          echo "BUILIDING ${APP} with tag: ${BUILD_TAG}"
+            oc -n ${BUILD_NAMESPACE} process -f docker-build.yml \
+            -p DEPLOY_NAMESPACE=${BRANCH} \
+            -p APP_NAME=${APP} | oc -n ${BUILD_NAMESPACE} apply -f -
+          oc -n ${BUILD_NAMESPACE} start-build bc/${APP} --no-cache --wait
+
   # Deploy App
   deploy:
     name: Deploy
@@ -71,15 +112,12 @@ jobs:
                 -p MEMORY_REQUEST=128Mi \
                 -p CPU_LIMIT=1 \
                 -p CPU_REQUEST=0.2 \
-                -p PROJECT_NAMESPACE=${DEPLOY_NAMESPACE} \
+                -p DEPLOY_NAMESPACE=${DEPLOY_NAMESPACE} \
                 -p VOLUME_SIZE=10Gi \
-                -p HTTP_PORT=8080 \
                 -p DB_PORT=3306 \
-                -p APACHE_DOCUMENT_ROOT="/var/www/html" \
+                -p APP_DATA_PATH="/var/www/html" \
                 -p MOODLE_DATA_PATH="/app/moodledata" \
-                -p DATA_MOUNT_PATH="/app" \
-                -p BUILD_NAMESPACE="${BUILD_NAMESPACE}" \
-                -p IMAGE_STREAM_TAG="moodle:${BRANCH}" \
+                -p IMAGE_STREAM="moodle:${BRANCH}" \
                 || echo "PHP already exists in $BUILD_NAMESPACE";
           oc -n ${DEPLOY_NAMESPACE} apply -f - \
             || echo "${PHP_APP_NAME} template cannot be applied in $BUILD_NAMESPACE";
