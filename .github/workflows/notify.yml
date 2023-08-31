@@ -1,0 +1,25 @@
+# Static Deploy On Openshift
+# Builds and Deploys merged PR's to persistent pods/services/routes/etc in the OpenShift Dev environment.
+name: Notify Team
+on:
+  push:
+    branches:
+      - dev
+      - test
+      - prod
+jobs:
+  checkEnv:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Env Vars
+        run: |
+          echo Git Base Ref: ${{ github.base_ref }}
+          echo Git Build ID: ${{ github.event.number }}
+          echo Git Pull Request Ref: ${{ github.event.pull_request.head.sha }}
+          echo Git Branch name: ${{ github.ref_name }}
+      - name: Notify Team
+        uses: muinmomin/webhook-action@v1.0.0
+        with:
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+          data: '{"alias":"GitHub Actions (${{ github.ref_name }})","text":"GitHub Deployment to: ${{ github.ref_name }}","attachments":[{"title":"GitHub Deployment Notification for ${{ github.ref_name }} environment.","title_link":"https://github.com/kaji-bikash/rocketchat-pagerduty/blob/master/rocketchat_pagerduty_incoming.js","text":"Test notification from GitHub. Intention is to use this to notify Moodle team about deployments.","image_url":"https://chat.developer.gov.bc.ca/images/integration-attachment-example.png","color":"#764FA5"}]}'
