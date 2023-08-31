@@ -8,8 +8,8 @@ env:
   DB_BACKUP_APP: db-backup
   BUILD_ID: ${{ github.event.number }}
   BRANCH: ${{ github.ref_name }}
-  APP_HOST: moodle-${{ github.ref_name }}-${{ env.PROJECT }}.apps.silver.devops.gov.bc.ca
   DB_HOST: db-0.mysql
+  APP_HOST: moodle-${{ github.ref_name }}-$PROJECT.apps.silver.devops.gov.bc.ca
 
 on:
   push:
