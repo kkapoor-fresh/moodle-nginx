@@ -1,15 +1,14 @@
-# Moodle with Nginx, PHP-FPM, MariaDB and Redis for docker-compose and OpenShift
+# docker_moodle11
 
-[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md) - The project is in the early stages of development. The codebase will be changing frequently.
-
-## Explanation
+== Explanation ==
 
 This directory contains the docker setup to run an instance of Moodle 3.11. A number of containers are created as follows
 
-* PHP-FPM for Moodle app and cron
-* Nginx as the web server
-* Mariadb Galera database
-* Redis cache
+* PHP 8.0-fpm to run the web instance of Moodle
+* PHP 7.4-fpm (second instance) to run cron
+* nginx as the web server
+* redis for cache
+* mariadb for database
 
 The main configuration is setup in the file docker-compose.yml. Each service is a container and the compose file gives the
 various configuration details for that service. The volumes directives map paths inside the containers to local paths. Note that
@@ -25,17 +24,20 @@ without worrying about the containers.
 
 Network host names are the same as the service names (e.g. just 'redis')
 
-## Local server setup
+== To set up ==
 
-* Install and run Docker daemon
+* Install Docker daemon and get running
+* Stop any local instances of web server and mysql
 * Make sure you have the docker-compose command installed
 * Clone this repo somewhere suitable (everything else is relative to this folder)
-* Create subdirectories for Moodle installation (for local development with docker-compose):
-  /temp/var/www/html
-  /temp/var/www/moodledata
-* Use example.env file to create a custom .env file for the docker-compose build
-* Build / run Moodle
-  docker-compose build --no-cache
-  docker-compose -p moodle up -d --env-file ./.env.dev
-* Rebuild single service (php), without affecting dependencies
-  docker-compose up --build --force-recreate --no-deps -d php
+* Creat subdirectories app/moodledata app/public.
+* Clone/copy Moodle into app/public (not as a subdir, public itself)
+* Copy config.php from here to that directory - modify as required
+* app/moodledata should be chmod 0777
+* docker-compose up --build -d
+* If I haven't missed anything, you should be able to access/install Moodle at localhost
+* MySQL should be accessible by your favourite client also at localhost
+
+# Build / run Moodle
+docker-compose build --no-cache
+docker-compose -p moodle up -d --env-file ./.env.dev

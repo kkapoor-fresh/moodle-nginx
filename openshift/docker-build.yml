@@ -4,7 +4,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: ${BASE_IMAGE_NAME}-${BASE_IMAGE_TAG}
+  name: ${NAME}
 objects:
   - apiVersion: image.openshift.io/v1
     kind: ImageStream
@@ -28,10 +28,17 @@ objects:
         scheduled: true
       referencePolicy:
         type: Source
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: ${NAME}
+    spec:
+      lookupPolicy:
+        local: false
   - apiVersion: v1
     kind: BuildConfig
     metadata:
-      name: ${BASE_IMAGE_NAME}-${BASE_IMAGE_TAG}
+      name: ${NAME}
     spec:
       resources:
         limits:
@@ -43,51 +50,68 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: "${BASE_IMAGE_NAME}:${TAG}"
+          name: "${NAME}:${TAG}"
       runPolicy: SerialLatestOnly
       source:
         contextDir: "${SOURCE_CONTEXT_DIR}"
         git:
           uri: "${SOURCE_REPOSITORY_URL}"
-          ref: "${TAG}"
+          ref: "${SOURCE_REPOSITORY_REF}"
         type: Git
       strategy:
         dockerStrategy:
-          dockerfilePath: "${DOCKERFILE}"
+          from:
+            kind: ImageStreamTag
+            name: ${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG}
           buildArgs:
-          - name: "DB_HOST"
-            value: "${DB_HOST}"
-          - name: "DB_NAME"
-            value: "moodle"
-          - name: "DB_USER"
-            value: "moodle"
-          - name: "DB_PASSWORD"
-            value: "${DB_PASSWORD}"
+            - name: GITHUB_AUTH_TOKEN
+              value: ${GITHUB_AUTH_TOKEN}
+            - name: SITE_URL
+              value: ${SITE_URL}
+            - name: DB_HOST
+              value: ${DB_HOST}
+            - name: DB_NAME
+              value: ${DB_NAME}
+            - name: DB_PASSWORD
+              value: ${DB_PASSWORD}
+            - name: DB_USER
+              value: ${DB_USER}
         type: Docker
 parameters:
+  - name: NAME
+    required: true
   - name: SUFFIX
   - name: SOURCE_CONTEXT_DIR
-    value: .
-  - name: DOCKERFILE
-    value: "Dockerfile"
+    required: true
   - name: SOURCE_REPOSITORY_URL
-    value: https://github.com/bcgov/moodle-nginx.git
+    required: true
+    value: https://github.com/bcgov/moodle.git
+  - name: SOURCE_REPOSITORY_REF
+    required: true
   - name: TAG
     value: "latest"
   - name: BASE_IMAGE_REPO
   - name: BASE_IMAGE_NAME
     required: true
   - name: BASE_IMAGE_TAG
-    value: "prod"
+    required: true
   - name: CPU_LIMIT
-    value: "1"
-  - name: CPU_REQUEST
-    value: "0.25"
+    value: "4"
   - name: MEMORY_LIMIT
-    value: "2Gi"
+    value: "8Gi"
+  - name: CPU_REQUEST
+    value: "2"
   - name: MEMORY_REQUEST
-    value: "128Mi"
+    value: "8Gi"
+  - name: GITHUB_AUTH_TOKEN
+    required: true
+  - name: SITE_URL
+    required: false
   - name: DB_HOST
-    value: "mariadb-sts-0.mariadb"
+    required: true
+  - name: DB_NAME
+    required: true
   - name: DB_PASSWORD
-    value: "empty"
+    required: true
+  - name: DB_USER
+    required: true
