@@ -31,12 +31,14 @@ jobs:
   #Build the app
 
   build:
-    name: Build APP
+    name: Build Moodle
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
     env:
       BUILD_ID: ${{ github.event.number }}
-      BUILD_NAMESPACE: 950003-tools
+      PROJECT: e66ac2
+      BUILD_NAMESPACE: ${PROJECT}-tools
+      DEPLOY_NAMESPACE: ${PROJECT}-${{ github.ref_name }}
       BRANCH: ${{ github.ref_name }}
       BUILD_TAG: ${{ github.ref_name }}
       APP: moodle
@@ -65,7 +67,7 @@ jobs:
           test -n "${BUILD_NAMESPACE}"
           echo "BUILIDING ${APP} with tag: ${BUILD_TAG}"
             oc -n ${BUILD_NAMESPACE} process -f docker-build.yml \
-            -p DEPLOY_NAMESPACE=${BRANCH} \
+            -p DEPLOY_NAMESPACE=${DEPLOY_NAMESPACE} \
             -p APP_NAME=${APP} | oc -n ${BUILD_NAMESPACE} apply -f -
           oc -n ${BUILD_NAMESPACE} start-build bc/${APP} --no-cache --wait
 
@@ -75,8 +77,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BUILD_ID: ${{ github.event.number }}
-      DEPLOY_NAMESPACE: e66ac2-${{ github.ref_name }}
-      BUILD_NAMESPACE: e66ac2-tools
+      PROJECT: e66ac2
+      DEPLOY_NAMESPACE: ${PROJECT}-${{ github.ref_name }}
+      BUILD_NAMESPACE: ${PROJECT}-tools
       BRANCH: ${{ github.ref_name }}
       APP: moodle
       APP_HOST: moodle-e66ac2-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
