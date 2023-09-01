@@ -12,7 +12,9 @@ env:
   BRANCH: ${{ github.ref_name }}
   IMAGE_NAME: moodle-${{ github.ref_name }}
   BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
+  BUILD_ICON_URL: https://cdn-icons-png.flaticon.com/128/5110/5110294.png
   DEPLOY_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+  DEPLOY_ICON_URL: https://cdn-icons-png.flaticon.com/128/1356/1356479.png
   SOURCE_REPOSITORY_URL: ${{ github.repository }}
 
 on:
@@ -76,6 +78,27 @@ jobs:
               -p SOURCE_REPOSITORY_URL=$SOURCE_REPOSITORY_URL | \
             | oc -n $BUILD_NAMESPACE apply -f -
           oc -n $BUILD_NAMESPACE start-build bc/$APP --no-cache --wait
+
+      - name: Notify Team of Build Status
+        uses: muinmomin/webhook-action@v1.0.0
+        with:
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+          data: '{"alias":"GitHub Action","text":"
+            ${{ github.job }} in
+            ${{ github.workflow }} of
+            ${{ github.repository }}:${{ github.ref_name }} >
+            ${{ job.status }}
+            ","attachments":[{
+                "title":"${{ github.job }} ${{ job.status }} to
+                ${{ github.ref_name }}
+                environment.",
+                "title_link":
+                  "https://github.com/kaji-bikash/rocketchat-pagerduty/blob/master/rocketchat_pagerduty_incoming.js",
+                  "text":"Test notification from GitHub. Intention is to use this to notify Moodle team about deployments.",
+                  "thumb_url":"$BUILD_ICON_URL",
+                  "color":"#764FA5"
+              }]
+            }'
 
   # Deploy App
   deploy:
@@ -141,3 +164,24 @@ jobs:
           done
           export ROUTE="$(oc get route moodle -o jsonpath='{.spec.host}')"
           echo "$APP is exposed at 'https://'$ROUTE"
+
+      - name: Notify Team of Deployment Status
+        uses: muinmomin/webhook-action@v1.0.0
+        with:
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+          data: '{"alias":"GitHub Action","text":"
+            ${{ github.job }} in
+            ${{ github.workflow }} of
+            ${{ github.repository }}:${{ github.ref_name }} >
+            ${{ job.status }}
+            ","attachments":[{
+                "title":"${{ github.job }} ${{ job.status }} to
+                ${{ github.ref_name }}
+                environment.",
+                "title_link":
+                  "https://github.com/kaji-bikash/rocketchat-pagerduty/blob/master/rocketchat_pagerduty_incoming.js",
+                  "text":"Test notification from GitHub. Intention is to use this to notify Moodle team about deployments.",
+                  "thumb_url":"$DEPLOY_ICON_URL",
+                  "color":"#764FA5"
+              }]
+            }'
