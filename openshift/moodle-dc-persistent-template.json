@@ -4,7 +4,7 @@
   "labels": {
     "template": "${APP_NAME}"
   },
-  "message": "The following Site has been created in your project: ${APP_NAME}.\nDB: ${DB_NAME}.\n\n  URL: ${SITE_URL}",
+  "message": "The following Site has been created in your project: ${APP_NAME}.\nDB: ${APP_NAME}.\n\n  URL: ${SITE_URL}",
   "metadata": {
     "annotations": {
       "description": "Moodle application service, with persistent storage.",
@@ -175,7 +175,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${IMAGE_STREAM_TAG}",
+                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${IMAGE_NAME}",
                 "name": "${APP_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
@@ -318,110 +318,40 @@
       "description": "Image stream tag",
       "displayName": "Image Stream Tag",
       "required": true,
-      "name": "IMAGE_STREAM_TAG"
+      "name": "IMAGE_NAME"
     },
     {
       "description": "Maximum amount of memory the container can use.",
       "displayName": "Memory Limit",
       "name": "MOODLE_MEMORY_LIMIT",
-      "required": true,
-      "value": "${MOODLE_MEMORY_LIMIT}"
+      "value": "512Mi"
     },
     {
       "description": "Volume space available for Moodle application, e.g. 512Mi, 2Gi.",
       "displayName": "Moodle Volume Capacity",
       "name": "MOODLE_VOLUME_CAPACITY",
       "required": true,
-      "value": "${MOODLE_VOLUME_CAPACITY}"
+      "value": "5Gi"
     },
     {
       "description": "Volume for storing file backups",
       "displayName": "Moodle File backups",
       "name": "BACKUP_VOLUME_SIZE",
       "required": true,
-      "value": "${BACKUP_VOLUME_SIZE}"
+      "value": "10Gi"
     },
     {
       "description": "Path where the persistent volume will be mounted",
       "displayName": "Mount Path",
       "name": "MOODLE_DATA_MOUNT_PATH",
       "required": true,
-      "value": "${MOODLE_DATA_MOUNT_PATH}"
-    },
-    {
-      "description": "Ports opened for connections to the application from the Internet.",
-      "displayName": "App Port",
-      "name": "HTTP_PORT",
-      "required": true,
-      "value": "${HTTP_PORT}"
-    },
-    {
-      "description": "Container Ports opened for connections to the application from the Internet.",
-      "displayName": "Container Port",
-      "name": "CONTAINER_PORT",
-      "required": true,
-      "value": "${CONTAINER_PORT}"
-    },
-    {
-      "description": "Database service name.",
-      "displayName": "DB Service Name",
-      "name": "DB_SERVICE_NAME",
-      "required": true,
-      "value": "db"
-    },
-    {
-      "description": "Database Port opened for connections from other containers.",
-      "displayName": "DB Port",
-      "name": "DB_PORT",
-      "value": "3306"
+      "value": "/var/www/html/moodledata"
     },
     {
       "description": "The OpenShift Namespace where the ImageStream resides.",
       "displayName": "Namespace",
       "name": "DEPLOY_NAMESPACE",
       "required": true
-    },
-    {
-      "description": "Name of the MySQL database accessed.",
-      "displayName": "MySQL Database Name",
-      "name": "DB_NAME",
-      "required": true,
-      "value": "${DB_NAME}"
-    },
-    {
-      "description": "Username for MySQL user that will be used for accessing the database.",
-      "displayName": "MySQL Connection Username",
-      "name": "DB_USER",
-      "required": false,
-      "value": "${DB_USER}"
-    },
-    {
-      "description": "Password for the MySQL connection user.",
-      "displayName": "MySQL Connection Password",
-      "name": "DB_PASSWORD",
-      "required": false,
-      "value": "${DB_PASSWORD}"
-    },
-    {
-      "description": "Git project URL, where project source can be found.",
-      "displayName": "Git Project",
-      "name": "GIT_PROJECT",
-      "required": true,
-      "value": "${GIT_PROJECT}"
-    },
-    {
-      "description": "Git project URL.",
-      "displayName": "Git URL",
-      "name": "GIT_URL",
-      "required": true,
-      "value": "${GIT_URL}"
-    },
-    {
-      "description": "Git project tag to use for source.",
-      "displayName": "Git Tag",
-      "name": "GIT_TAG",
-      "required": true,
-      "value": "${GIT_TAG}"
     }
   ]
 }

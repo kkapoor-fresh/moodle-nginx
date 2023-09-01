@@ -5,15 +5,21 @@ name: Deploy on Openshift
 env:
   PROJECT: e66ac2
   APP: moodle
-  REGISTRY_USER: ${{ github.actor }}
+  USER: ${{ github.actor }}
+
   DB_USER: moodle
   DB_BACKUP_APP: db-backup
   DB_HOST: db-0.mysql
-  BUILD_ID: ${{ github.event.number }}
-  BRANCH: ${{ github.ref_name }}
+
+  IMAGE_REPO: ""
   IMAGE_NAME: moodle-${{ github.ref_name }}
+  BASE_IMAGE_TAG: latest
+
   BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
   DEPLOY_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+
+  BUILD_ID: ${{ github.event.number }}
+  BRANCH: ${{ github.ref_name }}
   SOURCE_REPOSITORY_URL: ${{ github.repository }}
   INSPECT_JOB_URL: ${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}
 
@@ -78,7 +84,10 @@ jobs:
               -p SITE_URL=$APP_HOST \
               -p DB_HOST=$DB_HOST \
               -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              -p IMAGE_STREAM_TAG=$IMAGE_NAME \
+              -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
+              -p IMAGE_REPO=$IMAGE_REPO \
+              -p IMAGE_NAME=$IMAGE_NAME \
+              -p IMAGE_TAG=$IMAGE_TAG \
               -p SOURCE_REPOSITORY_URL=$SOURCE_REPOSITORY_URL | oc -n $BUILD_NAMESPACE apply -f - \
           oc -n $BUILD_NAMESPACE start-build bc/$APP --no-cache --wait
 
@@ -115,7 +124,8 @@ jobs:
                 -p DB_SERVICE_NAME=$DB_HOST \
                 -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
                 -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
-                -p IMAGE_STREAM_TAG=$IMAGE_NAME | \
+                -p DEPLOY_NAMESPACE=$DEPLOY_NAMESPACE \
+                -p IMAGE_NAME=$IMAGE_NAME | \
           oc -n $DEPLOY_NAMESPACE apply -f -
           oc rollout latest dc/moodle -n $DEPLOY_NAMESPACE
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
@@ -157,24 +167,18 @@ jobs:
         uses: muinmomin/webhook-action@v1.0.0
         with:
           url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
-          data: '{"alias":"FAILED GitHub Action (by $REGISTRY_USER)","text":"
-            Job:
-            ${{ github.job }} in
-            ${{ github.workflow }} of
-            ${{ github.repository }}:${{ github.ref_name }}
-            ","attachments":[{
-                "title":"${{ github.job }} ${{ job.status }} to
-                ${{ github.ref_name }}
-                environment.",
-                "title_link":
-                  "$INSPECT_JOB_URL",
-                  "text":"Build failure.
-                  ${{ github.repository }}:${{ github.ref_name }}.
-                  Click to view on GitHub.",
-                  "thumb_url":"$FAIL_ICON_URL",
-                  "color":"#764FA5"
-              }]
-            }'
+          data: '{
+            "alias":"FAILED GitHub Action (by $USER)",
+            "text":"Job: ${{ github.job }} in
+              ${{ github.workflow }} of
+              ${{ github.repository }}:${{ github.ref_name }}",
+            "attachments":[{
+                "title":"Build failure",
+                "title_link":"$INSPECT_JOB_URL",
+                "text":"Build failure. ${{ github.repository }} / ${{ github.ref_name }}",
+                "thumb_url":"$FAIL_ICON_URL",
+                "color":"#764FA5"
+            }]}'
 
   notify-success:
     if: ${{ success() }}
@@ -185,7 +189,7 @@ jobs:
         uses: muinmomin/webhook-action@v1.0.0
         with:
           url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
-          data: '{"alias":"GitHub Action (by $REGISTRY_USER)","text":"
+          data: '{"alias":"GitHub Action (by $USER)","text":"
             ${{ github.job }} in
             ${{ github.workflow }} of
             ${{ github.repository }}:${{ github.ref_name }} >
@@ -210,7 +214,7 @@ jobs:
         uses: muinmomin/webhook-action@v1.0.0
         with:
           url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
-          data: '{"alias":"Deployment ${{ job.status }} (by $REGISTRY_USER)",
+          data: '{"alias":"Deployment ${{ job.status }} (by $USER)",
             "text":"
             ${{ github.job }} in
             ${{ github.workflow }} of
