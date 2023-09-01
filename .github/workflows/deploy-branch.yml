@@ -46,6 +46,7 @@ jobs:
 
   build:
     name: Build Moodle
+    needs: checkEnv
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
     steps:
@@ -79,9 +80,7 @@ jobs:
               -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
               -p IMAGE_STREAM_TAG=$IMAGE_NAME \
-              -p SOURCE_REPOSITORY_URL=$SOURCE_REPOSITORY_URL \
-              || echo "$IMAGE_NAME already exists in $BUILD_NAMESPACE";
-          oc -n $BUILD_NAMESPACE apply -f - \
+              -p SOURCE_REPOSITORY_URL=$SOURCE_REPOSITORY_URL | oc -n $BUILD_NAMESPACE apply -f - \
           oc -n $BUILD_NAMESPACE start-build bc/$APP --no-cache --wait
 
   # Deploy App
