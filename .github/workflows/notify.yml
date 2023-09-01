@@ -1,12 +1,14 @@
 # Static Deploy On Openshift
 # Builds and Deploys merged PR's to persistent pods/services/routes/etc in the OpenShift Dev environment.
 name: Notify Team
+
 on:
   push:
     branches:
       - dev
       - test
       - prod
+
 jobs:
   checkEnv:
     name: Send Notifications
@@ -22,18 +24,18 @@ jobs:
         uses: muinmomin/webhook-action@v1.0.0
         with:
           url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
-          data: '{"alias":"GitHub Actions (
-            ${{ github.ref_name }}
+          data: '{"alias":"GitHub Actions:
+            ${{ github.ref_name }} (${{ job.status }})
             )","text":"GitHub Deployment to:
             ${{ github.ref_name }}
             ","attachments":[{
-                "title":"GitHub Deployment Notification for
+                "title":"GitHub Deployment ${{ job.status }} to
                 ${{ github.ref_name }}
                 environment.",
                 "title_link":
                   "https://github.com/kaji-bikash/rocketchat-pagerduty/blob/master/rocketchat_pagerduty_incoming.js",
                   "text":"Test notification from GitHub. Intention is to use this to notify Moodle team about deployments.",
-                  "image_url":"https://citz-dev-exchange.objectstore.gov.bc.ca/rocketchat-uploads-prod/bbHt3pN9E6krBBhqf/uploads/dZdwJkXq8mgqkkf6h/umxmwSiuoEKmM6Buv/f5WbRdp3bwYxSCMoH?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA477E9C91CC9F4FCB%2F20230901%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230901T183154Z&X-Amz-Expires=120&X-Amz-Signature=f50908a6d2028c0c2bc2478db00afa3672507c7370fe120af544316f0bb20622&X-Amz-SignedHeaders=host&response-content-disposition=inline%3B%20filename%3D%22Rocket_Icon.png%22",
+                  "image_url":"https://cdn-icons-png.flaticon.com/128/1356/1356479.png",
                   "color":"#764FA5"
               }]
             }'
