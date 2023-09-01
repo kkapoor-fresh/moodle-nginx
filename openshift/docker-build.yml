@@ -69,7 +69,7 @@ objects:
             - name: DB_HOST
               value: ${DB_HOST}
             - name: DB_NAME
-              value: ${DB_NAME}
+              value: ${NAME}
             - name: DB_PASSWORD
               value: ${DB_PASSWORD}
             - name: DB_USER
@@ -91,6 +91,7 @@ parameters:
     value: "moodle-dev"
   - name: IMAGE_TAG
     required: true
+    value: "latest"
   - name: CPU_LIMIT
     value: "4"
   - name: MEMORY_LIMIT
@@ -101,8 +102,6 @@ parameters:
     value: "8Gi"
   - name: SITE_URL
   - name: DB_HOST
-    required: true
-  - name: DB_NAME
     required: true
   - name: DB_PASSWORD
     required: true
