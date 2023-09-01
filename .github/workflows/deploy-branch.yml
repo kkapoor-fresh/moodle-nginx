@@ -39,7 +39,6 @@ jobs:
     if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
     env:
       BUILD_NAMESPACE: $PROJECT-tools
-      DEPLOY_NAMESPACE: $PROJECT-$BRANCH
     steps:
       # Checkout the PR branch
       - name: Print env
@@ -64,7 +63,6 @@ jobs:
           test -n "$BUILD_NAMESPACE"
           echo "BUILIDING $APP with tag: $BRANCH"
             oc -n $BUILD_NAMESPACE process -f docker-build.yml \
-            -p DEPLOY_NAMESPACE=$DEPLOY_NAMESPACE \
             -p APP_NAME=$APP | oc -n $BUILD_NAMESPACE apply -f -
           oc -n $BUILD_NAMESPACE start-build bc/$APP --no-cache --wait
 
