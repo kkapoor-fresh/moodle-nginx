@@ -63,7 +63,7 @@ jobs:
           test -n "$BUILD_NAMESPACE"
           echo "BUILIDING $APP with tag: $BRANCH"
             oc -n $BUILD_NAMESPACE process -f docker-build.yml \
-            -p APP_NAME=$APP | oc -n $BUILD_NAMESPACE apply -f -
+            | oc -n $BUILD_NAMESPACE apply -f -
           oc -n $BUILD_NAMESPACE start-build bc/$APP --no-cache --wait
 
   # Deploy App
