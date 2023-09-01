@@ -6,9 +6,12 @@ env:
   PROJECT: e66ac2
   APP: moodle
   DB_BACKUP_APP: db-backup
+  DB_HOST: db-0.mysql
   BUILD_ID: ${{ github.event.number }}
   BRANCH: ${{ github.ref_name }}
-  DB_HOST: db-0.mysql
+  IMAGE_NAME: moodle-${{ github.ref_name }}
+  BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
+  DEPLOY_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
 
 on:
   push:
@@ -37,8 +40,6 @@ jobs:
     name: Build Moodle
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
-    env:
-      BUILD_NAMESPACE: $PROJECT-tools
     steps:
       # Checkout the PR branch
       - name: Print env
@@ -71,10 +72,6 @@ jobs:
     name: Deploy APP
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
-    env:
-      DEPLOY_NAMESPACE: $PROJECT-$BRANCH
-      BUILD_NAMESPACE: $PROJECT-tools
-      IMAGE_NAME: $APP-$BRANCH
     needs:
       - build
     steps:
@@ -103,17 +100,17 @@ jobs:
                 -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
                 -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
                 -p IMAGE_STREAM_TAG=$IMAGE_NAME | \
-          oc -n $BUILD_NAMESPACE apply -f -
-          oc rollout latest dc/moodle -n $BUILD_NAMESPACE
+          oc -n $DEPLOY_NAMESPACE apply -f -
+          oc rollout latest dc/moodle -n $DEPLOY_NAMESPACE
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
           ATTEMPTS=0
-          ROLLOUT_STATUS_CMD="oc rollout status dc/moodle -n $BUILD_NAMESPACE"
+          ROLLOUT_STATUS_CMD="oc rollout status dc/moodle -n $DEPLOY_NAMESPACE"
           until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
             $ROLLOUT_STATUS_CMD
             ATTEMPTS=$((attempts + 1))
             sleep 10
           done
-          oc project $BUILD_NAMESPACE
+          oc project $DEPLOY_NAMESPACE
           echo "Listing pods.."
           oc get pods|grep moodle
           sleep 30
