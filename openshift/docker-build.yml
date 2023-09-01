@@ -56,7 +56,7 @@ objects:
         contextDir: "${SOURCE_CONTEXT_DIR}"
         git:
           uri: "${SOURCE_REPOSITORY_URL}"
-          ref: "${SOURCE_REPOSITORY_REF}"
+          ref: "${BASE_IMAGE_TAG}"
         type: Git
       strategy:
         dockerStrategy:
@@ -64,8 +64,6 @@ objects:
             kind: ImageStreamTag
             name: ${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG}
           buildArgs:
-            - name: GITHUB_AUTH_TOKEN
-              value: ${GITHUB_AUTH_TOKEN}
             - name: SITE_URL
               value: ${SITE_URL}
             - name: DB_HOST
@@ -80,19 +78,17 @@ objects:
 parameters:
   - name: NAME
     required: true
-  - name: SUFFIX
   - name: SOURCE_CONTEXT_DIR
-    required: true
+    value: \
   - name: SOURCE_REPOSITORY_URL
-    required: true
     value: https://github.com/bcgov/moodle.git
-  - name: SOURCE_REPOSITORY_REF
-    required: true
   - name: TAG
     value: "latest"
   - name: BASE_IMAGE_REPO
+    value: ""
   - name: BASE_IMAGE_NAME
     required: true
+    value: "moodle"
   - name: BASE_IMAGE_TAG
     required: true
   - name: CPU_LIMIT
@@ -103,10 +99,7 @@ parameters:
     value: "2"
   - name: MEMORY_REQUEST
     value: "8Gi"
-  - name: GITHUB_AUTH_TOKEN
-    required: true
   - name: SITE_URL
-    required: false
   - name: DB_HOST
     required: true
   - name: DB_NAME

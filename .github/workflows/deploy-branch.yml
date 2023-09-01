@@ -5,6 +5,7 @@ name: Deploy on Openshift
 env:
   PROJECT: e66ac2
   APP: moodle
+  DB_USER: moodle
   DB_BACKUP_APP: db-backup
   DB_HOST: db-0.mysql
   BUILD_ID: ${{ github.event.number }}
@@ -12,6 +13,7 @@ env:
   IMAGE_NAME: moodle-${{ github.ref_name }}
   BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
   DEPLOY_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+  SOURCE_REPOSITORY_URL: ${{ github.repository }}
 
 on:
   push:
@@ -64,6 +66,14 @@ jobs:
           test -n "$BUILD_NAMESPACE"
           echo "BUILIDING $APP with tag: $BRANCH"
             oc -n $BUILD_NAMESPACE process -f docker-build.yml \
+              -p NAME=$APP \
+              -p DB_USER=$DB_USER \
+              -p SITE_URL=$APP_HOST \
+              -p DB_HOST=$DB_HOST \
+              -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
+              -p IMAGE_STREAM_TAG=$IMAGE_NAME \
+              -p SOURCE_REPOSITORY_URL=$SOURCE_REPOSITORY_URL | \
             | oc -n $BUILD_NAMESPACE apply -f -
           oc -n $BUILD_NAMESPACE start-build bc/$APP --no-cache --wait
 
