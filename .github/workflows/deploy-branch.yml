@@ -78,7 +78,6 @@ jobs:
               -p SITE_URL=$APP_HOST \
               -p DB_HOST=$DB_HOST \
               -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
               -p IMAGE_STREAM_TAG=$IMAGE_NAME \
               -p SOURCE_REPOSITORY_URL=$SOURCE_REPOSITORY_URL | oc -n $BUILD_NAMESPACE apply -f - \
           oc -n $BUILD_NAMESPACE start-build bc/$APP --no-cache --wait
@@ -159,10 +158,10 @@ jobs:
         with:
           url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
           data: '{"alias":"FAILED GitHub Action (by $REGISTRY_USER)","text":"
+            Job:
             ${{ github.job }} in
             ${{ github.workflow }} of
-            ${{ github.repository }}:${{ github.ref_name }} >
-            ${{ job.status }}
+            ${{ github.repository }}:${{ github.ref_name }}
             ","attachments":[{
                 "title":"${{ github.job }} ${{ job.status }} to
                 ${{ github.ref_name }}
