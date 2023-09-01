@@ -84,7 +84,6 @@ jobs:
               -p SITE_URL=$APP_HOST \
               -p DB_HOST=$DB_HOST \
               -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
               -p IMAGE_REPO=$IMAGE_REPO \
               -p IMAGE_NAME=$IMAGE_NAME \
               -p IMAGE_TAG=$IMAGE_TAG \
