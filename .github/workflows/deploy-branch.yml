@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
     needs:
-      - build
+      - build-php
     steps:
       - name: Checkout Target Branch
         uses: actions/checkout@v1
@@ -156,7 +156,7 @@ jobs:
 
   notify-failure:
     if: ${{ failure() }}
-    needs: [build, deploy]
+    needs: [build-php, deploy]
     runs-on: ubuntu-latest
     steps:
       - name: Notify Team of Workflow Failure
@@ -178,7 +178,7 @@ jobs:
 
   notify-success:
     if: ${{ success() }}
-    needs: [build, deploy]
+    needs: [build-php, deploy]
     runs-on: ubuntu-latest
     steps:
       - name: Notify Team of Workflow Success
