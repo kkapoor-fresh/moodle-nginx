@@ -12,8 +12,7 @@ env:
   DB_HOST: db-0.mysql
 
   IMAGE_REPO: ""
-  IMAGE_NAME: moodle-${{ github.ref_name }}
-  BASE_IMAGE_TAG: latest
+  BASE_IMAGE_TAG: ${{ github.ref_name }}
 
   BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
   DEPLOY_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
@@ -82,7 +81,7 @@ jobs:
               -p DB_HOST=$DB_HOST \
               -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -p IMAGE_REPO=$IMAGE_REPO \
-              -p IMAGE_NAME=php-$IMAGE_NAME \
+              -p IMAGE_NAME=$DEPLOYMENT_NAME \
               -p IMAGE_TAG=$BASE_IMAGE_TAG \
               -p SOURCE_REPOSITORY_URL=$SOURCE_REPOSITORY_URL | oc -n $BUILD_NAMESPACE apply -f -
           oc -n $BUILD_NAMESPACE start-build bc/$APP --no-cache --wait
