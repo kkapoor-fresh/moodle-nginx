@@ -7,17 +7,6 @@ env:
   APP: moodle
   USER: ${{ github.actor }}
 
-  # For use with OpenShift deployments: StatefulSet, DC & pod names
-  PHP_DEPLOYMENT_NAME: php
-  CRON_DEPLOYMENT_NAME: cron
-  DB_DEPLOYMENT_NAME: db
-  REDIS_DEPLOYMENT_NAME: redis
-
-  DB_USER: moodle
-  DB_BACKUP_APP: db-backup
-  DB_HOST: db-0.mysql
-
-  IMAGE_REPO: ""
   BASE_IMAGE_TAG: ${{ github.ref_name }}
 
   BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
@@ -54,12 +43,12 @@ jobs:
           echo Git Branch name: ${{ github.ref_name }}
           echo "-----------------------"
           echo Deploy to: ${{ env.DEPLOY_NAMESPACE }}
-          echo php: ${{ env.PHP_DEPLOYMENT_NAME }}
+          echo Pod name: ${{ env.PHP_DEPLOYMENT_NAME }}
           echo cron: ${{ env.CRON_DEPLOYMENT_NAME }}
           echo db: ${{ env.DB_DEPLOYMENT_NAME }}
           echo redis: ${{ env.REDIS_DEPLOYMENT_NAME }}
           echo moodle: ${{ env.DB_USER }}
-          echo db-backup: ${{ env.DB_BACKUP_APP }}
+          echo db-backup: ${{ env.DB_BACKUP_POD }}
           echo db-0.mysql: ${{ env.DB_HOST }}
 
   #Build the app
@@ -87,6 +76,9 @@ jobs:
       # Build the app images
       - name: Build PHP Image
         working-directory: "./openshift"
+        uses: dotenv-actions/setup-dotenv@v2
+        with:
+          dotenv_path: .env
         run: |
           test -n "${{ env.BRANCH }}"
           test -n "${{ env.BUILD_NAMESPACE }}"
@@ -101,7 +93,7 @@ jobs:
               -p IMAGE_NAME=${{ env.PHP_DEPLOYMENT_NAME }} \
               -p IMAGE_TAG=${{ env.BASE_IMAGE_TAG }} \
               -p SOURCE_REPOSITORY_URL=${{ env.SOURCE_REPOSITORY_URL }} | oc -n ${{ env.BUILD_NAMESPACE }} apply -f -
-          oc -n ${{ env.BUILD_NAMESPACE }} start-build bc/$${{ env.PHP_DEPLOYMENT_NAME }}-${{ github.ref_name }} --no-cache --wait
+          oc -n ${{ env.BUILD_NAMESPACE }} start-build bc/${{ env.PHP_DEPLOYMENT_NAME }}-${{ github.ref_name }} --no-cache --wait
 
   # Deploy App
 
