@@ -1,6 +1,6 @@
-# docker_moodle11
+# Moodle for OpenShift / Doocker
 
-== Explanation ==
+## Explanation
 
 This directory contains the docker setup to run an instance of Moodle 3.11. A number of containers are created as follows
 
@@ -24,7 +24,7 @@ without worrying about the containers.
 
 Network host names are the same as the service names (e.g. just 'redis')
 
-== To set up ==
+## Set up
 
 * Install Docker daemon and get running
 * Stop any local instances of web server and mysql
@@ -38,6 +38,11 @@ Network host names are the same as the service names (e.g. just 'redis')
 * If I haven't missed anything, you should be able to access/install Moodle at localhost
 * MySQL should be accessible by your favourite client also at localhost
 
-# Build / run Moodle
+## Build / Run Moodle
+
 docker-compose build --no-cache
 docker-compose -p moodle up -d --env-file ./.env.dev
+
+## Deployment
+
+Deployment to OpenShift is handled using GitHub Actions. The workflow is defined in .github/workflows/deploy-branch.yml. Build / deploy notifications to Rocket.Chat are addressed in .github/workflows/notify-rocket-chat.yml.

@@ -1,6 +1,6 @@
 # Static Deploy On Openshift
 # Builds and Deploys merged PR's to persistent pods/services/routes/etc in the OpenShift Dev environment.
-name: Notify Team
+name: Notify Team on Rocket.Chat
 
 on:
   push:
