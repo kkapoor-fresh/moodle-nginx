@@ -170,9 +170,9 @@ jobs:
               ${{ github.repository }}:${{ github.ref_name }}",
             "attachments":[{
               "title":"${{ github.job }} ${{ job.status }} to ${{ github.ref_name }}",
-              "title_link":"$INSPECT_JOB_URL",
+              "title_link": "${{ env.INSPECT_JOB_URL }}",
               "text":"Failure detected in ${{ github.repository }}:${{ github.ref_name }}",
-              "image_url":"$FAIL_ICON_URL",
+              "image_url": "${{ env.FAIL_ICON_URL }}",
               "color":"#764FA5"
             }]}'
 
