@@ -21,7 +21,7 @@ env:
   BUILD_ID: ${{ github.event.number }}
   BRANCH: ${{ github.ref_name }}
   SOURCE_REPOSITORY_URL: ${{ github.repository }}
-  INSPECT_JOB_URL: ${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}
+  INSPECT_JOB_URL: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}"
 
   BUILD_ICON_URL: https://cdn-icons-png.flaticon.com/128/5110/5110294.png
   SUCCESS_ICON_URL: https://cdn-icons-png.flaticon.com/128/1356/1356479.png
@@ -112,27 +112,27 @@ jobs:
       - name: Deploy APP
         run: |
           test -n "$DEPLOY_NAMESPACE"
-          test -n "$BRANCH"
-          echo "Current namespace is $DEPLOY_NAMESPACE"
+          test -n "${{ env.BRANCH}}"
+          echo "Current namespace is ${{ env.DEPLOY_NAMESPACE }}"
           oc -n $DEPLOY_NAMESPACE process -f openshift/moodle-dc-persistent-template.json \
-                -p APP_NAME=$APP \
-                -p SITE_URL=$APP_HOST \
-                -p DB_SERVICE_NAME=$DB_HOST \
+                -p APP_NAME=${{ env.APP}} \
+                -p SITE_URL=${{ env.APP_HOST }} \
+                -p DB_SERVICE_NAME=${{ env.DB_HOST }} \
                 -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-                -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
-                -p DEPLOY_NAMESPACE=$DEPLOY_NAMESPACE \
-                -p IMAGE_NAME=$IMAGE_NAME | \
-          oc -n $DEPLOY_NAMESPACE apply -f -
-          oc rollout latest dc/moodle -n $DEPLOY_NAMESPACE
+                -p BUILD_NAMESPACE=${{ env.BUILD_NAMESPACE }} \
+                -p DEPLOY_NAMESPACE=${{ env.DEPLOY_NAMESPACE }} \
+                -p IMAGE_NAME=${{ env.IMAGE_NAME }} | \
+          oc -n ${{ env.DEPLOY_NAMESPACE }} apply -f -
+          oc rollout latest dc/moodle -n ${{ env.DEPLOY_NAMESPACE }}
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
           ATTEMPTS=0
-          ROLLOUT_STATUS_CMD="oc rollout status dc/moodle -n $DEPLOY_NAMESPACE"
+          ROLLOUT_STATUS_CMD="oc rollout status dc/moodle -n ${{ env.DEPLOY_NAMESPACE }}"
           until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
             $ROLLOUT_STATUS_CMD
             ATTEMPTS=$((attempts + 1))
             sleep 10
           done
-          oc project $DEPLOY_NAMESPACE
+          oc project ${{ env.DEPLOY_NAMESPACE }}
           echo "Listing pods.."
           oc get pods|grep moodle
           sleep 30
@@ -148,7 +148,7 @@ jobs:
               DB_PASSWORD=${{ secrets.DB_PASSWORD }}
               SSL_PROXY=true
               SITE_URL=$APP_HOST
-              DB_HOST=$DB_HOST
+              DB_HOST=${{ env.DB_HOST }}
               `EOF` "
           done
           export ROUTE="$(oc get route moodle -o jsonpath='{.spec.host}')"
@@ -164,7 +164,7 @@ jobs:
         with:
           url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
           data: '{
-            "alias":"FAILED GitHub Action by $USER",
+            "alias":"FAILED GitHub Action by ${{ env.USER }}",
             "text":"Job: ${{ github.job }} in
               ${{ github.workflow }} of
               ${{ github.repository }}:${{ github.ref_name }}",
