@@ -120,12 +120,19 @@ jobs:
       - name: Checkout Target Branch
         uses: actions/checkout@v1
 
-       # Log in to OpenShift.
-       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
-       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
+      # Log in to OpenShift.
+      # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
+      # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
+      # First, build appropriate secret name for the environement: AUTH_TOKEN_DEV, AUTH_TOKEN_TEST, etc.
+      - id: auth_token_string
+        uses: ASzc/change-string-case-action@v1
+        with:
+          string: ${{ format('AUTH_TOKEN_{0}', github.ref_name) }}
+      - run: |
+          echo "ENV AUTH SECRET NAME: ${{ steps.auth_token_string.outputs.uppercase }}"
       - name: Log in to OpenShift ( ${{ github.ref_name }} )
         run: |
-          oc login --token=${{ format('AUTH_TOKEN_{0}', github.ref_name) }} --server=https://api.silver.devops.gov.bc.ca:6443
+          oc login --token=${{ steps.auth_token_string.outputs.uppercase }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       - name: Set env
         run: echo ::set-env name=APP_HOST::moodle-$PROJECT-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
