@@ -293,7 +293,7 @@
       "displayName": "App Name",
       "name": "APP_NAME",
       "required": true,
-      "value": "${APP_NAME}"
+      "value": "moodle"
     },
     {
       "description": "Website URL.",
