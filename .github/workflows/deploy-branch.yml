@@ -80,6 +80,7 @@ jobs:
           path: example.env
           export-variables: true
           log-variables: true
+          keys-case: upper
 
       # Build the app images
       - name: Build PHP Image
