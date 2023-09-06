@@ -57,14 +57,14 @@
         "name": "${APP_NAME}",
         "namespace": "${DEPLOY_NAMESPACE}",
         "labels": {
-          "service": "${APP_NAME}"
+          "service": "${WEB_SERVICE}"
         }
       },
       "spec": {
         "host": "${SITE_URL}",
         "to": {
           "kind": "Service",
-          "name": "${APP_NAME}",
+          "name": "${WEB_SERVICE}",
           "weight": 100
         },
         "conditions": [
@@ -301,6 +301,12 @@
       "name": "SITE_URL",
       "required": true,
       "value": "${SITE_URL}"
+    },
+    {
+      "description": "Web Service Name",
+      "displayName": "Web Service",
+      "name": "WEB_SERVICE",
+      "value": "web"
     },
     {
       "description": "Image registry",
