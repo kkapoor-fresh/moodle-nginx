@@ -7,11 +7,10 @@ env:
   APP: moodle
   USER: ${{ github.actor }}
 
+  APP_HOST_URL: moodle-${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
   BASE_IMAGE_TAG: ${{ github.ref_name }}
-
   BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
   DEPLOY_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
-
   BUILD_ID: ${{ github.event.number }}
   BRANCH: ${{ github.ref_name }}
   SOURCE_REPOSITORY_URL: "https://github.com/${{ github.repository }}"
@@ -97,7 +96,7 @@ jobs:
             oc -n $BUILD_NAMESPACE process -f ./openshift/docker-build.yml \
               -p NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
               -p DB_USER=${{ steps.dotenv.outputs.DB_USER }} \
-              -p SITE_URL=${{ steps.dotenv.outputs.APP_HOST }} \
+              -p SITE_URL=${{ steps.dotenv.outputs.APP_HOST_URL }} \
               -p DB_HOST=${{ steps.dotenv.outputs.DB_HOST }} \
               -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -p IMAGE_REPO=${{ steps.dotenv.outputs.IMAGE_REPO }} \
@@ -135,9 +134,6 @@ jobs:
         run: |
           oc login --token=${{ secrets[steps.auth_token_string.outputs.uppercase] }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      - name: Set env
-        run: echo ::set-env name=APP_HOST::moodle-${{ env.DEPLOY_NAMESPACE }}.apps.silver.devops.gov.bc.ca
-
       - name: Deploy APP
         run: |
           test -n "$DEPLOY_NAMESPACE"
@@ -145,7 +141,7 @@ jobs:
           echo "Current namespace is ${{ env.DEPLOY_NAMESPACE }}"
           oc -n $DEPLOY_NAMESPACE process -f openshift/moodle-dc-persistent-template.json \
                 -p APP_NAME=${{ steps.dotenv.outputs.APP}} \
-                -p SITE_URL=$APP_HOST \
+                -p SITE_URL=$APP_HOST_URL \
                 -p DB_SERVICE_NAME=${{ steps.dotenv.outputs.DB_HOST }} \
                 -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
                 -p BUILD_NAMESPACE=${{ env.BUILD_NAMESPACE }} \
@@ -176,7 +172,7 @@ jobs:
               cat <<- EOF > .env
               DB_PASSWORD=${{ secrets.DB_PASSWORD }}
               SSL_PROXY=true
-              SITE_URL=$APP_HOST
+              SITE_URL=$APP_HOST_URL
               DB_HOST=${{ env.DB_HOST }}
               `EOF` "
           done
