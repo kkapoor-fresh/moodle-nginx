@@ -172,7 +172,7 @@ jobs:
           sleep 20
           podNames=$(oc get pods -l deploymentconfig=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} --field-selector=status.phase=Running -o name)
           pwd
-          ls -lrt .env
+          # ls -lrt .env
           echo $podNames
           for name in $podNames; do
             oc exec $podNames -- bash -c "
