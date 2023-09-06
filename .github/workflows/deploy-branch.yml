@@ -73,16 +73,20 @@ jobs:
       - name: Log in to OpenShift (tools)
         run: echo "Building ${{ env.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }} ..."
 
+      # Get Environment Variables from file
+      - name: Setup Env
+        uses: dotenv-actions/setup-dotenv@v2
+        with:
+          dotenv_path: example.env
+          export-variables: true
+
       # Build the app images
       - name: Build PHP Image
         working-directory: "./openshift"
-        uses: dotenv-actions/setup-dotenv@v2
-        with:
-          dotenv_path: .env
         run: |
           test -n "${{ env.BRANCH }}"
           test -n "${{ env.BUILD_NAMESPACE }}"
-          echo "BUILIDING ${{ env.PHP_DEPLOYMENT_NAME }} with tag: ${{ env.BRANCH }}"
+          echo "BUILIDING ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} with tag: ${{ env.BRANCH }}"
             oc -n $BUILD_NAMESPACE process -f docker-build.yml \
               -p NAME=${{ env.PHP_DEPLOYMENT_NAME }} \
               -p DB_USER=$DB_USER \
