@@ -3,10 +3,10 @@
 name: Deploy on Openshift
 
 env:
-  PROJECT: e66ac2
   APP: moodle
   USER: ${{ github.actor }}
 
+  PROJECT: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}
   APP_HOST_URL: moodle-${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
   BASE_IMAGE_TAG: ${{ github.ref_name }}
   BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
@@ -60,7 +60,7 @@ jobs:
     name: Build PHP
     needs: checkEnv
     runs-on: ubuntu-latest
-    if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
+    if: vars.SKIP_BUILD == 'false' && github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
     steps:
       # Checkout the PR branch
       - name: Checkout Target Branch
