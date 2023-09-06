@@ -150,7 +150,7 @@ jobs:
                 -p SITE_URL=$APP_HOST_URL \
                 -p BUILD_NAMESPACE=${{ env.BUILD_NAMESPACE }} \
                 -p DEPLOY_NAMESPACE=${{ env.DEPLOY_NAMESPACE }} \
-                -p IMAGE_NAME=${{ env.IMAGE_NAME }} | \
+                -p IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} | \
           oc -n ${{ env.DEPLOY_NAMESPACE }} apply -f -
           oc rollout latest dc/moodle -n ${{ env.DEPLOY_NAMESPACE }}
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
