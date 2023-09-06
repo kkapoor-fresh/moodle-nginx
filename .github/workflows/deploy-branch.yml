@@ -148,7 +148,7 @@ jobs:
           test -n "${{ env.BRANCH}}"
           echo "Current namespace is ${{ env.DEPLOY_NAMESPACE }}"
           oc -n $DEPLOY_NAMESPACE process -f openshift/moodle-dc-persistent-template.json \
-                -p APP_NAME=${{ steps.dotenv.outputs.APP}} \
+                -p APP_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
                 -p SITE_URL=$APP_HOST_URL \
                 -p BUILD_NAMESPACE=${{ env.BUILD_NAMESPACE }} \
                 -p DEPLOY_NAMESPACE=${{ env.DEPLOY_NAMESPACE }} \
@@ -166,11 +166,11 @@ jobs:
           done
           oc project ${{ env.DEPLOY_NAMESPACE }}
           echo "Listing pods.."
-          oc get pods|grep moodle
+          oc get pods|grep ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
           sleep 30
-          oc get pods -l deploymentconfig=moodle --field-selector=status.phase=Running -o name
+          oc get pods -l deploymentconfig=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} --field-selector=status.phase=Running -o name
           sleep 20
-          podNames=$(oc get pods -l deploymentconfig=moodle --field-selector=status.phase=Running -o name)
+          podNames=$(oc get pods -l deploymentconfig=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} --field-selector=status.phase=Running -o name)
           pwd
           ls -lrt .env
           echo $podNames
