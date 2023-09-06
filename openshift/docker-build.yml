@@ -61,12 +61,6 @@ objects:
       strategy:
         dockerStrategy:
           dockerfilePath: "${DOCKER_FILE_PATH}"
-          # from:
-          #   kind: ImageStreamTag
-          #   name: ${IMAGE_NAME}:${IMAGE_TAG}
-          buildArgs:
-            - name: SITE_URL
-              value: ${SITE_URL}
         type: Docker
 parameters:
   - name: NAME
@@ -95,4 +89,3 @@ parameters:
     value: "2"
   - name: MEMORY_REQUEST
     value: "8Gi"
-  - name: SITE_URL

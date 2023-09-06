@@ -95,10 +95,6 @@ jobs:
           echo "BUILIDING ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} with tag: ${{ env.BRANCH }}"
             oc -n $BUILD_NAMESPACE process -f ./openshift/docker-build.yml \
               -p NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
-              -p DB_USER=${{ steps.dotenv.outputs.DB_USER }} \
-              -p SITE_URL=${{ steps.dotenv.outputs.APP_HOST_URL }} \
-              -p DB_HOST=${{ steps.dotenv.outputs.DB_HOST }} \
-              -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -p IMAGE_REPO=${{ steps.dotenv.outputs.IMAGE_REPO }} \
               -p IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
               -p IMAGE_TAG=${{ env.BASE_IMAGE_TAG }} \
