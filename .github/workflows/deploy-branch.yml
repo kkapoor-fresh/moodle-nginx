@@ -132,7 +132,7 @@ jobs:
           echo "ENV AUTH SECRET NAME: ${{ steps.auth_token_string.outputs.uppercase }}"
       - name: Log in to OpenShift ( ${{ github.ref_name }} )
         run: |
-          oc login --token=${{ steps.auth_token_string.outputs.uppercase }} --server=https://api.silver.devops.gov.bc.ca:6443
+          oc login --token=${{ secrets[steps.auth_token_string.outputs.uppercase] }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       - name: Set env
         run: echo ::set-env name=APP_HOST::moodle-$PROJECT-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
