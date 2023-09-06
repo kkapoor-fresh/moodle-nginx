@@ -98,7 +98,7 @@ jobs:
               -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -p IMAGE_REPO=${{ steps.dotenv.outputs.IMAGE_REPO }} \
               -p IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
-              -p IMAGE_TAG=${{ steps.dotenv.outputs.BASE_IMAGE_TAG }} \
+              -p IMAGE_TAG=${{ env.BASE_IMAGE_TAG }} \
               -p SOURCE_REPOSITORY_URL=${{ steps.dotenv.outputs.SOURCE_REPOSITORY_URL }} | oc -n ${{ env.BUILD_NAMESPACE }} apply -f -
           oc -n ${{ env.BUILD_NAMESPACE }} start-build bc/${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}-${{ github.ref_name }} --no-cache --wait
 
