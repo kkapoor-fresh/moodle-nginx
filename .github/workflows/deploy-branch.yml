@@ -142,8 +142,6 @@ jobs:
           oc -n $DEPLOY_NAMESPACE process -f openshift/moodle-dc-persistent-template.json \
                 -p APP_NAME=${{ steps.dotenv.outputs.APP}} \
                 -p SITE_URL=$APP_HOST_URL \
-                -p DB_SERVICE_NAME=${{ steps.dotenv.outputs.DB_HOST }} \
-                -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
                 -p BUILD_NAMESPACE=${{ env.BUILD_NAMESPACE }} \
                 -p DEPLOY_NAMESPACE=${{ env.DEPLOY_NAMESPACE }} \
                 -p IMAGE_NAME=${{ env.IMAGE_NAME }} | \

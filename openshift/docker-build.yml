@@ -67,14 +67,6 @@ objects:
           buildArgs:
             - name: SITE_URL
               value: ${SITE_URL}
-            - name: DB_HOST
-              value: ${DB_HOST}
-            - name: DB_NAME
-              value: ${NAME}
-            - name: DB_PASSWORD
-              value: ${DB_PASSWORD}
-            - name: DB_USER
-              value: ${DB_USER}
         type: Docker
 parameters:
   - name: NAME
@@ -104,9 +96,3 @@ parameters:
   - name: MEMORY_REQUEST
     value: "8Gi"
   - name: SITE_URL
-  - name: DB_HOST
-    required: true
-  - name: DB_PASSWORD
-    required: true
-  - name: DB_USER
-    required: true
