@@ -43,7 +43,7 @@ jobs:
           echo Git Branch name: ${{ github.ref_name }}
           echo "-----------------------"
           echo Deploy to: ${{ env.DEPLOY_NAMESPACE }}
-          echo Pod name: ${{ env.PHP_DEPLOYMENT_NAME }}
+          echo Pod name: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
           echo cron: ${{ env.CRON_DEPLOYMENT_NAME }}
           echo db: ${{ env.DB_DEPLOYMENT_NAME }}
           echo redis: ${{ env.REDIS_DEPLOYMENT_NAME }}
@@ -71,7 +71,7 @@ jobs:
 
       # Echo build task
       - name: Log in to OpenShift (tools)
-        run: echo "Building ${{ env.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }} ..."
+        run: echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }} ..."
 
       # Get Environment Variables from file
       - name: Setup Env
@@ -79,6 +79,7 @@ jobs:
         with:
           path: example.env
           export-variables: true
+          log-variables: true
 
       # Build the app images
       - name: Build PHP Image
@@ -88,16 +89,16 @@ jobs:
           test -n "${{ env.BUILD_NAMESPACE }}"
           echo "BUILIDING ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} with tag: ${{ env.BRANCH }}"
             oc -n $BUILD_NAMESPACE process -f docker-build.yml \
-              -p NAME=${{ env.PHP_DEPLOYMENT_NAME }} \
+              -p NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
               -p DB_USER=$DB_USER \
               -p SITE_URL=$APP_HOST \
-              -p DB_HOST=${{ env.DB_HOST }} \
+              -p DB_HOST=${{ steps.dotenv.outputs.DB_HOST }} \
               -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              -p IMAGE_REPO=${{ env.IMAGE_REPO }} \
-              -p IMAGE_NAME=${{ env.PHP_DEPLOYMENT_NAME }} \
-              -p IMAGE_TAG=${{ env.BASE_IMAGE_TAG }} \
-              -p SOURCE_REPOSITORY_URL=${{ env.SOURCE_REPOSITORY_URL }} | oc -n ${{ env.BUILD_NAMESPACE }} apply -f -
-          oc -n ${{ env.BUILD_NAMESPACE }} start-build bc/${{ env.PHP_DEPLOYMENT_NAME }}-${{ github.ref_name }} --no-cache --wait
+              -p IMAGE_REPO=${{ steps.dotenv.outputs.IMAGE_REPO }} \
+              -p IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
+              -p IMAGE_TAG=${{ steps.dotenv.outputs.BASE_IMAGE_TAG }} \
+              -p SOURCE_REPOSITORY_URL=${{ steps.dotenv.outputs.SOURCE_REPOSITORY_URL }} | oc -n ${{ env.BUILD_NAMESPACE }} apply -f -
+          oc -n ${{ env.BUILD_NAMESPACE }} start-build bc/${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}-${{ github.ref_name }} --no-cache --wait
 
   # Deploy App
 
@@ -127,9 +128,9 @@ jobs:
           test -n "${{ env.BRANCH}}"
           echo "Current namespace is ${{ env.DEPLOY_NAMESPACE }}"
           oc -n $DEPLOY_NAMESPACE process -f openshift/moodle-dc-persistent-template.json \
-                -p APP_NAME=${{ env.APP}} \
+                -p APP_NAME=${{ steps.dotenv.outputs.APP}} \
                 -p SITE_URL=$APP_HOST \
-                -p DB_SERVICE_NAME=${{ env.DB_HOST }} \
+                -p DB_SERVICE_NAME=${{ steps.dotenv.outputs.DB_HOST }} \
                 -p DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
                 -p BUILD_NAMESPACE=${{ env.BUILD_NAMESPACE }} \
                 -p DEPLOY_NAMESPACE=${{ env.DEPLOY_NAMESPACE }} \
