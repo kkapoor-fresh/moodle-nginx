@@ -60,9 +60,10 @@ objects:
         type: Git
       strategy:
         dockerStrategy:
-          from:
-            kind: ImageStreamTag
-            name: ${IMAGE_NAME}:${IMAGE_TAG}
+          dockerfilePath: "${DOCKER_FILE_PATH}"
+          # from:
+          #   kind: ImageStreamTag
+          #   name: ${IMAGE_NAME}:${IMAGE_TAG}
           buildArgs:
             - name: SITE_URL
               value: ${SITE_URL}
@@ -80,8 +81,10 @@ parameters:
     required: true
   - name: SOURCE_CONTEXT_DIR
     value: \
+  - name: DOCKER_FILE_PATH
+    value: "dockerfile"
   - name: SOURCE_REPOSITORY_URL
-    value: https://github.com/bcgov/moodle.git
+    value: https://github.com/bcgov/moodle-nginx.git
   - name: TAG
     value: "latest"
   - name: IMAGE_REPO

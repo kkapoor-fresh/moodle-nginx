@@ -23,6 +23,7 @@ env:
 
   # Paths to find dockerfiles for builds
   PHP_SOURCE_CONTEXT_DIR: ./
+  PHP_DOCKER_FILE_PATH: "PHP.Dockerfile"
 
 on:
   push:
@@ -103,6 +104,7 @@ jobs:
               -p IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
               -p IMAGE_TAG=${{ env.BASE_IMAGE_TAG }} \
               -p SOURCE_REPOSITORY_URL=${{ env.SOURCE_REPOSITORY_URL }} \
+              -p DOCKER_FILE_PATH=${{ env.PHP_DOCKER_FILE_PATH }} \
               -p SOURCE_CONTEXT_DIR=${{ env.PHP_SOURCE_CONTEXT_DIR }} | oc -n ${{ env.BUILD_NAMESPACE }} apply -f -
           oc -n ${{ env.BUILD_NAMESPACE }} start-build bc/${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} --no-cache --wait
 

@@ -34,8 +34,7 @@ Network host names are the same as the service names (e.g. just 'redis')
 * Copy config.php from here to that directory - modify as required
 * app/moodledata should be chmod 0777
 * docker-compose up --build -d
-* If I haven't missed anything, you should be able to access/install Moodle at localhost
-* MySQL should be accessible by your favourite client also at localhost
+* You should then be able to access/install Moodle at http://localhost:8080
 
 ## Build / Run Moodle
 
