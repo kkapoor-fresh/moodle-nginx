@@ -170,7 +170,8 @@ jobs:
                 -p DEPLOY_NAMESPACE=${{ env.DEPLOY_NAMESPACE }} \
                 -p WEB_SERVICE=${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }} \
                 -p CRON_IMAGE_NAME=${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }} \
-                -p PHP_IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} | \
+                -p PHP_IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
+                -p BUILD_TAG=${{ github.ref_name }} | \
           oc -n ${{ env.DEPLOY_NAMESPACE }} apply -f -
           oc rollout latest dc/${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} -n ${{ env.DEPLOY_NAMESPACE }}
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
