@@ -288,6 +288,7 @@
             ]
           }
         },
+        "triggers": [],
         "revisionHistoryLimit": 10,
         "test": false
       }
@@ -401,6 +402,7 @@
             ]
           }
         },
+        "triggers": [],
         "revisionHistoryLimit": 10,
         "test": false
       }
