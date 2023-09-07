@@ -341,7 +341,10 @@
         },
         "triggers": [
           {
-            "type": "ImageChange"
+            "type": "ImageChange",
+            "imageChangeParams": [{
+              "automatic": true
+            }]
           }
         ],
         "revisionHistoryLimit": 10,
