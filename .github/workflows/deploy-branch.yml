@@ -203,6 +203,18 @@ jobs:
           done
           echo "${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} is deployed"
 
+      - name: Deploy Redis
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+          helm uninstall redis
+          helm install -f ./redis-values.yml --name ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }}
+          helm install ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }}
+
+      - name: Deploy DB (MariaDB Galera)
+        run: |
+          oc create -f ./openshift/mariadb-config.yaml -n ${{ env.DEPLOY_NAMESPACE }}
+
   notify-failure:
     if: ${{ failure() }}
     needs: [build-images, deploy]
