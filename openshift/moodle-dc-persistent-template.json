@@ -179,6 +179,29 @@
                 "name": "${PHP_IMAGE_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "php-fpm-healthcheck",
+                      "--listen-queue=10 # fails if there are more than 10 processes waiting in the fpm queue",
+                      "--accepted-conn=5000 # fails after fpm has served more than 5k requests, this will force the pod to reset, use with caution"
+                    ]
+                  },
+                  "initialDelaySeconds": 90,
+                  "periodSeconds": 60,
+                  "timeoutSeconds": 180,
+                  "successThreshold": 1,
+                  "failureThreshold": 3
+                },
+                "readinessProbe": {
+                  "exec": {
+                    "command": [
+                      "php-fpm-healthcheck"
+                    ]
+                  },
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 5
+                },
                 "ports": [
                   {
                     "containerPort": 8080
