@@ -175,7 +175,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${IMAGE_NAME}",
+                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${PHP_IMAGE_NAME}",
                 "name": "${APP_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
@@ -229,6 +229,48 @@
                   {
                     "name": "SITE_URL",
                     "value": "https://${SITE_URL}"
+                  },
+                  {
+                    "name": "DB_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${APP_NAME}-secrets",
+                        "key": "database-password"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_IMAGE_NAME}",
+                "name": "${CRON_IMAGE_NAME}",
+                "restartPolicy": "Always",
+                "imagePullPolicy": "Always",
+                "volumeMounts": [
+                  {
+                    "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
+                    "name": "${APP_NAME}-data"
+                  },
+                  {
+                    "name": "env-data",
+                    "mountPath": "/.env",
+                    "subPath": ".env"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "memory": "${CRON_MEMORY_LIMIT}",
+                    "cpu": "${CRON_CPU_LIMIT}"
+                  },
+                  "requests": {
+                    "memory": "${CRON_MEMORY_REQUEST}",
+                    "cpu": "${CRON_CPU_REQUEST}"
+                  }
+                },
+                "env": [
+                  {
+                    "name": "CRON_IMAGE_NAME",
+                    "value": "${CRON_IMAGE_NAME}"
                   },
                   {
                     "name": "DB_PASSWORD",
@@ -321,34 +363,16 @@
       "name": "BUILD_NAMESPACE"
     },
     {
-      "description": "Image stream tag",
-      "displayName": "Image Stream Tag",
+      "description": "PHP Image",
+      "displayName": "PHP Image",
       "required": true,
-      "name": "IMAGE_NAME"
+      "name": "PHP_IMAGE_NAME"
     },
     {
-      "description": "Maximum amount of memory the container can use.",
-      "displayName": "Memory Limit",
-      "name": "MEMORY_REQUEST",
-      "value": "70Mi"
-    },
-    {
-      "description": "Maximum amount of memory the container can use.",
-      "displayName": "Memory Limit",
-      "name": "MEMORY_LIMIT",
-      "value": "256Mi"
-    },
-    {
-      "description": "Maximum amount of memory the container can use.",
-      "displayName": "Memory Limit",
-      "name": "CPU_REQUEST",
-      "value": "50m"
-    },
-    {
-      "description": "Maximum amount of memory the container can use.",
-      "displayName": "Memory Limit",
-      "name": "CPU_LIMIT",
-      "value": "1"
+      "description": "Cron Image",
+      "displayName": "Cron Image",
+      "required": true,
+      "name": "CRON_IMAGE_NAME"
     },
     {
       "description": "Volume space available for Moodle application, e.g. 512Mi, 2Gi.",
@@ -376,6 +400,54 @@
       "displayName": "Namespace",
       "name": "DEPLOY_NAMESPACE",
       "required": true
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Limit",
+      "name": "MEMORY_REQUEST",
+      "value": "70Mi"
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Limit",
+      "name": "MEMORY_LIMIT",
+      "value": "256Mi"
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Limit",
+      "name": "CPU_REQUEST",
+      "value": "50m"
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Limit",
+      "name": "CPU_LIMIT",
+      "value": "150m"
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Limit",
+      "name": "CRON_MEMORY_REQUEST",
+      "value": "50Mi"
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Limit",
+      "name": "CRON_MEMORY_LIMIT",
+      "value": "128Mi"
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Limit",
+      "name": "CRON_CPU_REQUEST",
+      "value": "30m"
+    },
+    {
+      "description": "Maximum amount of memory the container can use.",
+      "displayName": "Memory Limit",
+      "name": "CRON_CPU_LIMIT",
+      "value": "1"
     }
   ]
 }

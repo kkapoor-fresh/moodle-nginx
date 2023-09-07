@@ -12,7 +12,14 @@ ENV CERTIFICATE_BRANCH_VERSION MOODLE_31_STABLE
 ENV CUSTOMCERT_BRANCH_VERSION MOODLE_311_STABLE
 ENV DATAFLOWS_BRANCH_VERSION MOODLE_35_STABLE
 
-RUN apt-get update && apt-get install -y git zlib1g-dev libpng-dev libxml2-dev libzip-dev libxslt-dev libldap-dev
+RUN apt-get update && apt-get install -y git zlib1g-dev libpng-dev libxml2-dev libzip-dev libxslt-dev libldap-dev wget libfcgi-bin
+
+# Add healthcheck
+RUN wget -O /usr/local/bin/php-fpm-healthcheck \
+    https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck \
+    && chmod +x /usr/local/bin/php-fpm-healthcheck
+COPY ./php-fpm-healthcheck /usr/local/bin/
+
 RUN pecl install channel://pecl.php.net/xmlrpc-1.0.0RC3
 RUN docker-php-ext-enable xmlrpc
 RUN docker-php-ext-install pdo pdo_mysql mysqli gd soap intl zip xsl opcache ldap
