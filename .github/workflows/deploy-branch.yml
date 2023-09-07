@@ -56,7 +56,7 @@ jobs:
 
   build-images:
     name: Build Images
-    needs: checkEnv
+    needs: [checkEnv]
     runs-on: ubuntu-latest
     if: vars.SKIP_BUILD && (github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod')
     steps:
@@ -72,7 +72,7 @@ jobs:
 
       # Echo build task
       - name: Prepare build
-        run: echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }} ..."
+        run: echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
 
       # Get Environment Variables from file
       - name: Setup Env
@@ -123,8 +123,12 @@ jobs:
   deploy:
     name: Deploy APP
     runs-on: ubuntu-latest
-    if: github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod'
-    needs: [checkEnv]
+    needs: [checkEnv, build-images]
+    if: |
+      always()
+      && (github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod')
+      && contains(needs.*.result, 'success')
+      && !contains(needs.*.result, 'failure')
     steps:
       - name: Checkout Target Branch
         uses: actions/checkout@v1
@@ -165,8 +169,8 @@ jobs:
                 -p BUILD_NAMESPACE=${{ env.BUILD_NAMESPACE }} \
                 -p DEPLOY_NAMESPACE=${{ env.DEPLOY_NAMESPACE }} \
                 -p WEB_SERVICE=${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }} \
-                -p CRON_IMAGE_NAME=${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }} \
-                -p PHP_IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }} | \
+                -p CRON_IMAGE_NAME=${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }} \
+                -p PHP_IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} | \
           oc -n ${{ env.DEPLOY_NAMESPACE }} apply -f -
           oc rollout latest dc/${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} -n ${{ env.DEPLOY_NAMESPACE }}
           # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.

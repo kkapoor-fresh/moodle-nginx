@@ -175,7 +175,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${PHP_IMAGE_NAME}",
+                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${PHP_IMAGE_NAME}:${BUILD_TAG}",
                 "name": "${PHP_IMAGE_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
@@ -322,7 +322,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_IMAGE_NAME}",
+                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_IMAGE_NAME}:${BUILD_TAG}",
                 "name": "${CRON_IMAGE_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
@@ -452,6 +452,12 @@
       "displayName": "Cron Image",
       "required": true,
       "name": "CRON_IMAGE_NAME"
+    },
+    {
+      "description": "Image Build Tag (dev, test, prod)",
+      "displayName": "Build Tag",
+      "required": true,
+      "name": "BUILD_TAG"
     },
     {
       "description": "Volume space available for Moodle application, e.g. 512Mi, 2Gi.",
