@@ -183,7 +183,7 @@ jobs:
               DB_HOST=${{ env.DB_HOST }}
               `EOF` "
           done
-          echo "${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} is deployed
+          echo "${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} is deployed"
 
   notify-failure:
     if: ${{ failure() }}
