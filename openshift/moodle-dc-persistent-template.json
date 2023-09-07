@@ -307,11 +307,11 @@
             ]
           }
         },
-        "triggers": [
-          {
-            "type": "ConfigChange"
-          }
-        ],
+        // "triggers": [
+        //   {
+        //     "type": "ConfigChange"
+        //   }
+        // ],
         "revisionHistoryLimit": 10,
         "test": false
       }
