@@ -310,7 +310,7 @@
           "deploymentconfig": "${CRON_IMAGE_NAME}"
         },
         "strategy": {
-          "type": "Replace"
+          "type": "Recreate"
         },
         "template": {
           "metadata": {
