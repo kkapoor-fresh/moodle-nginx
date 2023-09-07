@@ -339,6 +339,11 @@
             ]
           }
         },
+        "triggers": [
+          {
+            "type": "ImageChange"
+          }
+        ],
         "revisionHistoryLimit": 10,
         "test": false
       }
