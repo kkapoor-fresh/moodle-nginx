@@ -36,17 +36,17 @@
       "apiVersion": "v1",
       "kind": "Service",
       "metadata": {
-        "name": "${APP_NAME}"
+        "name": "${WEB_SERVICE}"
       },
       "spec": {
         "ports": [
           {
-            "name": "${APP_NAME}",
+            "name": "${WEB_SERVICE}",
             "port": 8080
           }
         ],
         "selector": {
-          "deploymentconfig": "${APP_NAME}"
+          "deploymentconfig": "${WEB_SERVICE}"
         }
       }
     },
@@ -78,7 +78,7 @@
           "insecureEdgeTerminationPolicy": "Redirect"
         },
         "port": {
-          "targetPort": "${APP_NAME}"
+          "targetPort": 8080
         },
         "wildcardPolicy": "None"
       }
@@ -145,16 +145,16 @@
         "annotations": {
           "template.alpha.openshift.io/wait-for-ready": "true"
         },
-        "name": "${APP_NAME}",
+        "name": "${PHP_IMAGE_NAME}",
         "namespace": "${DEPLOY_NAMESPACE}",
         "labels": {
-          "service": "${APP_NAME}"
+          "service": "${PHP_IMAGE_NAME}"
         }
       },
       "spec": {
         "replicas": 1,
         "selector": {
-          "deploymentconfig": "${APP_NAME}"
+          "deploymentconfig": "${PHP_IMAGE_NAME}"
         },
         "strategy": {
           "type": "Rolling",
@@ -169,28 +169,16 @@
         "template": {
           "metadata": {
             "labels": {
-              "deploymentconfig": "${APP_NAME}"
+              "deploymentconfig": "${PHP_IMAGE_NAME}"
             }
           },
           "spec": {
             "containers": [
               {
                 "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${PHP_IMAGE_NAME}",
-                "name": "${APP_NAME}",
+                "name": "${PHP_IMAGE_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
-                "livenessProbe": {
-                  "httpGet": {
-                    "path": "https://${SITE_URL}",
-                    "port": 8080,
-                    "scheme": "HTTP"
-                  },
-                  "initialDelaySeconds": 90,
-                  "periodSeconds": 60,
-                  "timeoutSeconds": 180,
-                  "successThreshold": 1,
-                  "failureThreshold": 3
-                },
                 "ports": [
                   {
                     "containerPort": 8080
@@ -298,9 +286,9 @@
                 }
               },
               {
-                "name": "${APP_NAME}-config",
+                "name": "${PHP_IMAGE_NAME}-config",
                 "configMap": {
-                  "name": "${APP_NAME}-config",
+                  "name": "${PHP_IMAGE_NAME}-config",
                   "defaultMode": 420
                 }
               },

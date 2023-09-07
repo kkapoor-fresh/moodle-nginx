@@ -58,7 +58,7 @@ jobs:
     name: Build PHP
     needs: checkEnv
     runs-on: ubuntu-latest
-    if: vars.SKIP_BUILD != true && (github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod')
+    if: ${{ vars.SKIP_BUILD != true }} && (github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod')
     steps:
       # Checkout the PR branch
       - name: Checkout Target Branch
@@ -161,7 +161,7 @@ jobs:
           test -n "${{ env.BRANCH}}"
           echo "Current namespace is ${{ env.DEPLOY_NAMESPACE }}"
           oc -n $DEPLOY_NAMESPACE process -f openshift/moodle-dc-persistent-template.json \
-                -p APP_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
+                -p APP_NAME=${{ env.APP }} \
                 -p SITE_URL=$APP_HOST_URL \
                 -p BUILD_NAMESPACE=${{ env.BUILD_NAMESPACE }} \
                 -p DEPLOY_NAMESPACE=${{ env.DEPLOY_NAMESPACE }} \
