@@ -152,7 +152,7 @@
         }
       },
       "spec": {
-        "replicas": 1,
+        "replicas": 3,
         "selector": {
           "deploymentconfig": "${PHP_IMAGE_NAME}"
         },
@@ -251,7 +251,75 @@
                     }
                   }
                 ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "${APP_NAME}-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${APP_NAME}-data"
+                }
               },
+              {
+                "name": "file-backup-data",
+                "persistentVolumeClaim": {
+                  "claimName": "file-backup-data"
+                }
+              },
+              {
+                "name": "${PHP_IMAGE_NAME}-config",
+                "configMap": {
+                  "name": "${PHP_IMAGE_NAME}-config",
+                  "defaultMode": 420
+                }
+              },
+              {
+                "name": "env-data",
+                "configMap": {
+                  "name": "moodle-env",
+                  "items": [
+                    {
+                      "key": ".env",
+                      "path": ".env"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "revisionHistoryLimit": 10,
+        "test": false
+      }
+    },
+
+
+    {
+      "apiVersion": "v1",
+      "kind": "DeploymentConfig",
+      "metadata": {
+        "annotations": {
+          "template.alpha.openshift.io/wait-for-ready": "true"
+        },
+        "name": "${CRON_IMAGE_NAME}",
+        "namespace": "${DEPLOY_NAMESPACE}"
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "deploymentconfig": "${CRON_IMAGE_NAME}"
+        },
+        "strategy": {
+          "type": "Replace"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "deploymentconfig": "${CRON_IMAGE_NAME}"
+            }
+          },
+          "spec": {
+            "containers": [
               {
                 "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_IMAGE_NAME}",
                 "name": "${CRON_IMAGE_NAME}",
@@ -312,12 +380,6 @@
                 }
               },
               {
-                "name": "file-backup-data",
-                "persistentVolumeClaim": {
-                  "claimName": "file-backup-data"
-                }
-              },
-              {
                 "name": "${PHP_IMAGE_NAME}-config",
                 "configMap": {
                   "name": "${PHP_IMAGE_NAME}-config",
@@ -339,14 +401,6 @@
             ]
           }
         },
-        "triggers": [
-          {
-            "type": "ImageChange",
-            "imageChangeParams": [{
-              "automatic": true
-            }]
-          }
-        ],
         "revisionHistoryLimit": 10,
         "test": false
       }
