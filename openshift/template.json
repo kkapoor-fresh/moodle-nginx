@@ -7,10 +7,10 @@
   "message": "The following Site has been created in your project: ${APP_NAME}.\nDB: ${APP_NAME}.\n\n  URL: ${SITE_URL}",
   "metadata": {
     "annotations": {
-      "description": "Moodle application service, with persistent storage.",
+      "description": "${APP_NAME} application",
       "iconClass": "icon-mysql-database",
       "openshift.io/display-name": "Moodle",
-      "openshift.io/long-description": "This template provides a standalone Moodle server (PHP, Moodle).  The application cache is stored on persistent storage.  The database name, username, and password are chosen via parameters when provisioning this service.",
+      "openshift.io/long-description": "This template provides application deployments for web (nginx), php and cron with related PVCs, route and secrets. Database and Redis cache are managed via helm chart installlations.",
       "tags": "application,${APP_NAME}"
     },
     "name": "${NAME}"
@@ -21,10 +21,7 @@
 			"kind": "Secret",
 			"metadata": {
 				"annotations": {
-					"template.openshift.io/expose-database_name": "{.data['database-name']}",
-					"template.openshift.io/expose-password": "{.data['database-password']}",
-					"template.openshift.io/expose-root_password": "{.data['database-root-password']}",
-					"template.openshift.io/expose-username": "{.data['database-user']}"
+					"template.openshift.io/expose-password": "{.data['database-password']}"
 				},
 				"name": "${APP_NAME}-secrets"
 			},
@@ -145,16 +142,16 @@
         "annotations": {
           "template.alpha.openshift.io/wait-for-ready": "true"
         },
-        "name": "${PHP_IMAGE_NAME}",
+        "name": "${PHP_IMAGE}",
         "namespace": "${DEPLOY_NAMESPACE}",
         "labels": {
-          "service": "${PHP_IMAGE_NAME}"
+          "service": "${PHP_IMAGE}"
         }
       },
       "spec": {
         "replicas": 3,
         "selector": {
-          "deploymentconfig": "${PHP_IMAGE_NAME}"
+          "deploymentconfig": "${PHP_IMAGE}"
         },
         "strategy": {
           "type": "Rolling",
@@ -169,14 +166,14 @@
         "template": {
           "metadata": {
             "labels": {
-              "deploymentconfig": "${PHP_IMAGE_NAME}"
+              "deploymentconfig": "${PHP_IMAGE}"
             }
           },
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${PHP_IMAGE_NAME}:${BUILD_TAG}",
-                "name": "${PHP_IMAGE_NAME}",
+                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${PHP_IMAGE}:${BUILD_TAG}",
+                "name": "${PHP_IMAGE}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
                 "livenessProbe": {
@@ -267,9 +264,9 @@
                 }
               },
               {
-                "name": "${PHP_IMAGE_NAME}-config",
+                "name": "${PHP_IMAGE}-config",
                 "configMap": {
-                  "name": "${PHP_IMAGE_NAME}-config",
+                  "name": "${PHP_IMAGE}-config",
                   "defaultMode": 420
                 }
               },
@@ -294,11 +291,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "${PHP_IMAGE_NAME}"
+                "${PHP_IMAGE}"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "${PHP_IMAGE_NAME}:${BUILD_TAG}",
+                "name": "${PHP_IMAGE}:${BUILD_TAG}",
                 "namespace": "${DEPLOY_NAMESPACE}"
               }
             }
@@ -320,13 +317,13 @@
         "annotations": {
           "template.alpha.openshift.io/wait-for-ready": "true"
         },
-        "name": "${CRON_IMAGE_NAME}",
+        "name": "${CRON_IMAGE}",
         "namespace": "${DEPLOY_NAMESPACE}"
       },
       "spec": {
         "replicas": 1,
         "selector": {
-          "deploymentconfig": "${CRON_IMAGE_NAME}"
+          "deploymentconfig": "${CRON_IMAGE}"
         },
         "strategy": {
           "type": "Recreate"
@@ -334,14 +331,14 @@
         "template": {
           "metadata": {
             "labels": {
-              "deploymentconfig": "${CRON_IMAGE_NAME}"
+              "deploymentconfig": "${CRON_IMAGE}"
             }
           },
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_IMAGE_NAME}:${BUILD_TAG}",
-                "name": "${CRON_IMAGE_NAME}",
+                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_IMAGE}:${BUILD_TAG}",
+                "name": "${CRON_IMAGE}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
                 "livenessProbe": {
@@ -376,8 +373,8 @@
                 },
                 "env": [
                   {
-                    "name": "CRON_IMAGE_NAME",
-                    "value": "${CRON_IMAGE_NAME}"
+                    "name": "CRON_IMAGE",
+                    "value": "${CRON_IMAGE}"
                   },
                   {
                     "name": "DB_PASSWORD",
@@ -399,9 +396,9 @@
                 }
               },
               {
-                "name": "${PHP_IMAGE_NAME}-config",
+                "name": "${PHP_IMAGE}-config",
                 "configMap": {
-                  "name": "${PHP_IMAGE_NAME}-config",
+                  "name": "${PHP_IMAGE}-config",
                   "defaultMode": 420
                 }
               },
@@ -426,11 +423,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "${CRON_IMAGE_NAME}"
+                "${CRON_IMAGE}"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "cron:${CRON_IMAGE_NAME}:${BUILD_TAG}",
+                "name": "cron:${CRON_IMAGE}:${BUILD_TAG}",
                 "namespace": "${DEPLOY_NAMESPACE}"
               }
             }
@@ -481,13 +478,13 @@
       "description": "PHP Image",
       "displayName": "PHP Image",
       "required": true,
-      "name": "PHP_IMAGE_NAME"
+      "name": "PHP_IMAGE"
     },
     {
       "description": "Cron Image",
       "displayName": "Cron Image",
       "required": true,
-      "name": "CRON_IMAGE_NAME"
+      "name": "CRON_IMAGE"
     },
     {
       "description": "Image Build Tag (dev, test, prod)",
