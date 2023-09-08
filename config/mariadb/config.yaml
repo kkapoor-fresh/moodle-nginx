@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mariadb-configmap
+  name: mariadb-config
 data:
 
   primary.cnf: |
