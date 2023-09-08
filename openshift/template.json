@@ -179,7 +179,7 @@
                 "livenessProbe": {
                   "exec": {
                     "command": [
-                      "php-fpm-healthcheck",
+                      "php-fpm-healthcheck.sh",
                       "--listen-queue=10 # fails if there are more than 10 processes waiting in the fpm queue",
                       "--accepted-conn=5000 # fails after fpm has served more than 5k requests, this will force the pod to reset, use with caution"
                     ]
@@ -193,7 +193,7 @@
                 "readinessProbe": {
                   "exec": {
                     "command": [
-                      "php-fpm-healthcheck"
+                      "php-fpm-healthcheck.sh"
                     ]
                   },
                   "initialDelaySeconds": 10,
@@ -344,7 +344,7 @@
                 "livenessProbe": {
                   "exec": {
                     "command": [
-                      "php-fpm-healthcheck",
+                      "php-fpm-healthcheck.sh",
                       "--listen-queue=10 # fails if there are more than 10 processes waiting in the fpm queue",
                       "--accepted-conn=5000 # fails after fpm has served more than 5k requests, this will force the pod to reset, use with caution"
                     ]

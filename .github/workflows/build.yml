@@ -1,6 +1,6 @@
 # Static Deploy On Openshift
 # Builds and Deploys merged PR's to persistent pods/services/routes/etc in the OpenShift Dev environment.
-name: Deploy on Openshift
+name: Build Images
 
 env:
   APP: moodle
@@ -26,6 +26,12 @@ on:
       - dev
       - test
       - prod
+    paths:
+      - '**.Dockerfile'
+      - '**.conf'
+      - '**.ini'
+      - '**.php'
+      - 'php-fpm-healthcheck.sh'
 
 jobs:
   #Print variables for logging and debugging purposes
