@@ -107,7 +107,7 @@ jobs:
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
-          helm install -f ./config/redis/values.yml ${{ steps.dotenv.outputs.REDIS_IMAGE }}
+          helm install -f ./config/redis/values.yml ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }}
           helm install ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }}
 
       - name: Deploy DB (MariaDB Galera)
