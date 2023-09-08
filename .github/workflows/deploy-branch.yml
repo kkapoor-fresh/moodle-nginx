@@ -62,7 +62,7 @@ jobs:
     steps:
       # Checkout the PR branch
       - name: Checkout Target Branch
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
@@ -87,7 +87,7 @@ jobs:
       # Build the PHP image
       - name: Build PHP Image
         working-directory: "./"
-        run: sh ./openshift/build-php.sh
+        run: sh ./openshift/scripts/build-php.sh
         env:
           BRANCH: ${{ env.BRANCH }}
           BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
@@ -129,7 +129,7 @@ jobs:
       && !contains(needs.*.result, 'failure')
     steps:
       - name: Checkout Target Branch
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
