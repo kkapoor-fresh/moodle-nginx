@@ -100,7 +100,7 @@ jobs:
           keys-case: upper
 
       - name: Uninstall Redis
-        run: helm uninstall redis -n ${{ env.DEPLOY_NAMESPACE }}
+        run: helm uninstall redis -n ${{ env.DEPLOY_NAMESPACE }} --wait
 
       - name: Deploy Redis
         if: success() || failure()
