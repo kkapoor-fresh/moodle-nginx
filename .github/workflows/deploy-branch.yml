@@ -41,7 +41,7 @@ jobs:
           echo OC CLI Version: $(oc version)
           echo Git Branch name: ${{ github.ref_name }}
           echo "-----------------------"
-          echo Skip Build? ${{ vars.SKIP_BUILD }}
+          echo "Skip Build? ${{ vars.SKIP_BUILD }}"
           echo "-----------------------"
           echo Deploy to: ${{ env.DEPLOY_NAMESPACE }}
           echo Pod name: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
@@ -87,19 +87,17 @@ jobs:
       # Build the PHP image
       - name: Build PHP Image
         working-directory: "./"
-        run: |
-          test -n "${{ env.BRANCH }}"
-          test -n "${{ env.BUILD_NAMESPACE }}"
-          echo "BUILIDING ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} with tag: ${{ env.BRANCH }}"
-            oc -n $BUILD_NAMESPACE process -f ./openshift/docker-build.yml \
-              -p NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
-              -p IMAGE_REPO=${{ steps.dotenv.outputs.IMAGE_REPO }} \
-              -p IMAGE_NAME=${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} \
-              -p IMAGE_TAG=${{ env.BASE_IMAGE_TAG }} \
-              -p SOURCE_REPOSITORY_URL=${{ env.SOURCE_REPOSITORY_URL }} \
-              -p DOCKER_FILE_PATH=${{ env.PHP_DOCKER_FILE_PATH }} \
-              -p SOURCE_CONTEXT_DIR=${{ env.PHP_SOURCE_CONTEXT_DIR }} | oc -n ${{ env.BUILD_NAMESPACE }} apply -f -
-          oc -n ${{ env.BUILD_NAMESPACE }} start-build bc/${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} --commit=${{ env.BRANCH }} --no-cache --wait
+        run: sh ./openshift/build-php.sh
+        env:
+          BRANCH: ${{ env.BRANCH }}
+          BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
+          PHP_DOCKER_FILE_PATH: ${{ env.PHP_DOCKER_FILE_PATH }}
+          PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
+          PHP_IMAGE_TAG: ${{ env.BRANCH }}
+          PHP_SOURCE_CONTEXT_DIR: ${{ env.PHP_SOURCE_CONTEXT_DIR }}
+          IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
+          IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
+          SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
 
       # Build the Cron image
       - name: Build Cron Image
