@@ -294,12 +294,12 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "php"
+                "${PHP_IMAGE_NAME}"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "mysql:${MYSQL_VERSION}",
-                "namespace": "${NAMESPACE}"
+                "name": "${PHP_IMAGE_NAME}:${BUILD_TAG}",
+                "namespace": "${DEPLOY_NAMESPACE}"
               }
             }
           },
@@ -426,12 +426,12 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "cron"
+                "${CRON_IMAGE_NAME}"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "mysql:${MYSQL_VERSION}",
-                "namespace": "${NAMESPACE}"
+                "name": "cron:${CRON_IMAGE_NAME}:${BUILD_TAG}",
+                "namespace": "${DEPLOY_NAMESPACE}"
               }
             }
           },
