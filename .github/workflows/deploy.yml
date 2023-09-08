@@ -113,7 +113,7 @@ jobs:
       - name: Deploy DB (MariaDB Galera)
         if: success() || failure()
         run: |
-          oc create -f ./openshift/mariadb-config.yaml -n ${{ env.DEPLOY_NAMESPACE }}
+          oc create -f ./config/mariadb/config.yaml -n ${{ env.DEPLOY_NAMESPACE }}
 
       - name: Deploy OpenShift Template ( ${{ env.DEPLOY_NAMESPACE }} ) web, php, cron, with routes, secrets, configmaps
         id: deploy-to-os
