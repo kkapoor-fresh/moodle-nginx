@@ -50,7 +50,7 @@ objects:
       output:
         to:
           kind: ImageStreamTag
-          name: "${NAME}:${TAG}"
+          name: "${NAME}:${IMAGE_TAG}"
       runPolicy: SerialLatestOnly
       source:
         contextDir: "${SOURCE_CONTEXT_DIR}"
@@ -71,8 +71,6 @@ parameters:
     value: "dockerfile"
   - name: SOURCE_REPOSITORY_URL
     value: https://github.com/bcgov/moodle-nginx.git
-  - name: TAG
-    value: "latest"
   - name: IMAGE_REPO
     value: ""
   - name: IMAGE_NAME

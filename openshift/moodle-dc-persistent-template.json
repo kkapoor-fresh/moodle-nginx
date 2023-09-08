@@ -288,7 +288,25 @@
             ]
           }
         },
-        "triggers": [],
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "php"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "mysql:${MYSQL_VERSION}",
+                "namespace": "${NAMESPACE}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
         "revisionHistoryLimit": 10,
         "test": false
       }
@@ -402,7 +420,25 @@
             ]
           }
         },
-        "triggers": [],
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "cron"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "mysql:${MYSQL_VERSION}",
+                "namespace": "${NAMESPACE}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
         "revisionHistoryLimit": 10,
         "test": false
       }
