@@ -23,13 +23,10 @@ env:
 on:
   workflow_run:
     workflows: [Build Images]
+    branches: [dev, test, prod]
     types:
       - completed
   push:
-    branches:
-      - dev
-      - test
-      - prod
     paths:
       - './openshift/*'
       - '**.Dockerfile'

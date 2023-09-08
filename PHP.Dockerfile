@@ -1,7 +1,19 @@
-FROM php:8.0-fpm
+ARG PHP_IMAGE=php:8.0-fpm
+
+FROM $PHP_IMAGE
+
+# Config arguments
+ARG DB_PORT=3306
+ARG DB_HOST=${DB_HOST}
+ARG DB_NAME=${DB_NAME}
+ARG DB_PASSWORD=${DB_PASSWORD}
+ARG DB_USER=${DB_USER}
+ARG ETC_DIR=/usr/local/etc
 
 # Moodle App directory
 ENV MOODLE_APP_DIR /app/public
+ENV PHP_INI_DIR $ETC_DIR/php/conf.d
+ENV PHP_INI_FILE $PHP_INI_DIR/php.ini
 
 # Version control for Moodle and plugins
 ENV MOODLE_BRANCH_VERSION MOODLE_311_STABLE
@@ -29,8 +41,8 @@ RUN docker-php-ext-enable redis
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
-COPY ./moodlephp.ini "$PHP_INI_DIR/conf.d/moodlephp.ini"
-COPY ./moodlephpfpm.conf "/usr/local/etc/php-fpm.d"
+COPY ./config/php/php.ini "$PHP_INI_DIR/conf.d/moodlephp.ini"
+COPY ./config/php/php-fpm.conf "/usr/local/etc/php-fpm.d"
 
 RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_APP_DIR
 

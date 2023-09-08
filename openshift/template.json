@@ -273,7 +273,7 @@
               {
                 "name": "env-data",
                 "configMap": {
-                  "name": "moodle-env",
+                  "name": "${APP_NAME}-env",
                   "items": [
                     {
                       "key": ".env",
@@ -405,7 +405,7 @@
               {
                 "name": "env-data",
                 "configMap": {
-                  "name": "moodle-env",
+                  "name": "${APP_NAME}-env",
                   "items": [
                     {
                       "key": ".env",

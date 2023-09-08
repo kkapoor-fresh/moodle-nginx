@@ -32,6 +32,11 @@ on:
       - '**.ini'
       - '**.php'
       - 'php-fpm-healthcheck.sh'
+  pull_request:
+    branches:
+      - dev
+      - test
+      - prod
 
 jobs:
   #Print variables for logging and debugging purposes
@@ -47,7 +52,7 @@ jobs:
           echo OC CLI Version: $(oc version)
           echo Git Branch name: ${{ github.ref_name }}
           echo "-----------------------"
-          echo "Skip Build? ${{ vars.SKIP_BUILD }}"
+          echo "Build Image: ${{ steps.dotenv.outputs.PHP_IMAGE }}"
           echo "-----------------------"
           echo Deploy to: ${{ env.DEPLOY_NAMESPACE }}
           echo Pod name: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
@@ -95,6 +100,7 @@ jobs:
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
         env:
+          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
           DOCKER_FILE_PATH: ${{ env.PHP_DOCKER_FILE_PATH }}
           DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
           SOURCE_CONTEXT_DIR: ${{ env.PHP_SOURCE_CONTEXT_DIR }}
@@ -113,6 +119,7 @@ jobs:
         working-directory: "./"
         run: sh ./openshift/scripts/build-dc-docker-image.sh
         env:
+          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
           DOCKER_FILE_PATH: ${{ env.CRON_DOCKER_FILE_PATH }}
           DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
           SOURCE_CONTEXT_DIR: ${{ env.CRON_SOURCE_CONTEXT_DIR }}

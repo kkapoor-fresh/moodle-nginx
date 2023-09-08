@@ -12,8 +12,8 @@ COPY ./php-fpm-healthcheck.sh /usr/local/bin/
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
-COPY ./moodlephp.ini "$PHP_INI_DIR/conf.d/moodlephp.ini"
-COPY ./moodlephpfpm.conf "/usr/local/etc/php-fpm.d"
+COPY ./config/php/php.ini "$PHP_INI_DIR/conf.d/moodlephp.ini"
+COPY ./config/php/php-fpm.conf "/usr/local/etc/php-fpm.d"
 
 # Create cron log file
 RUN touch /var/log/schedule.log
