@@ -22,7 +22,7 @@ env:
 
 on:
   workflow_run:
-    workflows: [Build Images, Deploy on Openshift]
+    workflows: [DISABLED]
     types:
       - completed
 

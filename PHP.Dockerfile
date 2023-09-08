@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y git zlib1g-dev libpng-dev libxml2-dev l
 RUN wget -O /usr/local/bin/php-fpm-healthcheck \
     https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck \
     && chmod +x /usr/local/bin/php-fpm-healthcheck
-COPY ./php-fpm-healthcheck /usr/local/bin/
+COPY ./php-fpm-healthcheck.sh /usr/local/bin/
 
 RUN pecl install channel://pecl.php.net/xmlrpc-1.0.0RC3
 RUN docker-php-ext-enable xmlrpc

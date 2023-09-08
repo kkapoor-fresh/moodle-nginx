@@ -46,14 +46,14 @@ jobs:
     steps:
       - name: Print Env Vars
         run: |
+          echo "-----------------------"
+          echo "Deployment test: Workflow Run Conclusion: ${{ github.event.workflow_run.conclusion }}"
+          echo "-----------------------"
           echo Git Base Ref: ${{ github.base_ref }}
           echo Git Build ID: ${{ github.event.number }}
           echo Git Pull Request Ref: ${{ github.event.pull_request.head.sha }}
           echo OC CLI Version: $(oc version)
           echo Git Branch name: ${{ github.ref_name }}
-          echo "-----------------------"
-          echo "Skip Build? ${{ vars.SKIP_BUILD }}"
-          echo "-----------------------"
           echo Deploy to: ${{ env.DEPLOY_NAMESPACE }}
           echo Pod name: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
           echo cron: ${{ env.CRON_DEPLOYMENT_NAME }}
@@ -127,4 +127,49 @@ jobs:
           PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
           CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
           BUILD_TAG: ${{ env.BASE_IMAGE_TAG }}
+
+  notify-failure:
+    if: ${{ failure() }}
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Team of Workflow Failure
+        uses: muinmomin/webhook-action@v1.0.0
+        with:
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+          data: '{
+            "alias":"FAILED GitHub Action by ${{ env.USER }}",
+            "text":"Job: ${{ github.job }} in
+              ${{ github.workflow }} of
+              ${{ github.repository }}:${{ github.ref_name }}",
+            "attachments":[{
+              "title":"${{ github.job }} ${{ job.status }} to ${{ github.ref_name }}",
+              "title_link": "${{ env.INSPECT_JOB_URL }}",
+              "text":"Failure detected in ${{ github.repository }}:${{ github.ref_name }}",
+              "image_url": "${{ env.FAIL_ICON_URL }}",
+              "color":"#764FA5"
+            }]}'
+
+  notify-success:
+    if: ${{ success() }}
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Team of Workflow Success
+        uses: muinmomin/webhook-action@v1.0.0
+        with:
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+          data: '{
+            "alias":"Successful ${{ github.job }} by $USER",
+            "text":"${{ github.job }} in ${{ github.workflow }}
+              of ${{ github.repository }}:${{ github.ref_name }}",
+            "attachments":[{
+              "title":"${{ github.job }} ${{ job.status }} to ${{ github.ref_name }}",
+              "title_link":"https://github.com/kaji-bikash/rocketchat-pagerduty/blob/master/rocketchat_pagerduty_incoming.js",
+              "text":"Successful ${{ github.job }} in ${{ github.workflow }} of ${{ github.repository }}:${{ github.ref_name }}",
+              "image_url":"$SUCCESS_ICON_URL",
+              "color":"#764FA5"
+              }]
+            }]
+            }'
 

@@ -122,74 +122,9 @@ jobs:
           IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
 
-  # Deploy to Openshift
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    needs: [checkEnv, build-images]
-    if: |
-      always()
-      && (github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod')
-      && contains(needs.*.result, 'success')
-      && !contains(needs.*.result, 'failure')
-    steps:
-      - name: Checkout Target Branch
-        uses: actions/checkout@v2
-
-      # Log in to OpenShift.
-      # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
-      # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      # First, build appropriate secret name for the environement: AUTH_TOKEN_DEV, AUTH_TOKEN_TEST, etc.
-      - id: auth_token_string
-        uses: ASzc/change-string-case-action@v5
-        with:
-          string: ${{ format('AUTH_TOKEN_{0}', github.ref_name) }}
-      - run: |
-          echo "ENV AUTH SECRET NAME: ${{ steps.auth_token_string.outputs.uppercase }}"
-
-      - name: Log in to OpenShift ( ${{ github.ref_name }} )
-        run: |
-          oc login --token=${{ secrets[steps.auth_token_string.outputs.uppercase] }} --server=https://api.silver.devops.gov.bc.ca:6443
-
-      # Get Environment Variables from file
-      - name: Setup Env
-        id: dotenv
-        uses: falti/dotenv-action@v1.0.4
-        with:
-          path: example.env
-          export-variables: true
-          log-variables: true
-          keys-case: upper
-
-      - name: Deploy Redis
-        run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo update
-          helm uninstall redis
-          helm install -f ./redis-values.yml --name ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }}
-          helm install ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }}
-
-      - name: Deploy DB (MariaDB Galera)
-        run: |
-          oc create -f ./openshift/mariadb-config.yaml -n ${{ env.DEPLOY_NAMESPACE }}
-
-      - name: Deploy OpenShift Template ( ${{ env.DEPLOY_NAMESPACE }} ) web, php, cron, with routes, secrets, configmaps
-        run: sh ./openshift/scripts/deploy-template.sh
-        env:
-          APP: ${{ env.APP }}
-          BRANCH: ${{ env.BRANCH }}
-          APP_HOST_URL: ${{ env.APP_HOST_URL }}
-          BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
-          DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
-          WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
-          PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
-          PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
-          CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
-          BUILD_TAG: ${{ env.BASE_IMAGE_TAG }}
-
   notify-failure:
     if: ${{ failure() }}
-    needs: [build-images, deploy]
+    needs: [build-images]
     runs-on: ubuntu-latest
     steps:
       - name: Notify Team of Workflow Failure
@@ -211,7 +146,7 @@ jobs:
 
   notify-success:
     if: ${{ success() }}
-    needs: [build-images, deploy]
+    needs: [build-images]
     runs-on: ubuntu-latest
     steps:
       - name: Notify Team of Workflow Success
