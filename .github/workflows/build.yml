@@ -136,7 +136,7 @@ jobs:
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
 
   call-deploy-workflow:
-    uses: ./.github/workflows/deploy.yml@$BRANCH
+    uses: ./.github/workflows/deploy.yml
 
   notify-failure:
     if: ${{ failure() }}
