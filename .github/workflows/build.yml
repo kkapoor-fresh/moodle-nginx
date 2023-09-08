@@ -136,7 +136,7 @@ jobs:
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
 
   call-deploy-workflow:
-    uses: /.github/workflows/deploy.yml@${{ env.BRANCH }}
+    uses: /.github/workflows/deploy.yml@$BRANCH
 
   notify-failure:
     if: ${{ failure() }}
@@ -152,7 +152,7 @@ jobs:
             "text":"Job: ${{ github.job }} in
               ${{ github.workflow }} of
               ${{ github.repository }}:${{ github.ref_name }} >>
-              Deploy1: ${{ needs.call-deploy-workflow.outputs.deploy1 }} >>
+              Deploy1: ${{ needs.call-deploy-workflow.outputs.deploy1 }}
               Deploy2: ${{ needs.call-deploy-workflow.outputs.deploy2 }}",
             "attachments":[{
               "title":"${{ github.job }} ${{ job.status }} to ${{ github.ref_name }}",
