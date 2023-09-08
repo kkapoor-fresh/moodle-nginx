@@ -56,7 +56,7 @@ metadata:
   name: db
 spec:
   serviceName: "db"
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: db

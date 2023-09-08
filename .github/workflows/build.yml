@@ -1,5 +1,5 @@
-# Static Deploy On Openshift
-# Builds and Deploys merged PR's to persistent pods/services/routes/etc in the OpenShift Dev environment.
+# Build Images
+# Builds merged PR's to images in OpenShift tools namespace.
 name: Build Images
 
 env:
