@@ -37,6 +37,12 @@ on:
       - dev
       - test
       - prod
+    paths:
+      - '**.Dockerfile'
+      - '**.conf'
+      - '**.ini'
+      - '**.php'
+      - 'php-fpm-healthcheck.sh'
 
 jobs:
   #Print variables for logging and debugging purposes
@@ -129,9 +135,12 @@ jobs:
           IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
 
+  call-deploy-workflow:
+    uses: /.github/workflows/deploy.yml@${{ env.BRANCH }}
+
   notify-failure:
     if: ${{ failure() }}
-    needs: [build-images]
+    needs: [build-images, call-deploy-workflow]
     runs-on: ubuntu-latest
     steps:
       - name: Notify Team of Workflow Failure
@@ -142,7 +151,9 @@ jobs:
             "alias":"FAILED GitHub Action by ${{ env.USER }}",
             "text":"Job: ${{ github.job }} in
               ${{ github.workflow }} of
-              ${{ github.repository }}:${{ github.ref_name }}",
+              ${{ github.repository }}:${{ github.ref_name }} >>
+              Deploy1: ${{ needs.call-deploy-workflow.outputs.deploy1 }} >>
+              Deploy2: ${{ needs.call-deploy-workflow.outputs.deploy2 }}",
             "attachments":[{
               "title":"${{ github.job }} ${{ job.status }} to ${{ github.ref_name }}",
               "title_link": "${{ env.INSPECT_JOB_URL }}",
@@ -153,7 +164,7 @@ jobs:
 
   notify-success:
     if: ${{ success() }}
-    needs: [build-images]
+    needs: [build-images, call-deploy-workflow]
     runs-on: ubuntu-latest
     steps:
       - name: Notify Team of Workflow Success

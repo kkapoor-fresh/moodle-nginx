@@ -42,7 +42,7 @@ oc get pods -l deploymentconfig=$PHP_DEPLOYMENT_NAME --field-selector=status.pha
 sleep 20
 podNames=$(oc get pods -l deploymentconfig=$PHP_DEPLOYMENT_NAME --field-selector=status.phase=Running -o name)
 pwd
-echo "$PHP_DEPLOYMENT_NAME is deployed"
+echo "deploy1=$PHP_DEPLOYMENT_NAME is deployed" >> $GITHUB_OUTPUT
 
 oc get pods|grep $CRON_DEPLOYMENT_NAME
 sleep 30
@@ -50,4 +50,4 @@ oc get pods -l deploymentconfig=$CRON_DEPLOYMENT_NAME --field-selector=status.ph
 sleep 20
 podNames=$(oc get pods -l deploymentconfig=$CRON_DEPLOYMENT_NAME --field-selector=status.phase=Running -o name)
 pwd
-echo "$CRON_DEPLOYMENT_NAME is deployed"
+echo "deploy2=$CRON_DEPLOYMENT_NAME is deployed" >> $GITHUB_OUTPUT
