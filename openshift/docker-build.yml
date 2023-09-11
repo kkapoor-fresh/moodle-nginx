@@ -61,8 +61,13 @@ objects:
       strategy:
         dockerStrategy:
           dockerfilePath: "${DOCKER_FILE_PATH}"
+          buildArgs:
+            - name: "DOCKER_FROM_IMAGE"
+              value: "${DOCKER_FROM_IMAGE}"
         type: Docker
 parameters:
+  - name: DOCKER_FROM_IMAGE
+    required: true
   - name: NAME
     required: true
   - name: SOURCE_CONTEXT_DIR

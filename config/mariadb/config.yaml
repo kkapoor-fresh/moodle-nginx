@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mariadb-config
+  name: db-config
 data:
 
   primary.cnf: |
@@ -24,10 +24,10 @@ data:
 
   secondary.sql: |
     # We have to know name of sts (`mariadb-sts`) and
-    # service `mariadb-service` in advance as an FQDN.
+    # service `db-service` in advance as an FQDN.
     # No need to use master_port
     CHANGE MASTER TO
-    MASTER_HOST='mariadb-sts-0.mariadb-service.default.svc.cluster.local',
+    MASTER_HOST='db-sts-0.db-service.default.svc.cluster.local',
     MASTER_USER='repluser',
     MASTER_PASSWORD='replsecret',
     MASTER_CONNECT_RETRY=10;
@@ -112,7 +112,7 @@ spec:
         image: mariadb
         ports:
         - containerPort: 3306
-          name: mariadb-port
+          name: db-port
         env:
         # Using Secrets
         - name: MARIADB_ALLOW_EMPTY_ROOT_PASSWORD
@@ -146,7 +146,7 @@ spec:
         volumeMounts:
         - name: datadir
           mountPath: /var/lib/mysql/
-        - name: mariadb-config
+        - name: db-config
           mountPath: /etc/mysql/conf.d/
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
@@ -169,6 +169,6 @@ spec:
         requests:
           storage: 8Gi
 # Delete the
-# pvc's  for i in 0 1 2; do kubectl delete pvc datadir-mariadb-sts-$i; done
+# pvc's  for i in 0 1 2; do kubectl delete pvc datadir-db-sts-$i; done
 # https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/
 # https://github.com/Yolean/kubernetes-mysql-cluster/blob/master/50mariadb.yml

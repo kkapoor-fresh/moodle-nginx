@@ -5,6 +5,7 @@ name: Deploy on Openshift
 env:
   APP: moodle
   USER: ${{ github.actor }}
+  DATABASE_SERVICE_NAME: db
 
   PROJECT: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}
   APP_HOST_URL: moodle-${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
@@ -31,14 +32,14 @@ on:
       deploy2:
         description: "Deployment log"
         value: ${{ jobs.example_job.outputs.output2 }}
-  push:
-    paths:
-      - './openshift/*'
-      - '**.Dockerfile'
-      - '**.yml'
-      - '**.conf'
-      - '**.ini'
-      - '**.php'
+  # push:
+  #   paths:
+  #     - './openshift/*'
+  #     - '**.Dockerfile'
+  #     - '**.yml'
+  #     - '**.conf'
+  #     - '**.ini'
+  #     - '**.php'
 
 jobs:
   #Print variables for logging and debugging purposes
@@ -109,8 +110,18 @@ jobs:
           helm repo update
           helm install -f ./config/redis/values.yml ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }}
 
+      - name: Check for DB (MariaDB Galera) Statefulset (${{ env.DATABASE_SERVICE_NAME }})
+        id: check-db
+        run: |
+          result="$(oc describe sts ${{ env.DATABASE_SERVICE_NAME }})"
+          if [[ $result == *"NotFound"* ]]; then
+            echo "::set-output installed=false" >> $GITHUB_OUTPUT
+          else
+            echo "::set-output installed=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy DB (MariaDB Galera)
-        if: success() || failure()
+        if: ${{ steps.check-db.outputs.installed }} == true
         run: |
           oc create -f ./config/mariadb/config.yaml -n ${{ env.DEPLOY_NAMESPACE }}
 

@@ -34,6 +34,9 @@ services:
         build:
             context: .
             dockerfile: PHP.Dockerfile
+            args:
+              PHP_IMAGE: php:8.0-fpm
+              PHP_INI_ENVIRONMENT: development
         volumes:
             - ./temp/var/www:/var/www:delegated
         restart: "unless-stopped"
@@ -52,6 +55,9 @@ services:
         build:
             context: .
             dockerfile: CRON.Dockerfile
+            args:
+              CRON_IMAGE: php:7.4-fpm
+              PHP_INI_ENVIRONMENT: development
         volumes:
             - ./temp/var/www:/var/www:delegated
     redis:

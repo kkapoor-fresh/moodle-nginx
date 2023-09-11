@@ -1,19 +1,20 @@
-ARG PHP_IMAGE=php:8.0-fpm
-
-FROM $PHP_IMAGE
-
 # Config arguments
+# Environment uses ONLY production or development
+ARG PHP_INI_ENVIRONMENT=production
 ARG DB_PORT=3306
 ARG DB_HOST=${DB_HOST}
 ARG DB_NAME=${DB_NAME}
 ARG DB_PASSWORD=${DB_PASSWORD}
 ARG DB_USER=${DB_USER}
 ARG ETC_DIR=/usr/local/etc
+ARG PHP_IMAGE=php:8.0-fpm
+
+FROM $PHP_IMAGE
 
 # Moodle App directory
 ENV MOODLE_APP_DIR /app/public
-ENV PHP_INI_DIR $ETC_DIR/php/conf.d
-ENV PHP_INI_FILE $PHP_INI_DIR/php.ini
+ENV PHP_INI_DIR $ETC_DIR/php
+# ENV PHP_INI_FILE $PHP_INI_DIR/php.ini
 
 # Version control for Moodle and plugins
 ENV MOODLE_BRANCH_VERSION MOODLE_311_STABLE
@@ -32,15 +33,15 @@ RUN wget -O /usr/local/bin/php-fpm-healthcheck \
     && chmod +x /usr/local/bin/php-fpm-healthcheck
 COPY ./php-fpm-healthcheck.sh /usr/local/bin/
 
-RUN pecl install channel://pecl.php.net/xmlrpc-1.0.0RC3
-RUN docker-php-ext-enable xmlrpc
+# RUN pecl install channel://pecl.php.net/xmlrpc-1.0.0RC3
+# RUN docker-php-ext-enable xmlrpc
+
 RUN docker-php-ext-install pdo pdo_mysql mysqli gd soap intl zip xsl opcache ldap
 RUN pecl install -o -f redis
 RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
 
-RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
-
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_FILE"
 COPY ./config/php/php.ini "$PHP_INI_DIR/moodlephp.ini"
 COPY ./config/php/php-fpm.conf "/usr/local/etc/php-fpm.d"
 
