@@ -87,7 +87,8 @@ jobs:
 
       - name: Log in to OpenShift ( ${{ github.ref_name }} )
         run: |
-          oc login --token=${{ secrets[steps.auth_token_string.outputs.uppercase] }} --server=https://api.silver.devops.gov.bc.ca:6443
+          secret-name="${{ steps.auth_token_string.outputs.uppercase }}"
+          oc login --token=${{ secrets[$secret-name] }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       # Get Environment Variables from file
       - name: Setup Env
