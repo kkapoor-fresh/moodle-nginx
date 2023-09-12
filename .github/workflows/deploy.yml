@@ -5,7 +5,6 @@ name: Deploy on Openshift
 env:
   APP: moodle
   USER: ${{ github.actor }}
-  DATABASE_SERVICE_NAME: db
 
   PROJECT: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}
   APP_HOST_URL: moodle-${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
@@ -108,19 +107,19 @@ jobs:
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
-          helm install -f ./config/redis/values.yml ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }}
+          helm install ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }} -f ./config/redis/values.yml
 
-      - name: Check for DB (MariaDB Galera) Statefulset (${{ env.DATABASE_SERVICE_NAME }})
+      - name: Check for DB (MariaDB Galera) Statefulset (${{ env.DB_DEPLOYMENT_NAME  }})
         id: check-db
         run: |
-          result="$(oc describe sts ${{ env.DATABASE_SERVICE_NAME }})"
+          result="$(oc describe sts ${{ env.DB_DEPLOYMENT_NAME  }})"
           if [[ $result == *"NotFound"* ]]; then
             echo "::set-output installed=false" >> $GITHUB_OUTPUT
           else
             echo "::set-output installed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Deploy DB (MariaDB Galera)
+      - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
         if: ${{ steps.check-db.outputs.installed }} == true
         run: |
           oc create -f ./config/mariadb/config.yaml -n ${{ env.DEPLOY_NAMESPACE }}

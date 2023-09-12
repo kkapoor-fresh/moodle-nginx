@@ -1,31 +1,52 @@
-# Config arguments
-# Environment uses ONLY production or development
-ARG PHP_INI_ENVIRONMENT=production
-ARG DB_PORT=3306
-ARG DB_HOST=${DB_HOST}
-ARG DB_NAME=${DB_NAME}
-ARG DB_PASSWORD=${DB_PASSWORD}
-ARG DB_USER=${DB_USER}
-ARG ETC_DIR=/usr/local/etc
 ARG PHP_IMAGE=php:8.0-fpm
 
 FROM $PHP_IMAGE
 
+ARG PHP_INI_ENVIRONMENT=production
+ARG MOODLE_BRANCH_VERSION=MOODLE_402_STABLE
+ARG F2F_BRANCH_VERSION=MOODLE_400_STABLE
+ARG HVP_BRANCH_VERSION=stable
+ARG FORMAT_BRANCH_VERSION=MOODLE_311
+ARG CERTIFICATE_BRANCH_VERSION=MOODLE_402_STABLE
+ARG CUSTOMCERT_BRANCH_VERSION=MOODLE_402_STABLE
+ARG DATAFLOWS_BRANCH_VERSION=MOODLE_35_STABLE
+
 # Moodle App directory
 ENV MOODLE_APP_DIR /app/public
-ENV PHP_INI_DIR $ETC_DIR/php
-# ENV PHP_INI_FILE $PHP_INI_DIR/php.ini
+# ENV PHP_INI_DIR $ETC_DIR/php
+ENV PHP_INI_FILE /usr/local/etc/php/php.ini
 
-# Version control for Moodle and plugins
-ENV MOODLE_BRANCH_VERSION MOODLE_311_STABLE
-ENV F2F_BRANCH_VERSION MOODLE_311_STABLE
-ENV HVP_BRANCH_VERSION stable
-ENV FORMAT_BRANCH_VERSION MOODLE_311
-ENV CERTIFICATE_BRANCH_VERSION MOODLE_31_STABLE
-ENV CUSTOMCERT_BRANCH_VERSION MOODLE_311_STABLE
-ENV DATAFLOWS_BRANCH_VERSION MOODLE_35_STABLE
+RUN echo "Building Moodle version: $MOODLE_BRANCH_VERSION for $PHP_INI_ENVIRONMENT environment"
 
-RUN apt-get update && apt-get install -y git zlib1g-dev libpng-dev libxml2-dev libzip-dev libxslt-dev libldap-dev wget libfcgi-bin
+RUN apt-get update && apt-get install -y \
+  git \
+  zlib1g-dev \
+  libpng-dev \
+  libxml2-dev \
+  libzip-dev \
+  libxslt-dev \
+  libldap-dev \
+  libfreetype-dev \
+  wget \
+  libfcgi-bin \
+  && apt-get clean
+
+RUN docker-php-ext-install \
+  pdo \
+  pdo_mysql \
+  mysqli \
+  gd \
+  soap \
+  intl \
+  zip \
+  xsl \
+  opcache \
+  ldap
+# ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+# RUN chmod +x /usr/local/bin/install-php-extensions && \
+#     install-php-extensions pdo pdo_mysql mysqli gd soap intl zip xsl opcache ldap
+RUN pecl install channel://pecl.php.net/xmlrpc-1.0.0RC3 xmlrpc
+RUN docker-php-ext-enable xmlrpc
 
 # Add healthcheck
 RUN wget -O /usr/local/bin/php-fpm-healthcheck \
@@ -33,10 +54,6 @@ RUN wget -O /usr/local/bin/php-fpm-healthcheck \
     && chmod +x /usr/local/bin/php-fpm-healthcheck
 COPY ./php-fpm-healthcheck.sh /usr/local/bin/
 
-# RUN pecl install channel://pecl.php.net/xmlrpc-1.0.0RC3
-# RUN docker-php-ext-enable xmlrpc
-
-RUN docker-php-ext-install pdo pdo_mysql mysqli gd soap intl zip xsl opcache ldap
 RUN pecl install -o -f redis
 RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
