@@ -108,7 +108,7 @@ jobs:
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
-          helm install ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }} -f ./config/redis/values.yml
+          helm install "${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }} -f ./config/redis/values.yml"
 
       - name: Check for DB (MariaDB Galera) Statefulset (${{ env.DB_DEPLOYMENT_NAME  }})
         id: check-db
