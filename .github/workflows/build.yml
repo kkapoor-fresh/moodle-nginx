@@ -92,7 +92,7 @@ jobs:
       # Get Environment Variables from file
       - name: Setup Env
         id: dotenv
-        uses: falti/dotenv-action@v1.0.4
+        uses: falti/dotenv-action@1.0.4
         with:
           path: example.env
           export-variables: true
