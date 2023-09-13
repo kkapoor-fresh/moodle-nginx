@@ -140,6 +140,22 @@ jobs:
   call-deploy-workflow:
     uses: ./.github/workflows/deploy.yml
     needs: [build-images]
+    secrets: inherit
+    with:
+      APP: ${{ env.APP }}
+      PROJECT: ${{ env.PROJECT }}
+      DB_DEPLOYMENT_NAME: ${{ env.DB_DEPLOYMENT_NAME }}
+      APP_HOST_URL: ${{ env.APP_HOST_URL }}
+      BASE_IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
+      BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
+      DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
+      BUILD_ID: ${{ env.BUILD_ID }}
+      BRANCH: ${{ env.BRANCH }}
+      SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
+      INSPECT_JOB_URL: ${{ env.INSPECT_JOB_URL }}
+      BUILD_ICON_URL: ${{ env.BUILD_ICON_URL }}
+      SUCCESS_ICON_URL: ${{ env.SUCCESS_ICON_URL }}
+      FAIL_ICON_URL: ${{ env.FAIL_ICON_URL }}
 
   notify-failure:
     if: ${{ failure() }}

@@ -6,22 +6,49 @@ env:
   APP: moodle
   USER: ${{ github.actor }}
 
-  PROJECT: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}
-  APP_HOST_URL: moodle-${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
-  BASE_IMAGE_TAG: ${{ github.ref_name }}
-  BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
-  DEPLOY_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
-  BUILD_ID: ${{ github.event.number }}
-  BRANCH: ${{ github.ref_name }}
-  SOURCE_REPOSITORY_URL: "https://github.com/${{ github.repository }}"
-  INSPECT_JOB_URL: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-  BUILD_ICON_URL: https://cdn-icons-png.flaticon.com/128/5110/5110294.png
-  SUCCESS_ICON_URL: https://cdn-icons-png.flaticon.com/128/1356/1356479.png
-  FAIL_ICON_URL: https://www.flaticon.com/free-icon/rocket_6818114
-
 on:
   workflow_call:
+    inputs:
+      DB_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      APP:
+        required: true
+        type: string
+      BRANCH:
+        required: true
+        type: string
+      APP_HOST_URL:
+        required: true
+        type: string
+      BUILD_NAMESPACE:
+        required: true
+        type: string
+      DEPLOY_NAMESPACE:
+        required: true
+        type: string
+      WEB_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      PHP_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      PHP_IMAGE:
+        required: true
+        type: string
+      CRON_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      BUILD_TAG:
+        required: true
+        type: string
+    secrets:
+      AUTH_TOKEN_DEV:
+        required: true
+      AUTH_TOKEN_TEST:
+        required: true
+      AUTH_TOKEN_PROD:
+        required: true
     outputs:
       # This is the name of the output set by the workflow_dispatch action.
       # The value is the ID of the workflow run that was triggered.
@@ -51,11 +78,9 @@ jobs:
     steps:
       - name: Print Env Vars
         run: |
-          echo "Deployment test > Workflow Conclusion: ${{ github.event.workflow_run.conclusion }}"
-          echo "-----------------------"
           echo OC CLI Version: $(oc version)
           echo Git Branch name: ${{ github.ref_name }}
-          echo Deploy to: ${{ env.DEPLOY_NAMESPACE }}
+          echo Deploy to: ${{ inputs.DEPLOY_NAMESPACE }}
 
   # Deploy to Openshift
   deploy:
@@ -115,7 +140,7 @@ jobs:
           keys-case: upper
 
       - name: Uninstall Redis
-        run: helm uninstall redis -n ${{ env.DEPLOY_NAMESPACE }} --wait
+        run: helm uninstall redis -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
       - name: Deploy Redis
         if: success() || failure()
@@ -124,10 +149,10 @@ jobs:
           helm repo update
           helm install "${{ steps.dotenv.outputs.redis_deployment_name }} ${{ steps.dotenv.outputs.redis_image }} -f ./config/redis/values.yml"
 
-      - name: Check for DB (MariaDB Galera) Statefulset (${{ env.DB_DEPLOYMENT_NAME  }})
+      - name: Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
         id: check-db
         run: |
-          result="$(oc describe sts ${{ env.DB_DEPLOYMENT_NAME  }})"
+          result="$(oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }})"
           if [[ $result == *"NotFound"* ]]; then
             echo "::set-output installed='false'" >> $GITHUB_OUTPUT
           else
@@ -137,20 +162,20 @@ jobs:
       - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
         if: ${{ steps.check-db.outputs.installed }} == 'false'
         run: |
-          oc create -f ./config/mariadb/config.yaml -n ${{ env.DEPLOY_NAMESPACE }}
+          oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
 
-      - name: Deploy OpenShift Template ( ${{ env.DEPLOY_NAMESPACE }} ) web, php, cron, with routes, secrets, configmaps
+      - name: Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) web, php, cron, with routes, secrets, configmaps
         id: deploy-to-os
         if: success() || failure()
         run: sh ./openshift/scripts/deploy-template.sh
         env:
-          APP: ${{ env.APP }}
-          BRANCH: ${{ env.BRANCH }}
-          APP_HOST_URL: ${{ env.APP_HOST_URL }}
-          BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
-          DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
+          APP: ${{ inputs.APP }}
+          BRANCH: ${{ inputs.BRANCH }}
+          APP_HOST_URL: ${{ inputs.APP_HOST_URL }}
+          BUILD_NAMESPACE: ${{ inputs.BUILD_NAMESPACE }}
+          DEPLOY_NAMESPACE: ${{ inputs.DEPLOY_NAMESPACE }}
           WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.web_deployment_name }}
           PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.php_deployment_name }}
           PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
           CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.cron_deployment_name }}
-          BUILD_TAG: ${{ env.BASE_IMAGE_TAG }}
+          BUILD_TAG: ${{ inputs.BASE_IMAGE_TAG }}
