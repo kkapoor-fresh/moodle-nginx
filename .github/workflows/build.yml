@@ -139,6 +139,7 @@ jobs:
 
   call-deploy-workflow:
     uses: ./.github/workflows/deploy.yml
+    needs: [build-images]
 
   notify-failure:
     if: ${{ failure() }}
