@@ -9,6 +9,9 @@ env:
 on:
   workflow_call:
     inputs:
+      BASE_IMAGE_TAG:
+        required: true
+        type: string
       DB_DEPLOYMENT_NAME:
         required: true
         type: string
@@ -37,9 +40,6 @@ on:
         required: true
         type: string
       CRON_DEPLOYMENT_NAME:
-        required: true
-        type: string
-      BUILD_TAG:
         required: true
         type: string
     secrets:

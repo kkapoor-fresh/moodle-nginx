@@ -134,7 +134,6 @@ jobs:
       BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
       BRANCH: ${{ env.BRANCH }}
-      BASE_IMAGE_TAG: ${{ github.ref_name }}
       PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
 
   call-deploy-workflow:
@@ -142,7 +141,7 @@ jobs:
     needs: [checkEnv, build-images]
     secrets: inherit
     with:
-      BASE_IMAGE_TAG: ${{ needs.build-images.outputs.BASE_IMAGE_TAG }}
+      BASE_IMAGE_TAG: ${{ github.ref_name }}
       APP: ${{ needs.build-images.outputs.APP }}
       WEB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.WEB_DEPLOYMENT_NAME }}
       PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}
