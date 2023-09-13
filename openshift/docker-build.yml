@@ -62,11 +62,29 @@ objects:
         dockerStrategy:
           dockerfilePath: "${DOCKER_FILE_PATH}"
           buildArgs:
-            - name: "DOCKER_FROM_IMAGE"
-              value: "${DOCKER_FROM_IMAGE}"
+            - name: "PHP_IMAGE"
+              value: "${PHP_IMAGE}"
+            - name: ""
+              value: "${}"
+            - name: "PHP_INI_ENVIRONMENT"
+              value: "${PHP_INI_ENVIRONMENT}"
+            - name: "MOODLE_BRANCH_VERSION"
+              value: "${MOODLE_BRANCH_VERSION}"
+            - name: "F2F_BRANCH_VERSION"
+              value: "${F2F_BRANCH_VERSIONBLE}"
+            - name: "HVP_BRANCH_VERSION"
+              value: "${HVP_BRANCH_VERSION}"
+            - name: "FORMAT_BRANCH_VERSION"
+              value: "${FORMAT_BRANCH_VERSION}"
+            - name: "CERTIFICATE_BRANCH_VERSION"
+              value: "${CERTIFICATE_BRANCH_VERSION}"
+            - name: "CUSTOMCERT_BRANCH_VERSION"
+              value: "${CUSTOMCERT_BRANCH_VERSION}"
+            - name: "DATAFLOWS_BRANCH_VERSION"
+              value: "${DATAFLOWS_BRANCH_VERSION}"
         type: Docker
 parameters:
-  - name: DOCKER_FROM_IMAGE
+  - name: PHP_IMAGE
     required: true
   - name: NAME
     required: true

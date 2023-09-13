@@ -108,7 +108,7 @@ jobs:
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
         env:
-          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
+          PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
           DOCKER_FILE_PATH: ${{ env.PHP_DOCKER_FILE_PATH }}
           DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
           SOURCE_CONTEXT_DIR: ${{ env.PHP_SOURCE_CONTEXT_DIR }}
@@ -127,7 +127,7 @@ jobs:
         working-directory: "./"
         run: sh ./openshift/scripts/build-dc-docker-image.sh
         env:
-          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
+          PHP_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
           DOCKER_FILE_PATH: ${{ env.CRON_DOCKER_FILE_PATH }}
           DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
           SOURCE_CONTEXT_DIR: ${{ env.CRON_SOURCE_CONTEXT_DIR }}
