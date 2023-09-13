@@ -54,22 +54,10 @@ jobs:
     steps:
       - name: Print Env Vars
         run: |
-          echo Git Base Ref: ${{ github.base_ref }}
-          echo Git Build ID: ${{ github.event.number }}
-          echo Git Pull Request Ref: ${{ github.event.pull_request.head.sha }}
-          echo OC CLI Version: $(oc version)
-          echo Git Branch name: ${{ github.ref_name }}
-          echo "-----------------------"
-          echo "Build Image: ${{ steps.dotenv.outputs.PHP_IMAGE }}"
+          echo Deploying: ${{ env.PROJECT }}
           echo "-----------------------"
           echo Deploy to: ${{ env.DEPLOY_NAMESPACE }}
-          echo Pod name: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
-          echo cron: ${{ env.CRON_DEPLOYMENT_NAME }}
-          echo db: ${{ env.DB_DEPLOYMENT_NAME }}
-          echo redis: ${{ env.REDIS_DEPLOYMENT_NAME }}
-          echo moodle: ${{ env.DB_USER }}
-          echo db-backup: ${{ env.DB_BACKUP_POD }}
-          echo db-0.mysql: ${{ env.DB_HOST }}
+          echo URL: ${{ env.APP_HOST_URL }}
 
   # Build PHP Image
 

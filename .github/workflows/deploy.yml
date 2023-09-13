@@ -114,17 +114,17 @@ jobs:
           echo "ENV AUTH SECRET NAME: ${{ steps.auth_token_string.outputs.uppercase }}"
 
       - name: Log in to OpenShift ( DEV )
-        if: ${{ github.ref_name }} == 'dev'
+        if: github.ref_name == 'dev'
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_DEV }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       - name: Log in to OpenShift ( TEST )
-        if: ${{ github.ref_name }} == 'test'
+        if: github.ref_name == 'test'
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_TEST }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       - name: Log in to OpenShift ( PROD )
-        if: ${{ github.ref_name }} == 'prod'
+        if: github.ref_name == 'prod'
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=https://api.silver.devops.gov.bc.ca:6443
 
@@ -147,7 +147,7 @@ jobs:
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
-          helm install "${{ steps.dotenv.outputs.redis_deployment_name }} ${{ steps.dotenv.outputs.redis_image }} -f ./config/redis/values.yml"
+          helm install ${{ steps.dotenv.outputs.redis_deployment_name }} ${{ steps.dotenv.outputs.redis_image }} -f ./config/redis/values.yml
 
       - name: Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
         id: check-db
