@@ -136,15 +136,12 @@ jobs:
           IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
           IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
-
-  call-deploy-workflow:
-    uses: ./.github/workflows/deploy.yml
-    needs: [build-images]
-    secrets: inherit
-    with:
+    outputs:
       APP: ${{ env.APP }}
       PROJECT: ${{ env.PROJECT }}
-      DB_DEPLOYMENT_NAME: ${{ env.DB_DEPLOYMENT_NAME }}
+      DB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.DB_DEPLOYMENT_NAME }}
+      PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
+      CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
       APP_HOST_URL: ${{ env.APP_HOST_URL }}
       BASE_IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
       BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
@@ -156,6 +153,31 @@ jobs:
       BUILD_ICON_URL: ${{ env.BUILD_ICON_URL }}
       SUCCESS_ICON_URL: ${{ env.SUCCESS_ICON_URL }}
       FAIL_ICON_URL: ${{ env.FAIL_ICON_URL }}
+
+  call-deploy-workflow:
+    uses: ./.github/workflows/deploy.yml
+    needs: [checkEnv, build-images]
+    secrets: inherit
+    with:
+      BUILD_TAG: ${{ env.BASE_IMAGE_TAG }}
+      APP: ${{ needs.build-images.outputs.APP }}
+      PROJECT: ${{ needs.build-images.outputs.PROJECT }}
+      WEB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.WEB_DEPLOYMENT_NAME }}
+      PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}
+      PHP_IMAGE: ${{ needs.build-images.outputs.PHP_IMAGE }}
+      DB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.DB_DEPLOYMENT_NAME }}
+      CRON_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.CRON_DEPLOYMENT_NAME }}
+      APP_HOST_URL: ${{ needs.build-images.outputs.APP_HOST_URL }}
+      BASE_IMAGE_TAG: ${{ needs.build-images.outputs.BASE_IMAGE_TAG }}
+      BUILD_NAMESPACE: ${{ needs.build-images.outputs.BUILD_NAMESPACE }}
+      DEPLOY_NAMESPACE: ${{ needs.build-images.outputs.DEPLOY_NAMESPACE }}
+      BUILD_ID: ${{ needs.build-images.outputs.BUILD_ID }}
+      BRANCH: ${{ needs.build-images.outputs.BRANCH }}
+      SOURCE_REPOSITORY_URL: ${{ needs.build-images.outputs.SOURCE_REPOSITORY_URL }}
+      INSPECT_JOB_URL: ${{ needs.build-images.outputs.INSPECT_JOB_URL }}
+      BUILD_ICON_URL: ${{ needs.build-images.outputs.BUILD_ICON_URL }}
+      SUCCESS_ICON_URL: ${{ needs.build-images.outputs.SUCCESS_ICON_URL }}
+      FAIL_ICON_URL: ${{ needs.build-images.outputs.FAIL_ICON_URL }}
 
   notify-failure:
     if: ${{ failure() }}
