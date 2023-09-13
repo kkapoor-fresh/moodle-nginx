@@ -1,6 +1,6 @@
-ARG CRON_IMAGE=php:7.4-fpm
+ARG DOCKER_FROM_IMAGE=php:7.4-fpm
 
-FROM $CRON_IMAGE
+FROM $DOCKER_FROM_IMAGE
 
 # Environment uses ONLY production or development
 ARG PHP_INI_ENVIRONMENT=production

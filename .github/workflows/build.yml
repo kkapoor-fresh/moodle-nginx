@@ -96,7 +96,7 @@ jobs:
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
         env:
-          PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
+          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
           DOCKER_FILE_PATH: ${{ env.PHP_DOCKER_FILE_PATH }}
           DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
           SOURCE_CONTEXT_DIR: ${{ env.PHP_SOURCE_CONTEXT_DIR }}
@@ -115,7 +115,7 @@ jobs:
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
         env:
-          PHP_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
+          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
           DOCKER_FILE_PATH: ${{ env.CRON_DOCKER_FILE_PATH }}
           DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
           SOURCE_CONTEXT_DIR: ${{ env.CRON_SOURCE_CONTEXT_DIR }}
@@ -126,6 +126,7 @@ jobs:
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
     outputs:
       APP: ${{ env.APP }}
+      WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
       DB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.DB_DEPLOYMENT_NAME }}
       PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
       CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
@@ -133,17 +134,19 @@ jobs:
       BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
       BRANCH: ${{ env.BRANCH }}
+      BASE_IMAGE_TAG: ${{ github.ref_name }}
+      PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
 
   call-deploy-workflow:
     uses: ./.github/workflows/deploy.yml
     needs: [checkEnv, build-images]
     secrets: inherit
     with:
-      BUILD_TAG: ${{ needs.build-images.outputs.BASE_IMAGE_TAG }}
+      BASE_IMAGE_TAG: ${{ needs.build-images.outputs.BASE_IMAGE_TAG }}
       APP: ${{ needs.build-images.outputs.APP }}
       WEB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.WEB_DEPLOYMENT_NAME }}
       PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}
-      PHP_IMAGE: ${{ needs.build-images.outputs.PHP_IMAGE }}
+      DOCKER_FROM_IMAGE: ${{ needs.build-images.outputs.PHP_IMAGE }}
       DB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.DB_DEPLOYMENT_NAME }}
       CRON_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.CRON_DEPLOYMENT_NAME }}
       APP_HOST_URL: ${{ needs.build-images.outputs.APP_HOST_URL }}

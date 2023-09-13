@@ -33,7 +33,7 @@ on:
       PHP_DEPLOYMENT_NAME:
         required: true
         type: string
-      PHP_IMAGE:
+      DOCKER_FROM_IMAGE:
         required: true
         type: string
       CRON_DEPLOYMENT_NAME:
@@ -174,8 +174,8 @@ jobs:
           APP_HOST_URL: ${{ inputs.APP_HOST_URL }}
           BUILD_NAMESPACE: ${{ inputs.BUILD_NAMESPACE }}
           DEPLOY_NAMESPACE: ${{ inputs.DEPLOY_NAMESPACE }}
+          BASE_IMAGE_TAG: ${{ inputs.BASE_IMAGE_TAG }}
           WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.web_deployment_name }}
           PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.php_deployment_name }}
-          PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
+          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
           CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.cron_deployment_name }}
-          BUILD_TAG: ${{ inputs.BASE_IMAGE_TAG }}
