@@ -71,7 +71,7 @@ objects:
             - name: "MOODLE_BRANCH_VERSION"
               value: "${MOODLE_BRANCH_VERSION}"
             - name: "F2F_BRANCH_VERSION"
-              value: "${F2F_BRANCH_VERSIONBLE}"
+              value: "${F2F_BRANCH_VERSION}"
             - name: "HVP_BRANCH_VERSION"
               value: "${HVP_BRANCH_VERSION}"
             - name: "FORMAT_BRANCH_VERSION"
@@ -114,7 +114,7 @@ parameters:
     value: "production"
   - name: MOODLE_BRANCH_VERSION
     value: MOODLE_311_STABLE
-  - name: F2F_BRANCH_VERSIONBLE
+  - name: F2F_BRANCH_VERSION
     value: MOODLE_311_STABLE
   - name: HVP_BRANCH_VERSION
     value: stable
