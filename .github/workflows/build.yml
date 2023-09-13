@@ -125,7 +125,7 @@ jobs:
       # Build the Cron image
       - name: Build Cron Image
         working-directory: "./"
-        run: sh ./openshift/scripts/build-dc-docker-image.sh
+        run: sh ./openshift/scripts/build-docker-image.sh
         env:
           PHP_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
           DOCKER_FILE_PATH: ${{ env.CRON_DOCKER_FILE_PATH }}

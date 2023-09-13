@@ -1,6 +1,6 @@
 test -n "$BRANCH"
 test -n "$BUILD_NAMESPACE"
-echo "BUILIDING $DEPLOYMENT_NAME with tag: $BRANCH"
+echo "BUILIDING $DEPLOYMENT_NAME:$BRANCH"
   oc -n $BUILD_NAMESPACE process -f ./openshift/docker-build.yml \
     -p NAME=$DEPLOYMENT_NAME \
     -p PHP_IMAGE=$PHP_IMAGE \
