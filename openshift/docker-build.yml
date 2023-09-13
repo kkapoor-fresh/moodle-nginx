@@ -110,3 +110,19 @@ parameters:
     value: "2"
   - name: MEMORY_REQUEST
     value: "8Gi"
+  - name: PHP_INI_ENVIRONMENT
+    value: "production"
+  - name: MOODLE_BRANCH_VERSION
+    value: MOODLE_311_STABLE
+  - name: F2F_BRANCH_VERSIONBLE
+    value: MOODLE_311_STABLE
+  - name: HVP_BRANCH_VERSION
+    value: stable
+  - name: FORMAT_BRANCH_VERSION
+    value: MOODLE_311
+  - name: CERTIFICATE_BRANCH_VERSION
+    value: MOODLE_31_STABLE
+  - name: CUSTOMCERT_BRANCH_VERSION
+    value: MOODLE_311_STABLE
+  - name: DATAFLOWS_BRANCH_VERSION
+    value: MOODLE_35_STABLE
