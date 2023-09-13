@@ -93,7 +93,7 @@ jobs:
       # Get Environment Variables from file
       - name: Setup Env
         id: dotenv
-        uses: falti/dotenv-action@v1.0.4
+        uses: falti/dotenv-action@v1.0
         with:
           path: example.env
           export-variables: true
@@ -108,7 +108,7 @@ jobs:
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
-          helm install "${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.REDIS_IMAGE }} -f ./config/redis/values.yml"
+          helm install "${{ steps.dotenv.outputs.redis_deployment_name }} ${{ steps.dotenv.outputs.redis_image }} -f ./config/redis/values.yml"
 
       - name: Check for DB (MariaDB Galera) Statefulset (${{ env.DB_DEPLOYMENT_NAME  }})
         id: check-db
@@ -135,8 +135,8 @@ jobs:
           APP_HOST_URL: ${{ env.APP_HOST_URL }}
           BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
           DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
-          WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
-          PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
+          WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.web_deployment_name }}
+          PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.php_deployment_name }}
           PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
-          CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
+          CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.cron_deployment_name }}
           BUILD_TAG: ${{ env.BASE_IMAGE_TAG }}
