@@ -135,6 +135,8 @@ jobs:
       CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
       REDIS_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }}
       REDIS_IMAGE: ${{ steps.dotenv.outputs.REDIS_IMAGE }}
+      WEB_IMAGE: ${{ steps.dotenv.outputs.WEB_IMAGE }}
+      DB_IMAGE: ${{ steps.dotenv.outputs.DB_IMAGE }}
       APP_HOST_URL: ${{ env.APP_HOST_URL }}
       BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}

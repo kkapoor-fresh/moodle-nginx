@@ -33,17 +33,17 @@
       "apiVersion": "v1",
       "kind": "Service",
       "metadata": {
-        "name": "${WEB_SERVICE}"
+        "name": "${WEB_DEPLOYMENT_NAME}"
       },
       "spec": {
         "ports": [
           {
-            "name": "${WEB_SERVICE}",
+            "name": "${WEB_DEPLOYMENT_NAME}",
             "port": 8080
           }
         ],
         "selector": {
-          "deploymentconfig": "${WEB_SERVICE}"
+          "deploymentconfig": "${WEB_DEPLOYMENT_NAME}"
         }
       }
     },
@@ -54,14 +54,14 @@
         "name": "${APP_NAME}",
         "namespace": "${DEPLOY_NAMESPACE}",
         "labels": {
-          "service": "${WEB_SERVICE}"
+          "service": "${WEB_DEPLOYMENT_NAME}"
         }
       },
       "spec": {
         "host": "${SITE_URL}",
         "to": {
           "kind": "Service",
-          "name": "${WEB_SERVICE}",
+          "name": "${WEB_DEPLOYMENT_NAME}",
           "weight": 100
         },
         "conditions": [
@@ -307,7 +307,6 @@
       }
     },
 
-
     {
       "apiVersion": "v1",
       "kind": "DeploymentConfig",
@@ -315,13 +314,13 @@
         "annotations": {
           "template.alpha.openshift.io/wait-for-ready": "true"
         },
-        "name": "${CRON_IMAGE}",
+        "name": "${CRON_DEPLOYMENT_NAME}",
         "namespace": "${DEPLOY_NAMESPACE}"
       },
       "spec": {
         "replicas": 1,
         "selector": {
-          "deploymentconfig": "${CRON_IMAGE}"
+          "deploymentconfig": "${CRON_DEPLOYMENT_NAME}"
         },
         "strategy": {
           "type": "Recreate"
@@ -329,14 +328,14 @@
         "template": {
           "metadata": {
             "labels": {
-              "deploymentconfig": "${CRON_IMAGE}"
+              "deploymentconfig": "${CRON_DEPLOYMENT_NAME}"
             }
           },
           "spec": {
             "containers": [
               {
                 "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_IMAGE}:${BUILD_TAG}",
-                "name": "${CRON_IMAGE}",
+                "name": "${CRON_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
                 "livenessProbe": {
@@ -392,9 +391,9 @@
                 }
               },
               {
-                "name": "${PHP_IMAGE}-config",
+                "name": "${CRON_DEPLOYMENT_NAME}-config",
                 "configMap": {
-                  "name": "${PHP_IMAGE}-config",
+                  "name": "${CRON_DEPLOYMENT_NAME}-config",
                   "defaultMode": 420
                 }
               },
@@ -419,11 +418,118 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "${CRON_IMAGE}"
+                "${CRON_DEPLOYMENT_NAME}"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "cron:${CRON_IMAGE}:${BUILD_TAG}",
+                "name": "${CRON_DEPLOYMENT_NAME}",
+                "namespace": "${DEPLOY_NAMESPACE}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "revisionHistoryLimit": 10,
+        "test": false
+      }
+    },
+
+    {
+      "apiVersion": "v1",
+      "kind": "DeploymentConfig",
+      "metadata": {
+        "annotations": {
+          "template.alpha.openshift.io/wait-for-ready": "true"
+        },
+        "name": "${WEB_DEPLOYMENT_NAME}",
+        "namespace": "${DEPLOY_NAMESPACE}"
+      },
+      "spec": {
+        "replicas": 3,
+        "selector": {
+          "deploymentconfig": "${WEB_DEPLOYMENT_NAME}"
+        },
+        "strategy": {
+          "type": "Recreate"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "deploymentconfig": "${WEB_DEPLOYMENT_NAME}"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "image": "${WEB_IMAGE}",
+                "name": "${WEB_DEPLOYMENT_NAME}",
+                "restartPolicy": "Always",
+                "imagePullPolicy": "Always",
+                "volumeMounts": [
+                  {
+                    "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
+                    "name": "${APP_NAME}-data"
+                  },
+                  {
+                    "name": "env-data",
+                    "mountPath": "/.env",
+                    "subPath": ".env"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "memory": "${CRON_MEMORY_LIMIT}",
+                    "cpu": "${CRON_CPU_LIMIT}"
+                  },
+                  "requests": {
+                    "memory": "${CRON_MEMORY_REQUEST}",
+                    "cpu": "${CRON_CPU_REQUEST}"
+                  }
+                }
+              }
+            ],
+            "volumes": [
+              {
+                "name": "${APP_NAME}-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${APP_NAME}-data"
+                }
+              },
+              {
+                "name": "${WEB_DEPLOYMENT_NAME}-config",
+                "configMap": {
+                  "name": "${WEB_DEPLOYMENT_NAME}-config",
+                  "defaultMode": 420
+                }
+              },
+              {
+                "name": "env-data",
+                "configMap": {
+                  "name": "${WEB_DEPLOYMENT_NAME}-env",
+                  "items": [
+                    {
+                      "key": ".env",
+                      "path": ".env"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${WEB_DEPLOYMENT_NAME}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${WEB_IMAGE}:${BUILD_TAG}",
                 "namespace": "${DEPLOY_NAMESPACE}"
               }
             }
@@ -455,7 +561,7 @@
     {
       "description": "Web Service Name",
       "displayName": "Web Service",
-      "name": "WEB_SERVICE",
+      "name": "WEB_DEPLOYMENT_NAME",
       "value": "web"
     },
     {

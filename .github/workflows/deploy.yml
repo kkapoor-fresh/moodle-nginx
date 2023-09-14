@@ -18,6 +18,9 @@ on:
       DB_DEPLOYMENT_NAME:
         required: true
         type: string
+      DB_IMAGE:
+        required: true
+        type: string
       BRANCH:
         required: true
         type: string
@@ -31,6 +34,9 @@ on:
         required: true
         type: string
       WEB_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      WEB_IMAGE:
         required: true
         type: string
       PHP_IMAGE:
@@ -177,6 +183,7 @@ jobs:
           DEPLOY_NAMESPACE: ${{ inputs.DEPLOY_NAMESPACE }}
           BASE_IMAGE_TAG: ${{ inputs.BASE_IMAGE_TAG }}
           WEB_DEPLOYMENT_NAME: ${{ inputs.WEB_DEPLOYMENT_NAME }}
+          WEB_IMAGE: ${{ inputs.WEB_IMAGE }}
           PHP_DEPLOYMENT_NAME: ${{ inputs.PHP_DEPLOYMENT_NAME }}
           PHP_IMAGE: ${{ inputs.PHP_IMAGE }}
           CRON_DEPLOYMENT_NAME: ${{ inputs.CRON_DEPLOYMENT_NAME }}

@@ -8,6 +8,7 @@ oc -n $DEPLOY_NAMESPACE process -f openshift/template.json \
       -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
       -p DEPLOY_NAMESPACE=$DEPLOY_NAMESPACE \
       -p WEB_SERVICE=$WEB_DEPLOYMENT_NAME \
+      -p WEB_IMAGE=$WEB_IMAGE \
       -p CRON_IMAGE=$CRON_DEPLOYMENT_NAME \
       -p PHP_IMAGE=$PHP_IMAGE | \
 oc -n $DEPLOY_NAMESPACE apply -f -
