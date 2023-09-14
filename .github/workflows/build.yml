@@ -49,7 +49,7 @@ on:
 jobs:
   #Print variables for logging and debugging purposes
   checkEnv:
-    name: Env Check
+    name: Environment Check
     runs-on: ubuntu-latest
     steps:
       - name: Print Env Vars
@@ -144,9 +144,10 @@ jobs:
       BUILD_TEST_PASS:
 
   call-deploy-workflow:
+    name: Deploy to OpenShift (build status: ${{ needs.build-images.outcome }})
     uses: ./.github/workflows/deploy.yml
-    needs: [checkEnv, build-images]
-    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped'
+    needs: [build-images]
+    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ vars.SKIP_BUILD == 'false' }}
     secrets: inherit
     with:
       BASE_IMAGE_TAG: ${{ github.ref_name }}

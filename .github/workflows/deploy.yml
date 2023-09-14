@@ -141,9 +141,9 @@ jobs:
         id: check-db
         run: |
           if [[ $(oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }}) == *"NotFound"* ]]; then
-            echo "installed='false'" >> $GITHUB_OUTPUT
+            echo "installed=false" >> $GITHUB_OUTPUT
           else
-            echo "installed='true'" >> $GITHUB_OUTPUT
+            echo "installed=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
