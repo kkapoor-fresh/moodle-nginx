@@ -62,10 +62,8 @@ objects:
         dockerStrategy:
           dockerfilePath: "${DOCKER_FILE_PATH}"
           buildArgs:
-            - name: "PHP_IMAGE"
-              value: "${PHP_IMAGE}"
-            - name: ""
-              value: "${}"
+            - name: "DOCKER_FROM_IMAGE"
+              value: "${DOCKER_FROM_IMAGE}"
             - name: "PHP_INI_ENVIRONMENT"
               value: "${PHP_INI_ENVIRONMENT}"
             - name: "MOODLE_BRANCH_VERSION"
@@ -84,7 +82,7 @@ objects:
               value: "${DATAFLOWS_BRANCH_VERSION}"
         type: Docker
 parameters:
-  - name: PHP_IMAGE
+  - name: DOCKER_FROM_IMAGE
     required: true
   - name: NAME
     required: true

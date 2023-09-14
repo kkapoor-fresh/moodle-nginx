@@ -126,6 +126,7 @@ jobs:
           IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
           IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
+
     outputs:
       APP: ${{ env.APP }}
       WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
