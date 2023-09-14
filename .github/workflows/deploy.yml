@@ -129,12 +129,12 @@ jobs:
       - name: Uninstall Redis
         run: helm uninstall redis -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
-      - name: Deploy Redis | ${{ steps.dotenv.outputs.redis_deployment_name }} | ${{ steps.dotenv.outputs.redis_image }}
+      - name: Deploy Redis | ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} | ${{ steps.dotenv.outputs.redis_image }}
         if: success() || failure()
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
-          helm install "${{ steps.dotenv.outputs.redis_deployment_name }} ${{ steps.dotenv.outputs.redis_image }} -f ./config/redis/values.yml"
+          helm install "${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.redis_image }} -f ./config/redis/values.yml"
 
       - name: Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
         id: check-db
