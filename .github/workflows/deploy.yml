@@ -60,10 +60,10 @@ on:
       # The value is the ID of the workflow run that was triggered.
       deploy1:
         description: "Deployment log"
-        value: ${{ jobs.example_job.outputs.output1 }}
+        value: ${{ jobs.deploy.outputs.output1 }}
       deploy2:
         description: "Deployment log"
-        value: ${{ jobs.example_job.outputs.output2 }}
+        value: ${{ jobs.deploy.outputs.output2 }}
   # push:
   #   paths:
   #     - './openshift/*'
@@ -93,6 +93,9 @@ jobs:
       output1: ${{ steps.deploy-to-os.outputs.deploy1 }}
       output2: ${{ steps.deploy-to-os.outputs.deploy2 }}
     steps:
+      - name: Checkout Target Branch
+        uses: actions/checkout@v2
+
       # Get Environment Variables from file
       - name: Setup Env
         id: dotenv
@@ -102,9 +105,6 @@ jobs:
           export-variables: true
           log-variables: true
           keys-case: upper
-
-      - name: Checkout Target Branch
-        uses: actions/checkout@v2
 
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
@@ -124,15 +124,15 @@ jobs:
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      - name: Uninstall Redis
-        run: helm uninstall redis -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
+      - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+        run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
       - name: Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
         if: success() || failure()
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
-          helm install "${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} -f ./config/redis/values.yml"
+          helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} -f ./config/redis/values.yml
 
       - name: Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
         id: check-db
@@ -143,24 +143,24 @@ jobs:
             echo "installed='true'" >> $GITHUB_OUTPUT
           fi
 
-      # - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
-      #   if: steps.check-db.outputs.installed == 'false'
-      #   run: |
-      #     oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
+      - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
+        if: steps.check-db.outputs.installed == 'false'
+        run: |
+          oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
 
-      - name: 'Deploy DB (MariaDB Galera) via Helm bot'
-        uses: 'deliverybot/helm@v1'
-        with:
-          release: '${{ inputs.DB_DEPLOYMENT_NAME }}'
-          namespace: '${{ github.ref_name }}'
-          chart: 'mariadb-galera'
-          token: '${{ github.token }}'
-          values: |
-            name: ${{ inputs.DB_DEPLOYMENT_NAME }}
-          value-files: >-
-            [
-              "./config/mariadb/config.yaml"
-            ]
+      # - name: 'Deploy DB (MariaDB Galera) via Helm bot'
+      #   uses: 'deliverybot/helm@v1'
+      #   with:
+      #     release: '${{ inputs.DB_DEPLOYMENT_NAME }}'
+      #     namespace: '${{ github.ref_name }}'
+      #     chart: 'mariadb-galera'
+      #     token: '${{ github.token }}'
+      #     values: |
+      #       name: ${{ inputs.DB_DEPLOYMENT_NAME }}
+      #     value-files: >-
+      #       [
+      #         "./config/mariadb/config.yaml"
+      #       ]
 
       - name: Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) web, php, cron, with routes, secrets, configmaps
         id: deploy-to-os
