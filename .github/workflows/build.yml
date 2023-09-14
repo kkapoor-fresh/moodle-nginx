@@ -49,15 +49,15 @@ on:
 jobs:
   #Print variables for logging and debugging purposes
   checkEnv:
-    name: Check Env variables
+    name: Env Check
     runs-on: ubuntu-latest
     steps:
       - name: Print Env Vars
         run: |
-          echo Deploying: ${{ env.PROJECT }}
+          echo Deploying ${{ env.APP }} on ${{ env.PROJECT }}
           echo "-----------------------"
-          echo Deploy to: ${{ env.DEPLOY_NAMESPACE }}
-          echo URL: ${{ env.APP_HOST_URL }}
+          echo Deploy to Namespace: ${{ env.DEPLOY_NAMESPACE }}
+          echo URL: https://${{ env.APP_HOST_URL }}
 
   # Build PHP Image
 
