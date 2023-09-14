@@ -147,7 +147,7 @@ jobs:
           fi
 
       - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
-        if: ${{ steps.check-db.outputs.installed }} == 'false'
+        if: steps.check-db.outputs.installed == 'false'
         run: |
           oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
 
