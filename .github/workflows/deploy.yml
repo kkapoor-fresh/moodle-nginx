@@ -9,13 +9,13 @@ env:
 on:
   workflow_call:
     inputs:
+      APP:
+        required: true
+        type: string
       BASE_IMAGE_TAG:
         required: true
         type: string
       DB_DEPLOYMENT_NAME:
-        required: true
-        type: string
-      APP:
         required: true
         type: string
       BRANCH:
@@ -34,6 +34,12 @@ on:
         required: true
         type: string
       PHP_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      REDIS_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      REDIS_IMAGE:
         required: true
         type: string
       DOCKER_FROM_IMAGE:
@@ -103,14 +109,6 @@ jobs:
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      # First, build appropriate secret name for the environement: AUTH_TOKEN_DEV, AUTH_TOKEN_TEST, etc.
-      - id: auth_token_string
-        uses: ASzc/change-string-case-action@v5
-        with:
-          string: ${{ format('AUTH_TOKEN_{0}', github.ref_name) }}
-      - run: |
-          echo "ENV AUTH SECRET NAME: ${{ steps.auth_token_string.outputs.uppercase }}"
-
       - name: Log in to OpenShift ( DEV )
         if: github.ref_name == 'dev'
         run: |
@@ -129,12 +127,12 @@ jobs:
       - name: Uninstall Redis
         run: helm uninstall redis -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
-      - name: Deploy Redis | ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} | ${{ steps.dotenv.outputs.redis_image }}
+      - name: Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
         if: success() || failure()
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
-          helm install "${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }} ${{ steps.dotenv.outputs.redis_image }} -f ./config/redis/values.yml"
+          helm install "${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} -f ./config/redis/values.yml"
 
       - name: Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
         id: check-db
@@ -177,5 +175,6 @@ jobs:
           BASE_IMAGE_TAG: ${{ inputs.BASE_IMAGE_TAG }}
           WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.web_deployment_name }}
           PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.php_deployment_name }}
+          REDIS_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.redis_deployment_name }}
           DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
           CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.cron_deployment_name }}
