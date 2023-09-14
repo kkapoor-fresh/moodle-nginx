@@ -156,7 +156,7 @@ jobs:
       #   with:
       #     release: '${{ inputs.DB_DEPLOYMENT_NAME }}'
       #     namespace: '${{ github.ref_name }}'
-      #     chart: 'mariadb-galera'
+      #     chart: '${{ inputs.DB_IMAGE }}'
       #     token: '${{ github.token }}'
       #     values: |
       #       name: ${{ inputs.DB_DEPLOYMENT_NAME }}

@@ -1,6 +1,4 @@
-# Build Images
-# Builds merged PR's to images in OpenShift tools namespace.
-name: Build Images
+name: Build and Deploy Moodle 🚀
 
 env:
   APP: moodle
@@ -49,7 +47,7 @@ on:
 jobs:
   #Print variables for logging and debugging purposes
   checkEnv:
-    name: Environment Check
+    name: Environment Check 📋
     runs-on: ubuntu-latest
     steps:
       - name: Print Env Vars
@@ -62,23 +60,23 @@ jobs:
   # Build PHP Image
 
   build-images:
-    name: Build Images
+    name: Build and Deploy Application 🚀
     needs: [checkEnv]
     runs-on: ubuntu-latest
     if: ${{ vars.SKIP_BUILD == 'false' }} && (github.ref_name == 'dev' || github.ref_name  == 'test' || github.ref_name  == 'prod')
     steps:
       # Checkout the PR branch
-      - name: Checkout Target Branch
+      - name: Checkout Target Branch 🔀
         uses: actions/checkout@v2
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      - name: Log in to OpenShift (tools)
+      - name: Log in to OpenShift 🔑
         run: |
           oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       # Get Environment Variables from file
-      - name: Setup Env
+      - name: Setup Env 📋
         id: dotenv
         uses: falti/dotenv-action@v1
         with:
@@ -88,11 +86,11 @@ jobs:
           keys-case: upper
 
       # Echo build task
-      - name: Prepare PHP build
+      - name: Prepare PHP 🔂
         run: echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
 
       # Build the PHP image
-      - name: Build PHP Image
+      - name: Build PHP 🚧
         id: build-php
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
@@ -108,11 +106,11 @@ jobs:
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
 
           # Echo build task
-      - name: Prepare CRON build
+      - name: Prepare CRON 🔂
         run: echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
 
       # Build the Cron image
-      - name: Build Cron Image
+      - name: Build Cron 🚧
         id: build-cron
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
@@ -128,7 +126,7 @@ jobs:
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
 
     outputs:
-      APP: ${{ env.APP }}
+      APP: ${{ steps.dotenv.outputs.APP }}
       WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
       DB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.DB_DEPLOYMENT_NAME }}
       PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
@@ -144,7 +142,7 @@ jobs:
       BUILD_TEST_PASS:
 
   call-deploy-workflow:
-    name: Deploy to OpenShift (build status: ${{ needs.build-images.outcome }})
+    name: Deploy to OpenShift 🚀 (build status ${{ needs.build-images.outcome }})
     uses: ./.github/workflows/deploy.yml
     needs: [build-images]
     if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ vars.SKIP_BUILD == 'false' }}
@@ -153,21 +151,22 @@ jobs:
       BASE_IMAGE_TAG: ${{ github.ref_name }}
       APP: ${{ needs.build-images.outputs.APP }}
       WEB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.WEB_DEPLOYMENT_NAME }}
-
-      REDIS_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.REDIS_DEPLOYMENT_NAME }}
-      REDIS_IMAGE: ${{ needs.build-images.outputs.REDIS_IMAGE }}
-      PHP_IMAGE: ${{ needs.build-images.outputs.PHP_IMAGE }}
+      WEB_IMAGE: ${{ needs.build-images.outputs.WEB_IMAGE }}
       PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}
-
+      PHP_IMAGE: ${{ needs.build-images.outputs.PHP_IMAGE }}
       DB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.DB_DEPLOYMENT_NAME }}
+      DB_IMAGE: ${{ needs.build-images.outputs.DB_IMAGE }}
       CRON_IMAGE: ${{ needs.build-images.outputs.CRON_IMAGE }}
       CRON_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.CRON_DEPLOYMENT_NAME }}
+      REDIS_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.REDIS_DEPLOYMENT_NAME }}
+      REDIS_IMAGE: ${{ needs.build-images.outputs.REDIS_IMAGE }}
       APP_HOST_URL: ${{ needs.build-images.outputs.APP_HOST_URL }}
       BUILD_NAMESPACE: ${{ needs.build-images.outputs.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ needs.build-images.outputs.DEPLOY_NAMESPACE }}
       BRANCH: ${{ needs.build-images.outputs.BRANCH }}
 
   notify-failure:
+    name: Failed ⚠️
     if: ${{ failure() }}
     needs: [build-images, call-deploy-workflow]
     runs-on: ubuntu-latest
@@ -192,6 +191,7 @@ jobs:
             }]}'
 
   notify-success:
+    name: Succeeded ✅
     if: ${{ success() }}
     needs: [build-images, call-deploy-workflow]
     runs-on: ubuntu-latest
