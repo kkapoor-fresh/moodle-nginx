@@ -129,27 +129,40 @@ jobs:
       - name: Uninstall Redis
         run: helm uninstall redis -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
-      - name: Deploy Redis
+      - name: Deploy Redis | ${{ steps.dotenv.outputs.redis_deployment_name }} | ${{ steps.dotenv.outputs.redis_image }}
         if: success() || failure()
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
-          helm install ${{ steps.dotenv.outputs.redis_deployment_name }} ${{ steps.dotenv.outputs.redis_image }} -f ./config/redis/values.yml
+          helm install "${{ steps.dotenv.outputs.redis_deployment_name }} ${{ steps.dotenv.outputs.redis_image }} -f ./config/redis/values.yml"
 
       - name: Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
         id: check-db
         run: |
-          result="$(oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }})"
-          if [[ $result == *"NotFound"* ]]; then
-            echo "::set-output installed='false'" >> $GITHUB_OUTPUT
+          if [[ $(oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }}) == *"NotFound"* ]]; then
+            echo "installed='false'" >> $GITHUB_OUTPUT
           else
-            echo "::set-output installed='true'" >> $GITHUB_OUTPUT
+            echo "installed='true'" >> $GITHUB_OUTPUT
           fi
 
-      - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
-        if: steps.check-db.outputs.installed == 'false'
-        run: |
-          oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
+      # - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
+      #   if: steps.check-db.outputs.installed == 'false'
+      #   run: |
+      #     oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
+
+      - name: 'Deploy DB (MariaDB Galera) via Helm bot'
+        uses: 'deliverybot/helm@v1'
+        with:
+          release: '${{ inputs.DB_DEPLOYMENT_NAME }}'
+          namespace: '${{ github.ref_name }}'
+          chart: 'mariadb-galera'
+          token: '${{ github.token }}'
+          values: |
+            name: ${{ inputs.DB_DEPLOYMENT_NAME }}
+          value-files: >-
+            [
+              "./config/mariadb/config.yaml"
+            ]
 
       - name: Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) web, php, cron, with routes, secrets, configmaps
         id: deploy-to-os
