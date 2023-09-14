@@ -146,14 +146,14 @@ jobs:
       - name: Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
         id: check-db
         run: |
-          if [[ $(oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }}) == *"NotFound"* ]]; then
-            echo "installed=false" >> $GITHUB_OUTPUT
+          if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+            echo "installed='FALSE'" >> $GITHUB_OUTPUT
           else
-            echo "installed=true" >> $GITHUB_OUTPUT
+            echo "installed='TRUE'" >> $GITHUB_OUTPUT
           fi
 
       - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
-        if: steps.check-db.outputs.installed == 'false'
+        if: steps.check-db.outputs.installed == 'FALSE'
         run: |
           oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
 
