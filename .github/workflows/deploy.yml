@@ -33,19 +33,22 @@ on:
       WEB_DEPLOYMENT_NAME:
         required: true
         type: string
+      PHP_IMAGE:
+        required: true
+        type: string
       PHP_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      CRON_IMAGE:
+        required: true
+        type: string
+      CRON_DEPLOYMENT_NAME:
         required: true
         type: string
       REDIS_DEPLOYMENT_NAME:
         required: true
         type: string
       REDIS_IMAGE:
-        required: true
-        type: string
-      DOCKER_FROM_IMAGE:
-        required: true
-        type: string
-      CRON_DEPLOYMENT_NAME:
         required: true
         type: string
     secrets:
@@ -173,8 +176,9 @@ jobs:
           BUILD_NAMESPACE: ${{ inputs.BUILD_NAMESPACE }}
           DEPLOY_NAMESPACE: ${{ inputs.DEPLOY_NAMESPACE }}
           BASE_IMAGE_TAG: ${{ inputs.BASE_IMAGE_TAG }}
-          WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.web_deployment_name }}
-          PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.php_deployment_name }}
-          REDIS_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.redis_deployment_name }}
-          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
-          CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.cron_deployment_name }}
+          WEB_DEPLOYMENT_NAME: ${{ inputs.WEB_DEPLOYMENT_NAME }}
+          PHP_DEPLOYMENT_NAME: ${{ inputs.PHP_DEPLOYMENT_NAME }}
+          PHP_IMAGE: ${{ inputs.PHP_IMAGE }}
+          CRON_DEPLOYMENT_NAME: ${{ inputs.CRON_DEPLOYMENT_NAME }}
+          CRON_IMAGE: ${{ inputs.CRON_IMAGE }}
+          REDIS_DEPLOYMENT_NAME: ${{ inputs.REDIS_DEPLOYMENT_NAME }}

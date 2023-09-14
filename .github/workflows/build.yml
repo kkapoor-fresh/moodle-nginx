@@ -93,6 +93,7 @@ jobs:
 
       # Build the PHP image
       - name: Build PHP Image
+        id: build-php
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
         env:
@@ -112,6 +113,7 @@ jobs:
 
       # Build the Cron image
       - name: Build Cron Image
+        id: build-cron
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
         env:
@@ -128,7 +130,9 @@ jobs:
       APP: ${{ env.APP }}
       WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
       DB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.DB_DEPLOYMENT_NAME }}
+      PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
       PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
+      CRON_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
       CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
       REDIS_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }}
       REDIS_IMAGE: ${{ steps.dotenv.outputs.REDIS_IMAGE }}
@@ -136,21 +140,25 @@ jobs:
       BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
       BRANCH: ${{ env.BRANCH }}
-      PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
+      BUILD_TEST_PASS:
 
   call-deploy-workflow:
     uses: ./.github/workflows/deploy.yml
     needs: [checkEnv, build-images]
+    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped'
     secrets: inherit
     with:
       BASE_IMAGE_TAG: ${{ github.ref_name }}
       APP: ${{ needs.build-images.outputs.APP }}
       WEB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.WEB_DEPLOYMENT_NAME }}
-      PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}
+
       REDIS_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.REDIS_DEPLOYMENT_NAME }}
       REDIS_IMAGE: ${{ needs.build-images.outputs.REDIS_IMAGE }}
-      DOCKER_FROM_IMAGE: ${{ needs.build-images.outputs.PHP_IMAGE }}
+      PHP_IMAGE: ${{ needs.build-images.outputs.PHP_IMAGE }}
+      PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}
+
       DB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.DB_DEPLOYMENT_NAME }}
+      CRON_IMAGE: ${{ needs.build-images.outputs.CRON_IMAGE }}
       CRON_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.CRON_DEPLOYMENT_NAME }}
       APP_HOST_URL: ${{ needs.build-images.outputs.APP_HOST_URL }}
       BUILD_NAMESPACE: ${{ needs.build-images.outputs.BUILD_NAMESPACE }}
