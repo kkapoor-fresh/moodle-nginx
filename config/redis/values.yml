@@ -183,7 +183,7 @@ rbac:
 securityContext:
   enabled: true
   #fsGroup: 1001
-  #runAsUser: 1001
+  runAsUser: www-data
   ## sysctl settings for master and slave pods
   ##
   ## Uncomment the setting below to increase the net.core.somaxconn value
