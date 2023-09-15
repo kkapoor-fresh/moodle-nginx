@@ -195,7 +195,7 @@ jobs:
         run: sh ./openshift/scripts/deploy-template.sh
         env:
           APP: ${{ inputs.APP }}
-          BRANCH: ${{ inputs.BRANCH }}
+          BUILD_TAG: ${{ inputs.BRANCH }}
           APP_HOST_URL: ${{ inputs.APP_HOST_URL }}
           BUILD_NAMESPACE: ${{ inputs.BUILD_NAMESPACE }}
           DEPLOY_NAMESPACE: ${{ inputs.DEPLOY_NAMESPACE }}
