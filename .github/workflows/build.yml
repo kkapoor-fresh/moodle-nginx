@@ -1,4 +1,4 @@
-name: Build and Deploy to OpenShift ✈️🌐
+name: Build and Deploy to OpenShift 🌐
 
 env:
   APP: moodle
@@ -87,11 +87,15 @@ jobs:
 
       # Echo build task
       - name: Prepare PHP 🔂
-        run: echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
+        run: |
+          echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
+          echo "Using ${{ steps.dotenv.outputs.PHP_IMAGE }}"
+          echo "Skip build? ${{ vars.SKIP_BUILD }}"
 
       # Build the PHP image
       - name: Build PHP 🚧
         id: build-php
+        if: ${{ vars.SKIP_BUILD == 'false' }}
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
         env:

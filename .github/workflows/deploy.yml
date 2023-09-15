@@ -147,8 +147,10 @@ jobs:
         id: check-db
         run: |
           if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
-            echo "installed=false" >> $GITHUB_OUTPUT
+          echo "${{ inputs.DB_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
+          echo "installed=false" >> $GITHUB_OUTPUT
           else
+            echo "${{ inputs.DB_DEPLOYMENT_NAME  }} FOUND: Moving on..."
             echo "installed=true" >> $GITHUB_OUTPUT
           fi
 
@@ -175,9 +177,10 @@ jobs:
       #         "./config/mariadb/config.yaml"
       #       ]
 
-      - name: Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) web, php, cron, with routes, secrets, configmaps
+      - name: Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) ${{ inputs.WEB_DEPLOYMENT_NAME }}, ${{ inputs.PHP_DEPLOYMENT_NAME }}, ${{ inputs.CRON_DEPLOYMENT_NAME }} - with routes, secrets, configmaps
         id: deploy-to-os
-        if: success() || failure()
+        # if: success() || failure()
+        if: success()
         run: sh ./openshift/scripts/deploy-template.sh
         env:
           APP: ${{ inputs.APP }}

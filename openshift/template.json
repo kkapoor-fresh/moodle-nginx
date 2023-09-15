@@ -142,16 +142,16 @@
         "annotations": {
           "template.alpha.openshift.io/wait-for-ready": "true"
         },
-        "name": "${PHP_IMAGE}",
+        "name": "${PHP_DEPLOYMENT_NAME}",
         "namespace": "${DEPLOY_NAMESPACE}",
         "labels": {
-          "service": "${PHP_IMAGE}"
+          "service": "${PHP_DEPLOYMENT_NAME}"
         }
       },
       "spec": {
         "replicas": 3,
         "selector": {
-          "deploymentconfig": "${PHP_IMAGE}"
+          "deploymentconfig": "${PHP_DEPLOYMENT_NAME}"
         },
         "strategy": {
           "type": "Rolling",
@@ -166,14 +166,14 @@
         "template": {
           "metadata": {
             "labels": {
-              "deploymentconfig": "${PHP_IMAGE}"
+              "deploymentconfig": "${PHP_DEPLOYMENT_NAME}"
             }
           },
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${PHP_IMAGE}:${BUILD_TAG}",
-                "name": "${PHP_IMAGE}",
+                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
+                "name": "${PHP_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
                 "livenessProbe": {
@@ -262,9 +262,9 @@
                 }
               },
               {
-                "name": "${PHP_IMAGE}-config",
+                "name": "${PHP_DEPLOYMENT_NAME}-config",
                 "configMap": {
-                  "name": "${PHP_IMAGE}-config",
+                  "name": "${PHP_DEPLOYMENT_NAME}-config",
                   "defaultMode": 420
                 }
               },
@@ -289,11 +289,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "${PHP_IMAGE}"
+                "${PHP_DEPLOYMENT_NAME}"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "${PHP_IMAGE}:${BUILD_TAG}",
+                "name": "${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
                 "namespace": "${DEPLOY_NAMESPACE}"
               }
             }
@@ -565,6 +565,12 @@
       "value": "web"
     },
     {
+      "description": "Web Image Name",
+      "displayName": "Web Image",
+      "name": "WEB_IMAGE",
+      "value": "nginx"
+    },
+    {
       "description": "Image registry",
       "displayName": "Image Registry",
       "name": "IMAGE_REGISTRY",
@@ -580,7 +586,7 @@
       "description": "PHP Image",
       "displayName": "PHP Image",
       "required": true,
-      "name": "PHP_IMAGE"
+      "name": "PHP_DEPLOYMENT_NAME"
     },
     {
       "description": "Cron Image",
