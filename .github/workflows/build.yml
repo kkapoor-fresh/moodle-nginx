@@ -184,7 +184,7 @@ jobs:
       BRANCH: ${{ needs.build-images.outputs.BRANCH }}
 
   notify-failure:
-    name: Failed ⚠️
+    name: ⚠️ Failed
     if: ${{ failure() }}
     needs: [build-images, call-deploy-workflow]
     runs-on: ubuntu-latest
@@ -209,7 +209,7 @@ jobs:
             }]}'
 
   notify-success:
-    name: Succeeded ✅
+    name: ✅ Succeeded
     if: ${{ success() }}
     needs: [build-images, call-deploy-workflow]
     runs-on: ubuntu-latest
@@ -228,6 +228,4 @@ jobs:
               "text":"Successful ${{ github.job }} in ${{ github.workflow }} of ${{ github.repository }}:${{ github.ref_name }}",
               "image_url":"$SUCCESS_ICON_URL",
               "color":"#764FA5"
-              }]
-            }]
-            }'
+            }]}'

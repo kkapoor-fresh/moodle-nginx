@@ -133,11 +133,22 @@ jobs:
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
-        run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
+      - name: Check for ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+        id: check-redis
+        run: |
+          if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+          echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
+          echo "installed=false" >> $GITHUB_OUTPUT
+          else
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} FOUND: Moving on..."
+            echo "installed=true" >> $GITHUB_OUTPUT
+          fi
+
+      # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+      #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
       - name: Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
-        if: success() || failure()
+        if: ${{ steps.check-redis.outputs.installed == 'false' }}
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
