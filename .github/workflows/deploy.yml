@@ -203,7 +203,6 @@ jobs:
           WEB_DEPLOYMENT_NAME: ${{ inputs.WEB_DEPLOYMENT_NAME }}
           WEB_IMAGE: ${{ inputs.WEB_IMAGE }}
           PHP_DEPLOYMENT_NAME: ${{ inputs.PHP_DEPLOYMENT_NAME }}
-          PHP_IMAGE: ${{ inputs.PHP_IMAGE }}
           CRON_DEPLOYMENT_NAME: ${{ inputs.CRON_DEPLOYMENT_NAME }}
           CRON_IMAGE: ${{ inputs.CRON_IMAGE }}
           REDIS_DEPLOYMENT_NAME: ${{ inputs.REDIS_DEPLOYMENT_NAME }}
