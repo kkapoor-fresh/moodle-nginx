@@ -90,7 +90,10 @@ jobs:
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
           echo "Using ${{ steps.dotenv.outputs.PHP_IMAGE }}"
-          echo "Skip build? ${{ vars.SKIP_BUILD }}"
+          if [ ${{ vars.SKIP_BUILD == 'false' }} ]; then
+            echo "STARTING BUILD..."
+          else
+            echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
 
       # Build the PHP image
       - name: Build PHP 🚧
@@ -111,11 +114,18 @@ jobs:
 
           # Echo build task
       - name: Prepare CRON 🔂
-        run: echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
+        run: |
+            echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
+            echo "Using ${{ steps.dotenv.outputs.CRON_IMAGE }}"
+            if [ ${{ vars.SKIP_BUILD == 'false' }} ]; then
+              echo "STARTING BUILD..."
+            else
+              echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
 
       # Build the Cron image
       - name: Build Cron 🚧
         id: build-cron
+        if: ${{ vars.SKIP_BUILD == 'false' }}
         working-directory: "./"
         run: sh ./openshift/scripts/build-docker-image.sh
         env:
@@ -145,7 +155,7 @@ jobs:
       BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
       BRANCH: ${{ env.BRANCH }}
-      BUILD_TEST_PASS:
+      BUILD_TEST_PASS: false
 
   call-deploy-workflow:
     name: Deploy to OpenShift 🚀 (build status ${{ needs.build-images.outcome }})
