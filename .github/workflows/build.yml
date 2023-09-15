@@ -85,8 +85,11 @@ jobs:
           log-variables: true
           keys-case: upper
 
-      # Echo build task
-      - name: Prepare PHP 🔂
+      # Build the PHP image
+      - name: 🚧 Build PHP
+        id: build-php
+        if: ${{ vars.SKIP_BUILD == 'false' }}
+        working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
           echo "Using ${{ steps.dotenv.outputs.PHP_IMAGE }}"
@@ -95,13 +98,7 @@ jobs:
           else
             echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
           fi
-
-      # Build the PHP image
-      - name: Build PHP 🚧
-        id: build-php
-        if: ${{ vars.SKIP_BUILD == 'false' }}
-        working-directory: "./"
-        run: sh ./openshift/scripts/build-docker-image.sh
+          sh ./openshift/scripts/build-docker-image.sh
         env:
           DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
           DOCKER_FILE_PATH: ${{ env.PHP_DOCKER_FILE_PATH }}
@@ -113,23 +110,20 @@ jobs:
           IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
 
-          # Echo build task
-      - name: Prepare CRON 🔂
-        run: |
-            echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
-            echo "Using ${{ steps.dotenv.outputs.CRON_IMAGE }}"
-            if [ ${{ vars.SKIP_BUILD == 'false' }} == true ]; then
-              echo "STARTING BUILD..."
-            else
-              echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
-            fi
-
       # Build the Cron image
-      - name: Build Cron 🚧
+      - name: 🚧 Build Cron
         id: build-cron
         if: ${{ vars.SKIP_BUILD == 'false' }}
         working-directory: "./"
-        run: sh ./openshift/scripts/build-docker-image.sh
+        run: |
+          echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
+          echo "Using ${{ steps.dotenv.outputs.CRON_IMAGE }}"
+          if [ ${{ vars.SKIP_BUILD == 'false' }} == true ]; then
+            echo "STARTING BUILD..."
+          else
+            echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
+          fi
+          sh ./openshift/scripts/build-docker-image.sh
         env:
           DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
           DOCKER_FILE_PATH: ${{ env.CRON_DOCKER_FILE_PATH }}
@@ -160,7 +154,7 @@ jobs:
       BUILD_TEST_PASS: false
 
   call-deploy-workflow:
-    name: Deploy to OpenShift 🚀 (build status ${{ needs.build-images.outcome }})
+    name: 🚀 Deploy to OpenShift
     uses: ./.github/workflows/deploy.yml
     needs: [build-images]
     if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ vars.SKIP_BUILD == 'false' }}
