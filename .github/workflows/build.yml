@@ -60,10 +60,10 @@ jobs:
   # Build PHP Image
 
   build-images:
-    name: Build Application Images (${{ github.ref_name }}) ⚙️
+    name: Build Application Images (${{ github.ref_name }} |  ${{ vars.SKIP_BUILD }}) ⚙️
     needs: [checkEnv]
     runs-on: ubuntu-latest
-    if: ${{ vars.SKIP_BUILD == 'false' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+    if: (${{ vars.SKIP_BUILD == 'false' }} || ${{ vars.SKIP_BUILD == false }}) && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     steps:
       # Checkout the PR branch
       - name: Checkout Target Branch 📤
