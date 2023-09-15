@@ -118,7 +118,7 @@ jobs:
         run: |
             echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
             echo "Using ${{ steps.dotenv.outputs.CRON_IMAGE }}"
-            if [ ${{ vars.SKIP_BUILD == 'false' }} ]; then
+            if [ ${{ vars.SKIP_BUILD == 'false' }} == true ]; then
               echo "STARTING BUILD..."
             else
               echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
