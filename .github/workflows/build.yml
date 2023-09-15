@@ -56,6 +56,7 @@ jobs:
           echo "-----------------------"
           echo Deploy to Namespace: ${{ env.DEPLOY_NAMESPACE }}
           echo URL: https://${{ env.APP_HOST_URL }}
+          echo clean_builds='${{ env.CLEAN_BUILDS }}' >> $GITHUB_OUTPUT
 
   # Build PHP Image
 
@@ -151,13 +152,12 @@ jobs:
       BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
       BRANCH: ${{ env.BRANCH }}
-      CLEAN_BUILDS: '${{ env.CLEAN_BUILDS }}'
 
   call-cleanup-workflow:
-    name: 🧹️ Deploy to OpenShift
+    name: 🧹️ Deploy to OpenShift (clean builds = ${{ needs.checkEnv.clean_builds }})
     uses: ./.github/workflows/cleanup.yml
-    needs: [build-images]
-    if: needs.build-images.outcome == 'success' && needs.build-images.CLEAN_BUILDS == 'true'
+    needs: [checkEnv]
+    if: needs.checkEnv.clean_builds == 'true'
     secrets: inherit
     with:
       APP: ${{ needs.build-images.outputs.APP }}
