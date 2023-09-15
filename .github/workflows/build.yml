@@ -56,6 +56,7 @@ jobs:
           echo "-----------------------"
           echo Deploy to Namespace: ${{ env.DEPLOY_NAMESPACE }}
           echo URL: https://${{ env.APP_HOST_URL }}
+          echo clean_builds: '${{ env.CLEAN_BUILDS }}'
           echo clean_builds='${{ env.CLEAN_BUILDS }}' >> $GITHUB_OUTPUT
 
   # Build PHP Image
