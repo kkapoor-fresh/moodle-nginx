@@ -94,6 +94,7 @@ jobs:
             echo "STARTING BUILD..."
           else
             echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
+          fi
 
       # Build the PHP image
       - name: Build PHP 🚧
@@ -121,6 +122,7 @@ jobs:
               echo "STARTING BUILD..."
             else
               echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
+            fi
 
       # Build the Cron image
       - name: Build Cron 🚧
