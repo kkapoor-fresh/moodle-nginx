@@ -1,6 +1,6 @@
 # Deploy On Openshift
 # Builds and Deploys merged PR's to persistent pods/services/routes/etc in the OpenShift environment.
-name: Deploy on Openshift
+name: 🚀 Deploy on Openshift
 
 env:
   APP: moodle
@@ -88,7 +88,7 @@ permissions:
 jobs:
   # Deploy to Openshift
   deploy:
-    name: Deploy to OpenShift (${{ github.ref_name }})
+    name: 🚀 Deploy to OpenShift (${{ github.ref_name }})
     runs-on: ubuntu-latest
     if: |
       always()
@@ -102,11 +102,11 @@ jobs:
       output1: ${{ steps.deploy-to-os.outputs.deploy1 }}
       output2: ${{ steps.deploy-to-os.outputs.deploy2 }}
     steps:
-      - name: Checkout Target Branch
+      - name: 📤 Checkout Target Branch
         uses: actions/checkout@v2
 
       # Get Environment Variables from file
-      - name: Setup Env
+      - name: 📋 Setup Environment from File
         id: dotenv
         uses: falti/dotenv-action@v1
         with:
@@ -118,22 +118,22 @@ jobs:
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      - name: Log in to OpenShift ( DEV )
+      - name: 🔑 Log in to OpenShift ( DEV )
         if: github.ref_name == 'dev'
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_DEV }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      - name: Log in to OpenShift ( TEST )
+      - name: 🔑 Log in to OpenShift ( TEST )
         if: github.ref_name == 'test'
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_TEST }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      - name: Log in to OpenShift ( PROD )
+      - name: 🔑 Log in to OpenShift ( PROD )
         if: github.ref_name == 'prod'
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      - name: Check for ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+      - name: 🔍 Check for ${{ inputs.REDIS_DEPLOYMENT_NAME }}
         id: check-redis
         run: |
           if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
@@ -147,14 +147,14 @@ jobs:
       # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
       #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
-      - name: Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
+      - name: 🚀 Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
         if: ${{ steps.check-redis.outputs.installed == 'false' }}
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
           helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} --set securityContext.runAsUser=null --set securityContext.fsGroup=null -f ./config/redis/values.yml
 
-      - name: Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
+      - name: 🔍 Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
         id: check-db
         run: |
           if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
@@ -169,12 +169,12 @@ jobs:
       # oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
       # To uninstall/delete the my-release release:
       # helm delete --purge ${{ inputs.DB_DEPLOYMENT_NAME  }}
-      - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
+      - name: 🚀 Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
         if: ${{ steps.check-db.outputs.installed == 'false' }}
         run: |
           oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
 
-      # - name: 'Deploy DB (MariaDB Galera) via Helm bot'
+      # - name: '🚀 Deploy DB (MariaDB Galera) via Helm bot'
       #   uses: 'deliverybot/helm@v1'
       #   with:
       #     release: '${{ inputs.DB_DEPLOYMENT_NAME }}'
@@ -188,7 +188,7 @@ jobs:
       #         "./config/mariadb/config.yaml"
       #       ]
 
-      - name: Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) ${{ inputs.WEB_DEPLOYMENT_NAME }}, ${{ inputs.PHP_DEPLOYMENT_NAME }}, ${{ inputs.CRON_DEPLOYMENT_NAME }} - with routes, secrets, configmaps
+      - name: 🚀 Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) ${{ inputs.WEB_DEPLOYMENT_NAME }}, ${{ inputs.PHP_DEPLOYMENT_NAME }}, ${{ inputs.CRON_DEPLOYMENT_NAME }} - with routes, secrets, configmaps
         id: deploy-to-os
         # if: success() || failure()
         if: success()

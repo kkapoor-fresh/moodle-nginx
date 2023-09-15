@@ -1,0 +1,197 @@
+# Cleanup Openshift
+# Deletes all resources from OpenShift to prepare for a fresh deployment
+name: 🧹️ Cleanup Openshift Project
+
+env:
+  APP: ${{ github.repository }}
+  USER: ${{ github.actor }}
+
+on:
+  workflow_call:
+    inputs:
+      APP:
+        required: true
+        type: string
+      BRANCH:
+        required: true
+        type: string
+      APP_HOST_URL:
+        required: true
+        type: string
+      BUILD_NAMESPACE:
+        required: true
+        type: string
+      DEPLOY_NAMESPACE:
+        required: true
+        type: string
+      DB_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      WEB_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      PHP_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      CRON_DEPLOYMENT_NAME:
+        required: true
+        type: string
+      REDIS_DEPLOYMENT_NAME:
+        required: true
+        type: string
+    secrets:
+      AUTH_TOKEN_DEV:
+        required: true
+      AUTH_TOKEN_TEST:
+        required: true
+      AUTH_TOKEN_PROD:
+        required: true
+    outputs:
+      # This is the name of the output set by the workflow_dispatch action.
+      # The value is the ID of the workflow run that was triggered.
+      cleanup1:
+        description: "Cleanup log"
+        value: ${{ jobs.cleanup.outputs.output1 }}
+
+jobs:
+  # Cleanup Openshift
+  # Not configured for prod deployments (to be safe)
+  cleanup:
+    name: 🧹️ Cleanup OpenShift (${{ github.ref_name }})
+    runs-on: ubuntu-latest
+    if: |
+      always()
+      && (
+        github.ref_name == 'dev' || github.ref_name  == 'test'
+      )
+    outputs:
+      cleanup1: ${{ steps.delete-from-os.outputs.cleanup1 }}
+    steps:
+      - name: 📤 Checkout Target Branch
+        uses: actions/checkout@v2
+
+      # Get Environment Variables from file
+      - name: 📋 Setup Environment from File
+        id: dotenv
+        uses: falti/dotenv-action@v1
+        with:
+          path: example.env
+          export-variables: true
+          log-variables: true
+          keys-case: upper
+
+      # Log in to OpenShift.
+      # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
+      # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
+      - name: 🔑 Log in to OpenShift ( DEV )
+        if: github.ref_name == 'dev'
+        run: |
+          oc login --token=${{ secrets.AUTH_TOKEN_DEV }} --server=https://api.silver.devops.gov.bc.ca:6443
+
+      - name: 🔑 Log in to OpenShift ( TEST )
+        if: github.ref_name == 'test'
+        run: |
+          oc login --token=${{ secrets.AUTH_TOKEN_TEST }} --server=https://api.silver.devops.gov.bc.ca:6443
+
+      - name: 🔑 Log in to OpenShift ( PROD )
+        if: github.ref_name == 'prod'
+        run: |
+          oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=https://api.silver.devops.gov.bc.ca:6443
+
+      - name: 🔍 Check for ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+        id: check-redis
+        run: |
+          if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+          echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
+          echo "installed=false" >> $GITHUB_OUTPUT
+          else
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} FOUND: Moving on..."
+            echo "installed=true" >> $GITHUB_OUTPUT
+          fi
+
+      # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+      #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
+
+      - name: 🧹️ Cleanup ${{ inputs.REDIS_DEPLOYMENT_NAME }}}
+        if: ${{ steps.check-redis.outputs.installed == 'true' }}
+        run: |
+          helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+
+      - name: 🧹️ Cleanup ${{ inputs.DB_DEPLOYMENT_NAME }}
+        id: cleanup-db
+        run: |
+          if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+          echo "${{ inputs.DB_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
+          echo "installed=false" >> $GITHUB_OUTPUT
+          else
+            echo "${{ inputs.DB_DEPLOYMENT_NAME  }} FOUND: Moving on..."
+            echo "installed=true" >> $GITHUB_OUTPUT
+          fi
+
+      # For a graceful termination, set the replica count of the Pods in the mariadb-galera StatefulSet to 0:
+      # oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
+      - name: 🧹️ Cleanup ${{ inputs.DB_DEPLOYMENT_NAME }}]
+        if: ${{ steps.cleanup-db.outputs.installed == 'false' }}
+        run: |
+          oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0 --wait
+          oc delete sts ${{ inputs.DB_DEPLOYMENT_NAME  }}
+          oc delete configmap db-configmap
+          oc delete configmap db-config
+          oce delete service ${{ inputs.DB_DEPLOYMENT_NAME  }}
+          for i in 0 1 2; do kubectl delete pvc datadir-db-sts-$i; done
+
+      - name: 🧹️ Cleanup ${{ inputs.WEB_DEPLOYMENT_NAME }}
+        id: cleanup-web
+        run: |
+          if [[ `oc describe sts ${{ inputs.WEB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.WEB_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
+          else
+            echo "${{ inputs.WEB_DEPLOYMENT_NAME  }} FOUND: Cleaning resources..."
+            oc scale dc ${{ inputs.WEB_DEPLOYMENT_NAME  }} --replicas=0 --wait
+            oc delete dc ${{ inputs.WEB_DEPLOYMENT_NAME  }}
+            oc delete configmap ${{ inputs.WEB_DEPLOYMENT_NAME  }}-config
+          fi
+
+      - name: 🧹️ Cleanup ${{ inputs.PHP_DEPLOYMENT_NAME }}
+        id: cleanup-php
+        run: |
+          if [[ `oc describe sts ${{ inputs.PHP_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.PHP_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
+          else
+            echo "${{ inputs.PHP_DEPLOYMENT_NAME  }} FOUND: Cleaning resources..."
+            oc scale dc ${{ inputs.PHP_DEPLOYMENT_NAME  }} --replicas=0 --wait
+            oc delete dc ${{ inputs.PHP_DEPLOYMENT_NAME  }}
+            oc delete configmap ${{ inputs.PHP_DEPLOYMENT_NAME  }}-config
+          fi
+
+      - name: 🧹️ Cleanup ${{ inputs.CRON_DEPLOYMENT_NAME }}
+        id: cleanup-cron
+        run: |
+          if [[ `oc describe sts ${{ inputs.CRON_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.CRON_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
+          else
+            echo "${{ inputs.CRON_DEPLOYMENT_NAME  }} FOUND: Cleaning resources..."
+            oc scale dc ${{ inputs.CRON_DEPLOYMENT_NAME  }} --replicas=0 --wait
+            oc delete dc ${{ inputs.CRON_DEPLOYMENT_NAME  }}
+            oc delete configmap ${{ inputs.CRON_DEPLOYMENT_NAME  }}-config
+          fi
+
+      - name: 🧹️ Cleanup ${{ inputs.APP_HOST_URL }}
+        id: cleanup-route
+        run: |
+          if [[ `oc describe route ${{ inputs.APP_HOST_URL  }} 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.APP_HOST_URL  }} NOT FOUND: Skipping..."
+          else
+            echo "${{ inputs.APP_HOST_URL  }} FOUND: Cleaning resources..."
+            oc delete route ${{ inputs.APP_HOST_URL  }}
+          fi
+
+      - name: 🧹️ Cleanup ${{ inputs.APP }}-secrets
+        id: cleanup-secrets
+        run: |
+          if [[ `oc describe secret ${{ inputs.APP }}-secrets 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.APP }} NOT FOUND: Skipping..."
+          else
+            echo "${{ inputs.APP }} FOUND: Cleaning resources..."
+            oc delete secret ${{ inputs.APP }}-secrets
+          fi

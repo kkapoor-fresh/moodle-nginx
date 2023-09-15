@@ -1,4 +1,4 @@
-name: Build and Deploy to OpenShift 🌐
+name: 🔨 Build on OpenShift
 
 env:
   APP: moodle
@@ -47,7 +47,7 @@ on:
 jobs:
   #Print variables for logging and debugging purposes
   checkEnv:
-    name: Environment Check 📋
+    name: 📋 Environment Check
     runs-on: ubuntu-latest
     steps:
       - name: Print Env Vars
@@ -60,23 +60,24 @@ jobs:
   # Build PHP Image
 
   build-images:
-    name: Build Application Images (${{ github.ref_name }} |  ${{ vars.SKIP_BUILD }}) ⚙️
+    name: 🔨 Build Application Images (${{ github.ref_name }} |  ${{ vars.SKIP_BUILD }})
     needs: [checkEnv]
     runs-on: ubuntu-latest
     if: (${{ vars.SKIP_BUILD == 'false' }} || ${{ vars.SKIP_BUILD == false }}) && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     steps:
       # Checkout the PR branch
-      - name: Checkout Target Branch 📤
+      - name: 📤 Checkout Target Branch
         uses: actions/checkout@v2
-      # Log in to OpenShift.
+
+        # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      - name: Log in to OpenShift 🔑
+      - name: 🔑 Log in to OpenShift
         run: |
           oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
 
       # Get Environment Variables from file
-      - name: Setup Env 📋
+      - name: 📋 Setup Environment from File
         id: dotenv
         uses: falti/dotenv-action@v1
         with:
@@ -134,7 +135,6 @@ jobs:
           IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
           IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
-
     outputs:
       APP: ${{ steps.dotenv.outputs.APP }}
       WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
@@ -151,7 +151,25 @@ jobs:
       BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
       BRANCH: ${{ env.BRANCH }}
-      BUILD_TEST_PASS: false
+      CLEAN_BUILDS: '${{ env.CLEAN_BUILDS }}'
+
+  call-cleanup-workflow:
+    name: 🧹️ Deploy to OpenShift
+    uses: ./.github/workflows/cleanup.yml
+    needs: [build-images]
+    if: needs.build-images.outcome == 'success' && needs.build-images.CLEAN_BUILDS == 'true'
+    secrets: inherit
+    with:
+      APP: ${{ needs.build-images.outputs.APP }}
+      APP_HOST_URL: ${{ needs.build-images.outputs.APP_HOST_URL }}
+      BRANCH: ${{ needs.build-images.outputs.BRANCH }}
+      BUILD_NAMESPACE: ${{ needs.build-images.outputs.BUILD_NAMESPACE }}
+      DEPLOY_NAMESPACE: ${{ needs.build-images.outputs.DEPLOY_NAMESPACE }}
+      DB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.DB_DEPLOYMENT_NAME }}
+      WEB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.WEB_DEPLOYMENT_NAME }}
+      PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}
+      CRON_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.CRON_DEPLOYMENT_NAME }}
+      REDIS_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.REDIS_DEPLOYMENT_NAME }}
 
   call-deploy-workflow:
     name: 🚀 Deploy to OpenShift
