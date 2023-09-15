@@ -147,13 +147,17 @@ jobs:
         id: check-db
         run: |
           if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
-            echo "installed='FALSE'" >> $GITHUB_OUTPUT
+            echo "installed=false" >> $GITHUB_OUTPUT
           else
-            echo "installed='TRUE'" >> $GITHUB_OUTPUT
+            echo "installed=true" >> $GITHUB_OUTPUT
           fi
 
+      # For a graceful termination, set the replica count of the Pods in the mariadb-galera StatefulSet to 0:
+      # oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
+      # To uninstall/delete the my-release release:
+      # helm delete --purge ${{ inputs.DB_DEPLOYMENT_NAME  }}
       - name: Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
-        if: steps.check-db.outputs.installed == 'FALSE'
+        if: steps.check-db.outputs.installed == false
         run: |
           oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
 
