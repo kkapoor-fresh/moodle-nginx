@@ -88,12 +88,12 @@ jobs:
       # Build the PHP image
       - name: 🚧 Build PHP
         id: build-php
-        if: ${{ vars.SKIP_BUILD == 'false' }}
+        if: ${{ vars.SKIP_BUILD == false }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
           echo "Using ${{ steps.dotenv.outputs.PHP_IMAGE }}"
-          if [ ${{ vars.SKIP_BUILD == 'false' }} == true ]; then
+          if [ ${{ vars.SKIP_BUILD == false }} == true ]; then
             echo "STARTING BUILD..."
           else
             echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
@@ -113,12 +113,12 @@ jobs:
       # Build the Cron image
       - name: 🚧 Build Cron
         id: build-cron
-        if: ${{ vars.SKIP_BUILD == 'false' }}
+        if: ${{ vars.SKIP_BUILD == false }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
           echo "Using ${{ steps.dotenv.outputs.CRON_IMAGE }}"
-          if [ ${{ vars.SKIP_BUILD == 'false' }} == true ]; then
+          if [ ${{ vars.SKIP_BUILD == false }} == true ]; then
             echo "STARTING BUILD..."
           else
             echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
