@@ -201,12 +201,13 @@ jobs:
       - name: 🧹️ Cleanup ${{ inputs.APP_HOST_URL }}
         id: cleanup-route
         run: |
-          if [[ `oc describe route ${{ inputs.APP }} 2>&1` =~ "NotFound" ]]; then
-            echo "${{ inputs.APP }} Route NOT FOUND: Skipping..."
+          route_name="${{ inputs.APP_HOST_URL }}-${{ inputs.WEB_DEPLOYMENT_NAME }}"
+          if [[ `oc describe route $route_name 2>&1` =~ "NotFound" ]]; then
+            echo "Route NOT FOUND: $route_name - Skipping..."
           else
-            echo "${{ inputs.APP }} FOUND: Cleaning resources..."
-            oc delete route ${{ inputs.APP }}
-            echo "DELETED route ${{ inputs.APP }}"
+            echo "$route_name FOUND: Cleaning resources..."
+            oc delete route $route_name
+            echo "DELETED route:  $route_name"
           fi
 
       - name: 🧹️ Cleanup ${{ inputs.APP }}-secrets

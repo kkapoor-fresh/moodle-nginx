@@ -100,7 +100,7 @@ spec:
           ls /etc/mysql/conf.d/
           cat /etc/mysql/conf.d/server-id.cnf
         volumeMounts:
-          - name: db-configmap
+          - name: db-config
             mountPath: /mnt/config-map
           - name: db-config
             mountPath: /etc/mysql/conf.d/
@@ -151,9 +151,9 @@ spec:
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
       volumes:
-      - name: db-configmap
+      - name: db-config
         configMap:
-          name: db-configmap
+          name: db-config
           #defaultMode: 0544
       - name: db-config
         emptyDir: {}
