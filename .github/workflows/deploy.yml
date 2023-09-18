@@ -118,20 +118,18 @@ jobs:
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      - name: 🔑 Log in to OpenShift ( DEV )
-        if: github.ref_name == 'dev'
+      - name: 🔑 Log in to OpenShift ( ${{ github.ref_name }} )
         run: |
-          oc login --token=${{ secrets.AUTH_TOKEN_DEV }} --server=https://api.silver.devops.gov.bc.ca:6443
-
-      - name: 🔑 Log in to OpenShift ( TEST )
-        if: github.ref_name == 'test'
-        run: |
-          oc login --token=${{ secrets.AUTH_TOKEN_TEST }} --server=https://api.silver.devops.gov.bc.ca:6443
-
-      - name: 🔑 Log in to OpenShift ( PROD )
-        if: github.ref_name == 'prod'
-        run: |
-          oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=https://api.silver.devops.gov.bc.ca:6443
+          server=https://api.silver.devops.gov.bc.ca:6443
+          if [[ ${{ github.ref_name == 'test' }} ]]; then
+            oc login --token=${{ secrets.AUTH_TOKEN_DEV }} --server=$server
+          elif [[ ${{ github.ref_name == 'test' }} ]]; then
+            oc login --token=${{ secrets.AUTH_TOKEN_TEST }} --server=$server
+          elif [[ ${{ github.ref_name == 'prod' }} ]]; then
+            oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=$server
+          else
+            echo "No AUTH_TOKEN found for ${{ github.ref_name }} branch"
+          fi
 
       - name: 🚀 Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
         id: check-redis

@@ -83,10 +83,18 @@ jobs:
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
-      - name: 🔑 Log in to OpenShift ( DEV )
-        if: github.ref_name == 'dev'
+      - name: 🔑 Log in to OpenShift ( ${{ github.ref_name }} )
         run: |
-          oc login --token=${{ secrets.AUTH_TOKEN_DEV }} --server=https://api.silver.devops.gov.bc.ca:6443
+          server=https://api.silver.devops.gov.bc.ca:6443
+          if [[ ${{ github.ref_name == 'test' }} ]]; then
+            oc login --token=${{ secrets.AUTH_TOKEN_DEV }} --server=$server
+          elif [[ ${{ github.ref_name == 'test' }} ]]; then
+            oc login --token=${{ secrets.AUTH_TOKEN_TEST }} --server=$server
+          elif [[ ${{ github.ref_name == 'prod' }} ]]; then
+            oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=$server
+          else
+            echo "No AUTH_TOKEN found for ${{ github.ref_name }} branch"
+          fi
 
       - name: 🔑 Log in to OpenShift ( TEST )
         if: github.ref_name == 'test'
@@ -101,7 +109,7 @@ jobs:
       # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
       #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
-      - name: 🧹️ Cleanup ${{ inputs.REDIS_DEPLOYMENT_NAME }}}
+      - name: 🧹️ Cleanup ${{ inputs.REDIS_DEPLOYMENT_NAME }}
         run: |
           if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
@@ -112,13 +120,13 @@ jobs:
 
       # For a graceful termination, set the replica count of the Pods in the mariadb-galera StatefulSet to 0:
       # oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
-      - name: 🧹️ Cleanup ${{ inputs.DB_DEPLOYMENT_NAME }}]
+      - name: 🧹️ Cleanup ${{ inputs.DB_DEPLOYMENT_NAME }}
         run: |
           if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.DB_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
           else
             echo "${{ inputs.DB_DEPLOYMENT_NAME  }} FOUND: Cleaning..."
-            oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0 --wait
+            oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
             oc delete sts ${{ inputs.DB_DEPLOYMENT_NAME  }}
             oc delete configmap db-configmap
             oc delete configmap db-config
