@@ -293,7 +293,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "${PHP_DEPLOYMENT_NAME}",
+                "name": "${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
                 "namespace": "${DEPLOY_NAMESPACE}"
               }
             }
@@ -422,7 +422,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "${CRON_DEPLOYMENT_NAME}",
+                "name": "${CRON_DEPLOYMENT_NAME}:${BUILD_TAG}",
                 "namespace": "${DEPLOY_NAMESPACE}"
               }
             }

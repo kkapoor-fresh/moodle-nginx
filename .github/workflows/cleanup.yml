@@ -1,6 +1,6 @@
-# Cleanup Openshift
+# Clean Openshift
 # Deletes all resources from OpenShift to prepare for a fresh deployment
-name: 🧹️ Cleanup Openshift Project
+name: 🧹️ Clean Openshift Project
 
 env:
   APP: ${{ github.repository }}
@@ -49,15 +49,15 @@ on:
     outputs:
       # This is the name of the output set by the workflow_dispatch action.
       # The value is the ID of the workflow run that was triggered.
-      cleanup1:
-        description: "Cleanup log"
-        value: ${{ jobs.cleanup.outputs.output1 }}
+      clean1:
+        description: "Clean log"
+        value: ${{ jobs.clean.outputs.output1 }}
 
 jobs:
-  # Cleanup Openshift
+  # Clean Openshift
   # Not configured for prod deployments (to be safe)
-  cleanup:
-    name: 🧹️ Cleanup OpenShift (${{ github.ref_name }})
+  clean:
+    name: 🧹️ Clean OpenShift (${{ github.ref_name }})
     runs-on: ubuntu-latest
     if: |
       always()
@@ -65,7 +65,7 @@ jobs:
         github.ref_name == 'dev' || github.ref_name  == 'test'
       )
     outputs:
-      cleanup1: ${{ steps.delete-from-os.outputs.cleanup1 }}
+      clean1: ${{ steps.delete-from-os.outputs.clean1 }}
     steps:
       - name: 📤 Checkout Target Branch
         uses: actions/checkout@v2
@@ -99,7 +99,7 @@ jobs:
       # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
       #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }}
 
-      - name: 🧹️ Cleanup ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+      - name: 🧹️ Clean ${{ inputs.REDIS_DEPLOYMENT_NAME }}
         run: |
           if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME }} NOT FOUND: Skipping..."
@@ -109,7 +109,7 @@ jobs:
             echo "Uninstalled helm ${{ inputs.REDIS_DEPLOYMENT_NAME }}"
           fi
 
-      - name: 🧹️ Cleanup ${{ inputs.DB_DEPLOYMENT_NAME }}
+      - name: 🧹️ Clean ${{ inputs.DB_DEPLOYMENT_NAME }}
         run: |
           configmap_name="${{ inputs.DB_DEPLOYMENT_NAME }}-config"
           if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
@@ -137,8 +137,8 @@ jobs:
             echo "DELETED service ${{ inputs.DB_DEPLOYMENT_NAME }}"
           fi
 
-      - name: 🧹️ Cleanup ${{ inputs.WEB_DEPLOYMENT_NAME }}
-        id: cleanup-web
+      - name: 🧹️ Clean ${{ inputs.WEB_DEPLOYMENT_NAME }}
+        id: clean-web
         run: |
           configmap_name="${{ inputs.WEB_DEPLOYMENT_NAME }}-config"
           if [[ `oc describe dc ${{ inputs.WEB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
@@ -155,13 +155,13 @@ jobs:
             oc delete configmap $configmap_name
             echo "DELETED configmap $configmap_name"
           fi
-          if [[ `oc describe service ${{ inputs.WEB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
+          if ! [[ `oc describe service ${{ inputs.WEB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
             oc delete service ${{ inputs.WEB_DEPLOYMENT_NAME }}
             echo "DELETED service: ${{ inputs.WEB_DEPLOYMENT_NAME }}"
           fi
 
-      - name: 🧹️ Cleanup ${{ inputs.PHP_DEPLOYMENT_NAME }}
-        id: cleanup-php
+      - name: 🧹️ Clean ${{ inputs.PHP_DEPLOYMENT_NAME }}
+        id: clean-php
         run: |
           configmap_name="${{ inputs.PHP_DEPLOYMENT_NAME }}-config"
           if [[ `oc describe dc ${{ inputs.PHP_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
@@ -179,8 +179,8 @@ jobs:
             echo "DELETED configmap $configmap_name"
           fi
 
-      - name: 🧹️ Cleanup ${{ inputs.CRON_DEPLOYMENT_NAME }}
-        id: cleanup-cron
+      - name: 🧹️ Clean ${{ inputs.CRON_DEPLOYMENT_NAME }}
+        id: clean-cron
         run: |
           configmap_name="${{ inputs.CRON_DEPLOYMENT_NAME }}-config"
           if [[ `oc describe dc ${{ inputs.CRON_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
@@ -198,8 +198,8 @@ jobs:
             echo "DELETED configmap $configmap_name"
           fi
 
-      - name: 🧹️ Cleanup ${{ inputs.APP_HOST_URL }}
-        id: cleanup-route
+      - name: 🧹️ Clean ${{ inputs.APP_HOST_URL }}
+        id: clean-route
         run: |
           route_name="${{ inputs.APP_HOST_URL }}-${{ inputs.WEB_DEPLOYMENT_NAME }}"
           if [[ `oc describe route $route_name 2>&1` =~ "NotFound" ]]; then
@@ -210,8 +210,8 @@ jobs:
             echo "DELETED route:  $route_name"
           fi
 
-      - name: 🧹️ Cleanup ${{ inputs.APP }}-secrets
-        id: cleanup-secrets
+      - name: 🧹️ Clean ${{ inputs.APP }}-secrets
+        id: clean-secrets
         run: |
           if [[ `oc describe secret ${{ inputs.APP }}-secrets 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.APP }} NOT FOUND: Skipping..."
@@ -219,4 +219,15 @@ jobs:
             echo "${{ inputs.APP }} FOUND: Cleaning resources..."
             oc delete secret ${{ inputs.APP }}-secrets
             echo "DELETED secret ${{ inputs.APP }}-secrets"
+          fi
+
+      - name: 🧹️ Clean Backups
+        id: clean-backups
+        run: |
+          if [[ `oc describe pvc file-backup-data 2>&1` =~ "NotFound" ]]; then
+            echo "file-backup-data NOT FOUND: Skipping..."
+          else
+            echo "file-backup-data FOUND: Cleaning resources..."
+            oc delete pvc file-backup-data
+            echo "DELETED pvc file-backup-data"
           fi
