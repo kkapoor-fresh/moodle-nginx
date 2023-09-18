@@ -115,10 +115,6 @@ jobs:
           log-variables: true
           keys-case: upper
 
-      - name: Deploy Environment ConfigMap (moodle-env)
-        run: |
-          oc create configmap moodle-env --from-file=./example.env
-
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
@@ -135,6 +131,11 @@ jobs:
           else
             echo "No AUTH_TOKEN found for ${{ github.ref_name }} branch"
           fi
+
+      - name: Deploy Environment ConfigMap (moodle-env)
+        if: success()
+        run: |
+          oc create configmap moodle-env --from-file=./example.env
 
       - name: 🚀 Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
         if: success()
