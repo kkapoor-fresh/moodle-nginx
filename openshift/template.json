@@ -174,7 +174,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
+                "image": "${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
                 "name": "${PHP_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
@@ -354,7 +354,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_DEPLOYMENT_NAME}:${BUILD_TAG}",
+                "image": "${BUILD_NAMESPACE}/${CRON_DEPLOYMENT_NAME}:${BUILD_TAG}",
                 "name": "${CRON_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
