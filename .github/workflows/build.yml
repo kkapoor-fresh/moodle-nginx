@@ -57,7 +57,7 @@ jobs:
           echo Deploy to Namespace: ${{ env.DEPLOY_NAMESPACE }}
           echo URL: https://${{ env.APP_HOST_URL }}
           echo clean_builds: ${{ env.CLEAN_BUILDS }}
-          if [[ "${{ env.CLEAN_BUILDS }}" == "true" ]]; then
+          if [[ "${{ env.CLEAN_BUILDS }}" != "false" ]]; then
             echo CLEAN_BUILDS_TEXT="TRUE" >> $GITHUB_OUTPUT
           else
             echo CLEAN_BUILDS_TEXT="FALSE" >> $GITHUB_OUTPUT
@@ -200,13 +200,14 @@ jobs:
       DEPLOY_NAMESPACE: ${{ needs.build-images.outputs.DEPLOY_NAMESPACE }}
       BRANCH: ${{ needs.build-images.outputs.BRANCH }}
 
-  notify-failure:
-    name: ⚠️ Failed
-    if: ${{ failure() }}
+  notify:
+    name: 📫 Send Notifications (via Rocket.Chat)
     needs: [build-images, call-deploy-workflow]
+    if: success() || failure()
     runs-on: ubuntu-latest
     steps:
-      - name: Notify Team of Workflow Failure ⚠️ via Rocket.Chat Webhook
+      - name: ⚠️ Failure
+        if: failure()
         uses: muinmomin/webhook-action@v1.0.0
         with:
           url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
@@ -224,14 +225,7 @@ jobs:
               "image_url": "${{ env.FAIL_ICON_URL }}",
               "color":"#e7e076"
             }]}'
-
-  notify-success:
-    name: ✅ Succeeded
-    if: ${{ success() }}
-    needs: [build-images, call-deploy-workflow]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notify Team of Workflow Success ✅ via Rocket.Chat Webhook
+      - name: ✅ Success
         uses: muinmomin/webhook-action@v1.0.0
         with:
           url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
