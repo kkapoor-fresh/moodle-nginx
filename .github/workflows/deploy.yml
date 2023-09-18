@@ -144,14 +144,14 @@ jobs:
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
             helm repo add bitnami https://charts.bitnami.com/bitnami
             helm repo update
-            helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} --set securityContext.runAsUser=null --set securityContext.fsGroup=null -f ./config/redis/values.yml
+            helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} --set securityContext.runAsUser=null --set spec.securityContext.fsGroup=null -f ./config/redis/values.yml
           else
-            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Installation FOUND: Skipping..."
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Installation FOUND: Updating..."
+            helm repo add bitnami https://charts.bitnami.com/bitnami
+            helm repo update
+            helm upgrade redis bitnami/redis
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Updates complete."
           fi
-      # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
-      #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
-
-
 
       # For a graceful termination, set the replica count of the Pods in the mariadb-galera StatefulSet to 0:
       # oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
