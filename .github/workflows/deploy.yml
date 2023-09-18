@@ -119,6 +119,7 @@ jobs:
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
       - name: 🔑 Log in to OpenShift ( ${{ github.ref_name }} )
+        if: success()
         run: |
           server=https://api.silver.devops.gov.bc.ca:6443
           if [[ ${{ github.ref_name == 'test' }} ]]; then
@@ -132,7 +133,7 @@ jobs:
           fi
 
       - name: 🚀 Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
-        id: check-redis
+        if: success()
         run: |
           if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
@@ -151,8 +152,8 @@ jobs:
       # oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
       # To uninstall/delete the my-release release:
       # helm delete --purge ${{ inputs.DB_DEPLOYMENT_NAME  }}
-      - name: 🚀 Deploy DB (MariaDB Galera)
-        if: ${{ steps.check-db.outputs.installed == 'false' }}
+      - name: 🚀 Deploy ${{ inputs.DB_DEPLOYMENT_NAME  }}
+        if: success()
         run: |
           if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.DB_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
@@ -162,8 +163,6 @@ jobs:
           fi
 
       - name: 🚀 Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) ${{ inputs.WEB_DEPLOYMENT_NAME }}, ${{ inputs.PHP_DEPLOYMENT_NAME }}, ${{ inputs.CRON_DEPLOYMENT_NAME }} - with routes, secrets, configmaps
-        id: deploy-to-os
-        # if: success() || failure()
         if: success()
         run: sh ./openshift/scripts/deploy-template.sh
         env:

@@ -57,12 +57,16 @@ jobs:
           echo Deploy to Namespace: ${{ env.DEPLOY_NAMESPACE }}
           echo URL: https://${{ env.APP_HOST_URL }}
           echo clean_builds: ${{ env.CLEAN_BUILDS }}
-          echo clean_builds=${{ env.CLEAN_BUILDS }} >> $GITHUB_OUTPUT
+          if [[ "${{ env.CLEAN_BUILDS }}" == "true" ]]; then
+            echo CLEAN_BUILDS_TEXT="TRUE" >> $GITHUB_OUTPUT
+          else
+            echo CLEAN_BUILDS_TEXT="FALSE" >> $GITHUB_OUTPUT
+          fi
 
   # Build PHP Image
 
   build-images:
-    name: 🔨 Build Application Images (${{ github.ref_name }} |  ${{ vars.SKIP_BUILD }})
+    name: 🔨 Build Application Images (${{ github.ref_name }})
     needs: [checkEnv]
     runs-on: ubuntu-latest
     if: (${{ vars.SKIP_BUILD == 'false' }} || ${{ vars.SKIP_BUILD == false }}) && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
@@ -155,10 +159,10 @@ jobs:
       BRANCH: ${{ env.BRANCH }}
 
   call-cleanup-workflow:
-    name: 🧹️ Clean Build ( ${{ needs.checkEnv.clean_builds }} )
+    name: 🧹️ Clean Build ( ${{ needs.checkEnv.CLEAN_BUILDS_TEXT }} )
     uses: ./.github/workflows/cleanup.yml
     needs: [checkEnv, build-images]
-    if: ${{ needs.checkEnv.clean_builds != 'false' }}
+    if: ${{ needs.checkEnv.CLEAN_BUILDS_TEXT == 'TRUE' }}
     secrets: inherit
     with:
       APP: ${{ needs.build-images.outputs.APP }}
