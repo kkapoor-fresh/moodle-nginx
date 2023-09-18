@@ -155,10 +155,10 @@ jobs:
       BRANCH: ${{ env.BRANCH }}
 
   call-cleanup-workflow:
-    name: 🧹️ Clean Build (${{ needs.checkEnv.clean_builds }})
+    name: 🧹️ Clean Build ( ${{ needs.checkEnv.clean_builds }} )
     uses: ./.github/workflows/cleanup.yml
-    needs: [checkEnv]
-    if: ${{ needs.checkEnv.clean_builds == 'true' }}
+    needs: [checkEnv, build-images]
+    if: ${{ needs.checkEnv.clean_builds != 'false' }}
     secrets: inherit
     with:
       APP: ${{ needs.build-images.outputs.APP }}
@@ -175,7 +175,7 @@ jobs:
   call-deploy-workflow:
     name: 🚀 Deploy to OpenShift
     uses: ./.github/workflows/deploy.yml
-    needs: [build-images]
+    needs: [build-images, call-cleanup-workflow]
     if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ vars.SKIP_BUILD == 'false' }}
     secrets: inherit
     with:
