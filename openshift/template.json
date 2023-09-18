@@ -293,7 +293,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
+                "name": "${PHP_DEPLOYMENT_NAME}",
                 "namespace": "${DEPLOY_NAMESPACE}"
               }
             }
@@ -334,7 +334,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_IMAGE}:${BUILD_TAG}",
+                "image": "${IMAGE_REGISTRY}/${BUILD_NAMESPACE}/${CRON_DEPLOYMENT_NAME}:${BUILD_TAG}",
                 "name": "${CRON_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
@@ -368,8 +368,8 @@
                 },
                 "env": [
                   {
-                    "name": "CRON_IMAGE",
-                    "value": "${CRON_IMAGE}"
+                    "name": "CRON_DEPLOYMENT_NAME",
+                    "value": "${CRON_DEPLOYMENT_NAME}"
                   },
                   {
                     "name": "DB_PASSWORD",
@@ -529,7 +529,7 @@
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "${WEB_IMAGE}:${BUILD_TAG}",
+                "name": "${WEB_IMAGE}",
                 "namespace": "${DEPLOY_NAMESPACE}"
               }
             }
@@ -592,7 +592,7 @@
       "description": "Cron Image",
       "displayName": "Cron Image",
       "required": true,
-      "name": "CRON_IMAGE"
+      "name": "CRON_DEPLOYMENT_NAME"
     },
     {
       "description": "Image Build Tag (dev, test, prod)",
