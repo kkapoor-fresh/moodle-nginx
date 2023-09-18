@@ -162,7 +162,7 @@ jobs:
     name: 🧹️ Clean Build ( ${{ needs.checkEnv.CLEAN_BUILDS_TEXT }} )
     uses: ./.github/workflows/cleanup.yml
     needs: [checkEnv, build-images]
-    if: ${{ needs.checkEnv.CLEAN_BUILDS_TEXT == 'TRUE' }}
+    if: ${{ needs.checkEnv.CLEAN_BUILDS_TEXT != 'FALSE' }}
     secrets: inherit
     with:
       APP: ${{ needs.build-images.outputs.APP }}
