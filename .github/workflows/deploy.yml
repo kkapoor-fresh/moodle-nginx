@@ -115,6 +115,10 @@ jobs:
           log-variables: true
           keys-case: upper
 
+      - name: Deploy Environment ConfigMap (moodle-env)
+        run: |
+          oc create configmap moodle-env --from-file=./example.env
+
       # Log in to OpenShift.
       # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
       # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.

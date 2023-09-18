@@ -155,10 +155,17 @@ jobs:
             oc delete configmap $configmap_name
             echo "DELETED configmap $configmap_name"
           fi
+          if [[ `oc describe configmap moodle-env 2>&1` =~ "NotFound" ]]; then
+            echo "Configmap moodle-env NOT FOUND: Skipping..."
+          else
+            oc delete configmap moodle-env
+            echo "DELETED configmap moodle-env"
+          fi
           if ! [[ `oc describe service ${{ inputs.WEB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
             oc delete service ${{ inputs.WEB_DEPLOYMENT_NAME }}
             echo "DELETED service: ${{ inputs.WEB_DEPLOYMENT_NAME }}"
           fi
+
 
       - name: 🧹️ Clean ${{ inputs.PHP_DEPLOYMENT_NAME }}
         id: clean-php
