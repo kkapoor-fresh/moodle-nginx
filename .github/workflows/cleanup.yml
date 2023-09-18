@@ -97,7 +97,7 @@ jobs:
           fi
 
       # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
-      #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
+      #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }}
 
       - name: 🧹️ Cleanup ${{ inputs.REDIS_DEPLOYMENT_NAME }}
         run: |
@@ -131,7 +131,7 @@ jobs:
             echo "${{ inputs.WEB_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
           else
             echo "${{ inputs.WEB_DEPLOYMENT_NAME  }} FOUND: Cleaning resources..."
-            oc scale dc ${{ inputs.WEB_DEPLOYMENT_NAME  }} --replicas=0 --wait
+            oc scale dc ${{ inputs.WEB_DEPLOYMENT_NAME  }} --replicas=0
             oc delete dc ${{ inputs.WEB_DEPLOYMENT_NAME  }}
             oc delete configmap ${{ inputs.WEB_DEPLOYMENT_NAME  }}-config
           fi
@@ -143,7 +143,7 @@ jobs:
             echo "${{ inputs.PHP_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
           else
             echo "${{ inputs.PHP_DEPLOYMENT_NAME  }} FOUND: Cleaning resources..."
-            oc scale dc ${{ inputs.PHP_DEPLOYMENT_NAME  }} --replicas=0 --wait
+            oc scale dc ${{ inputs.PHP_DEPLOYMENT_NAME  }} --replicas=0
             oc delete dc ${{ inputs.PHP_DEPLOYMENT_NAME  }}
             oc delete configmap ${{ inputs.PHP_DEPLOYMENT_NAME  }}-config
           fi
@@ -155,7 +155,7 @@ jobs:
             echo "${{ inputs.CRON_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
           else
             echo "${{ inputs.CRON_DEPLOYMENT_NAME  }} FOUND: Cleaning resources..."
-            oc scale dc ${{ inputs.CRON_DEPLOYMENT_NAME  }} --replicas=0 --wait
+            oc scale dc ${{ inputs.CRON_DEPLOYMENT_NAME  }} --replicas=0
             oc delete dc ${{ inputs.CRON_DEPLOYMENT_NAME  }}
             oc delete configmap ${{ inputs.CRON_DEPLOYMENT_NAME  }}-config
           fi
