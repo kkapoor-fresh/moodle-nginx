@@ -96,16 +96,6 @@ jobs:
             echo "No AUTH_TOKEN found for ${{ github.ref_name }} branch"
           fi
 
-      - name: 🔑 Log in to OpenShift ( TEST )
-        if: github.ref_name == 'test'
-        run: |
-          oc login --token=${{ secrets.AUTH_TOKEN_TEST }} --server=https://api.silver.devops.gov.bc.ca:6443
-
-      - name: 🔑 Log in to OpenShift ( PROD )
-        if: github.ref_name == 'prod'
-        run: |
-          oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=https://api.silver.devops.gov.bc.ca:6443
-
       # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
       #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
@@ -128,7 +118,7 @@ jobs:
             echo "${{ inputs.DB_DEPLOYMENT_NAME  }} FOUND: Cleaning..."
             oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
             oc delete sts ${{ inputs.DB_DEPLOYMENT_NAME  }}
-            oc delete configmap db-configmap
+            oc delete configmap db-config
             oc delete configmap db-config
             oce delete service ${{ inputs.DB_DEPLOYMENT_NAME  }}
             for i in 0 1 2; do kubectl delete pvc datadir-db-sts-$i; done
