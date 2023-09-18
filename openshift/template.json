@@ -26,7 +26,9 @@
 				"name": "${APP_NAME}-secrets"
 			},
 			"stringData": {
-				"database-password": "${DB_PASSWORD}"
+        "database-user": "${DB_USER}",
+				"database-password": "${DB_PASSWORD}",
+        "database-name": "${DB_NAME}"
 			}
     },
     {
@@ -237,11 +239,29 @@
                     "value": "https://${SITE_URL}"
                   },
                   {
+                    "name": "DB_USER",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${APP_NAME}-secrets",
+                        "key": "database-user"
+                      }
+                    }
+                  },
+                  {
                     "name": "DB_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
                         "name": "${APP_NAME}-secrets",
                         "key": "database-password"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DB_NAME",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${APP_NAME}-secrets",
+                        "key": "database-name"
                       }
                     }
                   }

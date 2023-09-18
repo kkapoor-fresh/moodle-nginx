@@ -198,10 +198,10 @@ jobs:
             echo "DELETED configmap $configmap_name"
           fi
 
-      - name: 🧹️ Clean ${{ inputs.APP_HOST_URL }}
+      - name: 🧹️ Clean ${{ inputs.APP }}-${{ inputs.WEB_DEPLOYMENT_NAME }} | ${{ inputs.APP_HOST_URL }}
         id: clean-route
         run: |
-          route_name="${{ inputs.APP_HOST_URL }}-${{ inputs.WEB_DEPLOYMENT_NAME }}"
+          route_name="${{ inputs.APP }}-${{ inputs.WEB_DEPLOYMENT_NAME }}"
           if [[ `oc describe route $route_name 2>&1` =~ "NotFound" ]]; then
             echo "Route NOT FOUND: $route_name - Skipping..."
           else

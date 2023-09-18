@@ -119,16 +119,16 @@ spec:
           value: "yes"
         - name: ALLOW_EMPTY_PASSWORD
           value: "yes"
-        - name: MARIADB_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: moodle-secrets
-              key: database-name
         - name: MYSQL_USER
           valueFrom:
             secretKeyRef:
               name: moodle-secrets
               key: database-user
+        - name: MARIADB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: moodle-secrets
+              key: database-name
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
