@@ -106,6 +106,7 @@ jobs:
           else
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME }} FOUND: Cleaning..."
             helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+            echo "Uninstalled helm ${{ inputs.REDIS_DEPLOYMENT_NAME }}"
           fi
 
       # For a graceful termination, set the replica count of the Pods in the mariadb-galera StatefulSet to 0:
@@ -119,12 +120,14 @@ jobs:
             oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME }} --replicas=0
             oc delete sts ${{ inputs.DB_DEPLOYMENT_NAME }}
             for i in 0 1 2; do kubectl delete pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i; done
+            echo "DELETED sts ${{ inputs.DB_DEPLOYMENT_NAME }}"
           fi
           if [[ `oc describe configmap ${{ inputs.DB_DEPLOYMENT_NAME }}-config 2>&1` =~ "NotFound" ]]; then
             oc delete configmap ${{ inputs.DB_DEPLOYMENT_NAME }}-config
           fi
           if [[ `oc describe service ${{ inputs.DB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
             oc delete service ${{ inputs.DB_DEPLOYMENT_NAME }}
+            echo "DELETED service ${{ inputs.DB_DEPLOYMENT_NAME }}"
           fi
 
       - name: 🧹️ Cleanup ${{ inputs.WEB_DEPLOYMENT_NAME }}
@@ -137,11 +140,17 @@ jobs:
             echo "${{ inputs.WEB_DEPLOYMENT_NAME }} FOUND: Cleaning resources..."
             oc scale dc ${{ inputs.WEB_DEPLOYMENT_NAME }} --replicas=0
             oc delete dc ${{ inputs.WEB_DEPLOYMENT_NAME }}
+            echo "DELETED dc ${{ inputs.WEB_DEPLOYMENT_NAME }}"
           fi
           if [[ `oc describe configmap $configmap_name 2>&1` =~ "NotFound" ]]; then
             echo "$configmap_name NOT FOUND: Skipping..."
           else
             oc delete configmap $configmap_name
+            echo "DELETED configmap $configmap_name"
+          fi
+          if [[ `oc describe service ${{ inputs.WEB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
+            oc delete service ${{ inputs.WEB_DEPLOYMENT_NAME }}
+            echo "DELETED service: ${{ inputs.WEB_DEPLOYMENT_NAME }}"
           fi
 
       - name: 🧹️ Cleanup ${{ inputs.PHP_DEPLOYMENT_NAME }}
@@ -154,11 +163,13 @@ jobs:
             echo "${{ inputs.PHP_DEPLOYMENT_NAME }} FOUND: Cleaning resources..."
             oc scale dc ${{ inputs.PHP_DEPLOYMENT_NAME }} --replicas=0
             oc delete dc ${{ inputs.PHP_DEPLOYMENT_NAME }}
+            echo "DELETED dc ${{ inputs.PHP_DEPLOYMENT_NAME }}"
           fi
           if [[ `oc describe configmap $configmap_name 2>&1` =~ "NotFound" ]]; then
             echo "$configmap_name NOT FOUND: Skipping..."
           else
             oc delete configmap $configmap_name
+            echo "DELETED configmap $configmap_name"
           fi
 
       - name: 🧹️ Cleanup ${{ inputs.CRON_DEPLOYMENT_NAME }}
@@ -171,11 +182,13 @@ jobs:
             echo "${{ inputs.CRON_DEPLOYMENT_NAME }} FOUND: Cleaning resources..."
             oc scale dc ${{ inputs.CRON_DEPLOYMENT_NAME }} --replicas=0
             oc delete dc ${{ inputs.CRON_DEPLOYMENT_NAME }}
+            echo "DELETED dc ${{ inputs.CRON_DEPLOYMENT_NAME }}"
           fi
           if [[ `oc describe configmap ${{ inputs.CRON_DEPLOYMENT_NAME }}-config 2>&1` =~ "NotFound" ]]; then
             echo "$configmap_name NOT FOUND: Skipping..."
           else
             oc delete configmap $configmap_name
+            echo "DELETED configmap $configmap_name"
           fi
 
       - name: 🧹️ Cleanup ${{ inputs.APP_HOST_URL }}
@@ -186,6 +199,7 @@ jobs:
           else
             echo "${{ inputs.APP }} FOUND: Cleaning resources..."
             oc delete route ${{ inputs.APP }}
+            echo "DELETED route ${{ inputs.APP }}"
           fi
 
       - name: 🧹️ Cleanup ${{ inputs.APP }}-secrets
@@ -196,4 +210,5 @@ jobs:
           else
             echo "${{ inputs.APP }} FOUND: Cleaning resources..."
             oc delete secret ${{ inputs.APP }}-secrets
+            echo "DELETED secret ${{ inputs.APP }}-secrets"
           fi
