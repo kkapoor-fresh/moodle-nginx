@@ -98,52 +98,38 @@ jobs:
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      - name: 🔍 Check for ${{ inputs.REDIS_DEPLOYMENT_NAME }}
-        id: check-redis
-        run: |
-          if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
-          echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
-          echo "installed=false" >> $GITHUB_OUTPUT
-          else
-            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} FOUND: Moving on..."
-            echo "installed=true" >> $GITHUB_OUTPUT
-          fi
-
       # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
       #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
       - name: 🧹️ Cleanup ${{ inputs.REDIS_DEPLOYMENT_NAME }}}
-        if: ${{ steps.check-redis.outputs.installed == 'true' }}
         run: |
-          helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
-
-      - name: 🧹️ Cleanup ${{ inputs.DB_DEPLOYMENT_NAME }}
-        id: cleanup-db
-        run: |
-          if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
-          echo "${{ inputs.DB_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
-          echo "installed=false" >> $GITHUB_OUTPUT
+          if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
           else
-            echo "${{ inputs.DB_DEPLOYMENT_NAME  }} FOUND: Moving on..."
-            echo "installed=true" >> $GITHUB_OUTPUT
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} FOUND: Cleaning..."
+            helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
           fi
 
       # For a graceful termination, set the replica count of the Pods in the mariadb-galera StatefulSet to 0:
       # oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
       - name: 🧹️ Cleanup ${{ inputs.DB_DEPLOYMENT_NAME }}]
-        if: ${{ steps.cleanup-db.outputs.installed == 'false' }}
         run: |
-          oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0 --wait
-          oc delete sts ${{ inputs.DB_DEPLOYMENT_NAME  }}
-          oc delete configmap db-configmap
-          oc delete configmap db-config
-          oce delete service ${{ inputs.DB_DEPLOYMENT_NAME  }}
-          for i in 0 1 2; do kubectl delete pvc datadir-db-sts-$i; done
+          if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.DB_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
+          else
+            echo "${{ inputs.DB_DEPLOYMENT_NAME  }} FOUND: Cleaning..."
+            oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0 --wait
+            oc delete sts ${{ inputs.DB_DEPLOYMENT_NAME  }}
+            oc delete configmap db-configmap
+            oc delete configmap db-config
+            oce delete service ${{ inputs.DB_DEPLOYMENT_NAME  }}
+            for i in 0 1 2; do kubectl delete pvc datadir-db-sts-$i; done
+          fi
 
       - name: 🧹️ Cleanup ${{ inputs.WEB_DEPLOYMENT_NAME }}
         id: cleanup-web
         run: |
-          if [[ `oc describe sts ${{ inputs.WEB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+          if [[ `oc describe dc ${{ inputs.WEB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.WEB_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
           else
             echo "${{ inputs.WEB_DEPLOYMENT_NAME  }} FOUND: Cleaning resources..."
@@ -155,7 +141,7 @@ jobs:
       - name: 🧹️ Cleanup ${{ inputs.PHP_DEPLOYMENT_NAME }}
         id: cleanup-php
         run: |
-          if [[ `oc describe sts ${{ inputs.PHP_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+          if [[ `oc describe dc ${{ inputs.PHP_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.PHP_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
           else
             echo "${{ inputs.PHP_DEPLOYMENT_NAME  }} FOUND: Cleaning resources..."
@@ -167,7 +153,7 @@ jobs:
       - name: 🧹️ Cleanup ${{ inputs.CRON_DEPLOYMENT_NAME }}
         id: cleanup-cron
         run: |
-          if [[ `oc describe sts ${{ inputs.CRON_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+          if [[ `oc describe dc ${{ inputs.CRON_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.CRON_DEPLOYMENT_NAME  }} NOT FOUND: Skipping..."
           else
             echo "${{ inputs.CRON_DEPLOYMENT_NAME  }} FOUND: Cleaning resources..."
@@ -179,11 +165,11 @@ jobs:
       - name: 🧹️ Cleanup ${{ inputs.APP_HOST_URL }}
         id: cleanup-route
         run: |
-          if [[ `oc describe route ${{ inputs.APP_HOST_URL  }} 2>&1` =~ "NotFound" ]]; then
-            echo "${{ inputs.APP_HOST_URL  }} NOT FOUND: Skipping..."
+          if [[ `oc describe route ${{ inputs.APP  }} 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.APP  }} Route NOT FOUND: Skipping..."
           else
-            echo "${{ inputs.APP_HOST_URL  }} FOUND: Cleaning resources..."
-            oc delete route ${{ inputs.APP_HOST_URL  }}
+            echo "${{ inputs.APP  }} FOUND: Cleaning resources..."
+            oc delete route ${{ inputs.APP  }}
           fi
 
       - name: 🧹️ Cleanup ${{ inputs.APP }}-secrets
