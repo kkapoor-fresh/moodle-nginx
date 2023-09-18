@@ -81,7 +81,7 @@ spec:
           # Statefulset has sticky identity, number should be last
           [[ `hostname` =~ -([0-9]+)$ ]] || exit 1
           ordinal=${BASH_REMATCH[1]}
-          # Copy appropriate conf.d files from config-map to
+          # Copy appropriate conf.d files from db-config-map to
           # db-config volume (emptyDir) depending on pod number
           if [[ $ordinal -eq 0 ]]; then
             # This file holds SQL for connecting to primary
@@ -100,7 +100,7 @@ spec:
           ls /etc/mysql/conf.d/
           cat /etc/mysql/conf.d/server-id.cnf
         volumeMounts:
-          - name: db-config
+          - name: db-config-map
             mountPath: /mnt/config-map
           - name: db-config
             mountPath: /etc/mysql/conf.d/
@@ -146,12 +146,12 @@ spec:
         volumeMounts:
         - name: datadir
           mountPath: /var/lib/mysql/
-        - name: db-config
+        - name: db-config-map
           mountPath: /etc/mysql/conf.d/
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
       volumes:
-      - name: db-config
+      - name: db-config-map
         configMap:
           name: db-config
           #defaultMode: 0544

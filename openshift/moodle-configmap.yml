@@ -3,22 +3,8 @@ apiVersion: v1
 metadata:
   name: moodle-config
   namespace: 950003-dev
-  uid: b0980f23-61fc-42de-bf68-56c10fee303e
-  resourceVersion: '7569153033'
-  creationTimestamp: '2022-12-20T21:02:05Z'
-  managedFields:
-    - manager: Mozilla
-      operation: Update
-      apiVersion: v1
-      time: '2022-12-20T21:02:05Z'
-      fieldsType: FieldsV1
-      fieldsV1:
-        'f:data':
-          .: {}
-          'f:config.php': {}
 data:
   config.php: >
-
     <?php  // Moodle configuration file
 
     require_once('/vendor/autoload.php');
