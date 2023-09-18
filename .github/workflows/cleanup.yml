@@ -128,11 +128,11 @@ jobs:
             done
             echo "DELETED sts ${{ inputs.DB_DEPLOYMENT_NAME }}"
           fi
-          if [[ `oc describe configmap $configmap_name 2>&1` =~ "NotFound" ]]; then
+          if ! [[ `oc describe configmap $configmap_name 2>&1` =~ "NotFound" ]]; then
             oc delete configmap $configmap_name
             echo "DELETED configmap $configmap_name"
           fi
-          if [[ `oc describe service ${{ inputs.DB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
+          if ! [[ `oc describe service ${{ inputs.DB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
             oc delete service ${{ inputs.DB_DEPLOYMENT_NAME }}
             echo "DELETED service ${{ inputs.DB_DEPLOYMENT_NAME }}"
           fi
