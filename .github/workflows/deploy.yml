@@ -133,60 +133,35 @@ jobs:
         run: |
           oc login --token=${{ secrets.AUTH_TOKEN_PROD }} --server=https://api.silver.devops.gov.bc.ca:6443
 
-      - name: 🔍 Check for ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+      - name: 🚀 Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
         id: check-redis
         run: |
           if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
-          echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
-          echo "installed=false" >> $GITHUB_OUTPUT
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
+            helm repo add bitnami https://charts.bitnami.com/bitnami
+            helm repo update
+            helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} --set securityContext.runAsUser=null --set securityContext.fsGroup=null -f ./config/redis/values.yml
           else
-            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} FOUND: Moving on..."
-            echo "installed=true" >> $GITHUB_OUTPUT
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Installation FOUND: Skipping..."
           fi
-
       # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
       #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }} --wait
 
-      - name: 🚀 Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
-        if: ${{ steps.check-redis.outputs.installed == 'false' }}
-        run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo update
-          helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} --set securityContext.runAsUser=null --set securityContext.fsGroup=null -f ./config/redis/values.yml
 
-      - name: 🔍 Check for DB (MariaDB Galera) Statefulset (${{ inputs.DB_DEPLOYMENT_NAME }})
-        id: check-db
-        run: |
-          if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
-          echo "${{ inputs.DB_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
-          echo "installed=false" >> $GITHUB_OUTPUT
-          else
-            echo "${{ inputs.DB_DEPLOYMENT_NAME  }} FOUND: Moving on..."
-            echo "installed=true" >> $GITHUB_OUTPUT
-          fi
 
       # For a graceful termination, set the replica count of the Pods in the mariadb-galera StatefulSet to 0:
       # oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME  }} --replicas=0
       # To uninstall/delete the my-release release:
       # helm delete --purge ${{ inputs.DB_DEPLOYMENT_NAME  }}
-      - name: 🚀 Deploy DB (MariaDB Galera) [is it installed already? ${{ steps.check-db.outputs.installed }}]
+      - name: 🚀 Deploy DB (MariaDB Galera)
         if: ${{ steps.check-db.outputs.installed == 'false' }}
         run: |
-          oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
-
-      # - name: '🚀 Deploy DB (MariaDB Galera) via Helm bot'
-      #   uses: 'deliverybot/helm@v1'
-      #   with:
-      #     release: '${{ inputs.DB_DEPLOYMENT_NAME }}'
-      #     namespace: '${{ github.ref_name }}'
-      #     chart: '${{ inputs.DB_IMAGE }}'
-      #     token: '${{ github.token }}'
-      #     values: |
-      #       name: ${{ inputs.DB_DEPLOYMENT_NAME }}
-      #     value-files: >-
-      #       [
-      #         "./config/mariadb/config.yaml"
-      #       ]
+          if [[ `oc describe sts ${{ inputs.DB_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.DB_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
+            oc create -f ./config/mariadb/config.yaml -n ${{ inputs.DEPLOY_NAMESPACE }}
+          else
+            echo "${{ inputs.DB_DEPLOYMENT_NAME  }} Installation FOUND: Skipping..."
+          fi
 
       - name: 🚀 Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) ${{ inputs.WEB_DEPLOYMENT_NAME }}, ${{ inputs.PHP_DEPLOYMENT_NAME }}, ${{ inputs.CRON_DEPLOYMENT_NAME }} - with routes, secrets, configmaps
         id: deploy-to-os
