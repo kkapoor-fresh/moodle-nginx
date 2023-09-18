@@ -592,6 +592,12 @@
       "description": "Cron Image",
       "displayName": "Cron Image",
       "required": true,
+      "name": "CRON_IMAGE"
+    },
+    {
+      "description": "Cron Deployment Name",
+      "displayName": "Cron Deployment",
+      "required": true,
       "name": "CRON_DEPLOYMENT_NAME"
     },
     {
