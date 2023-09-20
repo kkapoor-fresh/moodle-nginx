@@ -145,7 +145,7 @@ jobs:
             helm repo add bitnami https://charts.bitnami.com/bitnami
             helm repo update
             oc apply -f ./config/redis/redis-config.yml
-            helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} --set securityContext.enabled=false,securityContext.runAsUser="auto" -f ./config/redis/values.yml
+            helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} --set master.podSecurityContext.enabled=false,master.containerSecurityContext.enabled=false -f ./config/redis/values.yml
           else
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Installation FOUND: Updating..."
             helm repo add bitnami https://charts.bitnami.com/bitnami
