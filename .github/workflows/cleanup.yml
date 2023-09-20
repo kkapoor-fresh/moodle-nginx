@@ -108,6 +108,12 @@ jobs:
             helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
             echo "Uninstalled helm ${{ inputs.REDIS_DEPLOYMENT_NAME }}"
           fi
+          if [[ `oc describe configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-config 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME }}-config NOT FOUND: Skipping..."
+          else
+            oc delete configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-config
+            echo "DELETED configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-config"
+          fi
 
       - name: 🧹️ Clean ${{ inputs.DB_DEPLOYMENT_NAME }}
         run: |

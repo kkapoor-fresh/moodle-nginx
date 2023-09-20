@@ -42,7 +42,7 @@ image:
 ## Cluster settings
 cluster:
   enabled: true
-  slaveCount: 1
+  slaveCount: 0
 
 ## Use redis sentinel in the redis pod. This will disable the master and slave services and
 ## create one redis service with ports to the sentinel and the redis instances
@@ -181,7 +181,7 @@ rbac:
 
 ## Redis pod Security Context
 securityContext:
-  enabled: false
+#  enabled: false
   # fsGroup: 0
   # runAsUser: 0
   ## sysctl settings for master and slave pods

@@ -144,6 +144,7 @@ jobs:
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
             helm repo add bitnami https://charts.bitnami.com/bitnami
             helm repo update
+            oc apply -f ./config/redis/redis-config.yml
             helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} --set securityContext.enabled=false -f ./config/redis/values.yml
           else
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Installation FOUND: Updating..."
