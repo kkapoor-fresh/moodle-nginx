@@ -180,10 +180,10 @@ rbac:
     rules: []
 
 ## Redis pod Security Context
-securityContext: {}
-  #enabled: false
+securityContext:
+  enabled: false
   # fsGroup: 0
-  # runAsUser: 0
+  runAsUser: "auto"
   ## sysctl settings for master and slave pods
   ##
   ## Uncomment the setting below to increase the net.core.somaxconn value
