@@ -181,7 +181,7 @@ rbac:
 
 ## Redis pod Security Context
 securityContext:
-#  enabled: false
+  enabled: false
   # fsGroup: 0
   # runAsUser: 0
   ## sysctl settings for master and slave pods
