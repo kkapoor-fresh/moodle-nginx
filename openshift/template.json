@@ -174,7 +174,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
+                "image": "${IMAGE_REGISTRY}${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
                 "name": "${PHP_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
