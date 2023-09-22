@@ -176,6 +176,7 @@ jobs:
           BUILD_TAG: ${{ inputs.BRANCH }}
           APP_HOST_URL: ${{ inputs.APP_HOST_URL }}
           BUILD_NAMESPACE: ${{ inputs.BUILD_NAMESPACE }}
+          IMAGE_REPO: ${{ inputs.IMAGE_REPO }}
           DEPLOY_NAMESPACE: ${{ inputs.DEPLOY_NAMESPACE }}
           BASE_IMAGE_TAG: ${{ inputs.BASE_IMAGE_TAG }}
           WEB_DEPLOYMENT_NAME: ${{ inputs.WEB_DEPLOYMENT_NAME }}
