@@ -15,6 +15,9 @@ on:
       BASE_IMAGE_TAG:
         required: true
         type: string
+      IMAGE_REPO:
+        required: true
+        type: string
       DB_DEPLOYMENT_NAME:
         required: true
         type: string
