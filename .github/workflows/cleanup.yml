@@ -112,7 +112,6 @@ jobs:
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME }}-config NOT FOUND: Skipping..."
           else
             oc delete configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-config
-            echo "DELETED configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-config"
           fi
 
       - name: 🧹️ Clean ${{ inputs.DB_DEPLOYMENT_NAME }}
@@ -127,20 +126,15 @@ jobs:
             for i in 0 1 2; do
               if ! [[ `oc describe pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i 2>&1` =~ "NotFound" ]]; then
                 kubectl delete pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i;
-                echo "DELETED pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i"
               else
                 echo "pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i NOT FOUND: Skipping..."
               fi
             done
-            echo "DELETED sts ${{ inputs.DB_DEPLOYMENT_NAME }}"
           fi
           if ! [[ `oc describe configmap $configmap_name 2>&1` =~ "NotFound" ]]; then
             oc delete configmap $configmap_name
-            echo "DELETED configmap $configmap_name"
           fi
           if ! [[ `oc describe service ${{ inputs.DB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
-            oc delete service ${{ inputs.DB_DEPLOYMENT_NAME }}
-            echo "DELETED service ${{ inputs.DB_DEPLOYMENT_NAME }}"
           fi
 
       - name: 🧹️ Clean ${{ inputs.WEB_DEPLOYMENT_NAME }}
@@ -153,23 +147,19 @@ jobs:
             echo "${{ inputs.WEB_DEPLOYMENT_NAME }} FOUND: Cleaning resources..."
             oc scale dc ${{ inputs.WEB_DEPLOYMENT_NAME }} --replicas=0
             oc delete dc ${{ inputs.WEB_DEPLOYMENT_NAME }}
-            echo "DELETED dc ${{ inputs.WEB_DEPLOYMENT_NAME }}"
           fi
           if [[ `oc describe configmap $configmap_name 2>&1` =~ "NotFound" ]]; then
             echo "$configmap_name NOT FOUND: Skipping..."
           else
             oc delete configmap $configmap_name
-            echo "DELETED configmap $configmap_name"
           fi
           if [[ `oc describe configmap moodle-env 2>&1` =~ "NotFound" ]]; then
             echo "Configmap moodle-env NOT FOUND: Skipping..."
           else
             oc delete configmap moodle-env
-            echo "DELETED configmap moodle-env"
           fi
           if ! [[ `oc describe service ${{ inputs.WEB_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
             oc delete service ${{ inputs.WEB_DEPLOYMENT_NAME }}
-            echo "DELETED service: ${{ inputs.WEB_DEPLOYMENT_NAME }}"
           fi
 
 
@@ -183,17 +173,14 @@ jobs:
             echo "${{ inputs.PHP_DEPLOYMENT_NAME }} FOUND: Cleaning resources..."
             oc scale dc ${{ inputs.PHP_DEPLOYMENT_NAME }} --replicas=0
             oc delete dc ${{ inputs.PHP_DEPLOYMENT_NAME }}
-            echo "DELETED dc ${{ inputs.PHP_DEPLOYMENT_NAME }}"
           fi
           if [[ `oc describe configmap $configmap_name 2>&1` =~ "NotFound" ]]; then
             echo "$configmap_name NOT FOUND: Skipping..."
           else
             oc delete configmap $configmap_name
-            echo "DELETED configmap $configmap_name"
           fi
           if ! [[ `oc describe pvc env-data 2>&1` =~ "NotFound" ]]; then
             oc delete pvc env-data
-            echo "DELETED pvc env-data"
           fi
 
       - name: 🧹️ Clean ${{ inputs.CRON_DEPLOYMENT_NAME }}
@@ -206,13 +193,11 @@ jobs:
             echo "${{ inputs.CRON_DEPLOYMENT_NAME }} FOUND: Cleaning resources..."
             oc scale dc ${{ inputs.CRON_DEPLOYMENT_NAME }} --replicas=0
             oc delete dc ${{ inputs.CRON_DEPLOYMENT_NAME }}
-            echo "DELETED dc ${{ inputs.CRON_DEPLOYMENT_NAME }}"
           fi
           if [[ `oc describe configmap ${{ inputs.CRON_DEPLOYMENT_NAME }}-config 2>&1` =~ "NotFound" ]]; then
             echo "$configmap_name NOT FOUND: Skipping..."
           else
             oc delete configmap $configmap_name
-            echo "DELETED configmap $configmap_name"
           fi
 
       - name: 🧹️ Clean ${{ inputs.APP }}-${{ inputs.WEB_DEPLOYMENT_NAME }} | ${{ inputs.APP_HOST_URL }}
@@ -224,7 +209,6 @@ jobs:
           else
             echo "$route_name FOUND: Cleaning resources..."
             oc delete route $route_name
-            echo "DELETED route:  $route_name"
           fi
 
       - name: 🧹️ Clean ${{ inputs.APP }}-secrets
@@ -235,7 +219,6 @@ jobs:
           else
             echo "${{ inputs.APP }} FOUND: Cleaning resources..."
             oc delete secret ${{ inputs.APP }}-secrets
-            echo "DELETED secret ${{ inputs.APP }}-secrets"
           fi
 
       - name: 🧹️ Clean Backups
@@ -246,5 +229,4 @@ jobs:
           else
             echo "file-backup-data FOUND: Cleaning resources..."
             oc delete pvc file-backup-data
-            echo "DELETED pvc file-backup-data"
           fi
