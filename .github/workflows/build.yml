@@ -145,6 +145,7 @@ jobs:
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
     outputs:
       APP: ${{ steps.dotenv.outputs.APP }}
+      IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
       WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
       DB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.DB_DEPLOYMENT_NAME }}
       PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
@@ -200,6 +201,7 @@ jobs:
       APP_HOST_URL: ${{ needs.build-images.outputs.APP_HOST_URL }}
       BUILD_NAMESPACE: ${{ needs.build-images.outputs.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ needs.build-images.outputs.DEPLOY_NAMESPACE }}
+      IMAGE_REPO: ${{ needs.build-images.outputs.IMAGE_REPO }}
       BRANCH: ${{ needs.build-images.outputs.BRANCH }}
 
   notify:

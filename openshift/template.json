@@ -174,7 +174,7 @@
           "spec": {
             "containers": [
               {
-                "image": "${IMAGE_REGISTRY}${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
+                "image": "${IMAGE_REPO}${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
                 "name": "${PHP_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
@@ -593,8 +593,8 @@
     {
       "description": "Image registry",
       "displayName": "Image Registry",
-      "name": "IMAGE_REGISTRY",
-      "value": "image-registry.openshift-image-registry.svc:5000"
+      "name": "IMAGE_REPO",
+      "value": "image-registry.openshift-image-registry.svc:5000/"
     },
     {
       "description": "Build namespace.",
