@@ -1,6 +1,10 @@
 test -n "$DEPLOY_NAMESPACE"
 test -n "$BRANCH"
 echo "Current namespace is $DEPLOY_NAMESPACE"
+
+# Create ConfigMaps
+oc create configmap $WEB_DEPLOYMENT_NAME-env --from-file=./config/nginx/default.conf
+
 oc -n $DEPLOY_NAMESPACE process -f openshift/template.json \
       -p APP_NAME=$APP \
       -p BUILD_TAG=$BUILD_TAG \
