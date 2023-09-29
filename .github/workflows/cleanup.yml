@@ -186,9 +186,9 @@ jobs:
             oc delete configmap $configmap_name
             echo "DELETED configmap $configmap_name"
           fi
-          if ! [[ `oc describe pvc env-data 2>&1` =~ "NotFound" ]]; then
-            oc delete pvc env-data
-            echo "DELETED pvc env-data"
+          if ! [[ `oc describe pvc moodle-env 2>&1` =~ "NotFound" ]]; then
+            oc delete pvc moodle-env
+            echo "DELETED pvc moodle-env"
           fi
 
       - name: 🧹️ Clean ${{ inputs.CRON_DEPLOYMENT_NAME }}

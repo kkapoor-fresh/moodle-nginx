@@ -121,23 +121,6 @@
       }
     },
     {
-      "kind": "PersistentVolumeClaim",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "env-data"
-      },
-      "spec": {
-        "accessModes": [
-          "ReadWriteMany"
-        ],
-        "resources": {
-          "requests": {
-            "storage": "250Mi"
-          }
-        }
-      }
-    },
-    {
       "apiVersion": "v1",
       "kind": "DeploymentConfig",
       "metadata": {
@@ -214,7 +197,7 @@
                     "name": "file-backup-data"
                   },
                   {
-                    "name": "env-data",
+                    "name": "moodle-env",
                     "mountPath": "/.env",
                     "subPath": ".env"
                   }
@@ -289,7 +272,7 @@
                 }
               },
               {
-                "name": "env-data",
+                "name": "moodle-env",
                 "configMap": {
                   "name": "${APP_NAME}-env",
                   "items": [
@@ -371,7 +354,7 @@
                     "name": "${APP_NAME}-data"
                   },
                   {
-                    "name": "env-data",
+                    "name": "moodle-env",
                     "mountPath": "/.env",
                     "subPath": ".env"
                   }
@@ -418,7 +401,7 @@
                 }
               },
               {
-                "name": "env-data",
+                "name": "moodle-env",
                 "configMap": {
                   "name": "${APP_NAME}-env",
                   "items": [
@@ -493,7 +476,7 @@
                     "name": "${APP_NAME}-data"
                   },
                   {
-                    "name": "env-data",
+                    "name": "moodle-env",
                     "mountPath": "/.env",
                     "subPath": ".env"
                   }
@@ -525,7 +508,7 @@
                 }
               },
               {
-                "name": "env-data",
+                "name": "moodle-env",
                 "configMap": {
                   "name": "${WEB_DEPLOYMENT_NAME}-env",
                   "items": [
