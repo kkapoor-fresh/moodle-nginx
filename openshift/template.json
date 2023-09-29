@@ -50,6 +50,24 @@
       }
     },
     {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "name": "${PHP_DEPLOYMENT_NAME}"
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "${PHP_DEPLOYMENT_NAME}",
+            "port": 9000
+          }
+        ],
+        "selector": {
+          "deploymentconfig": "${PHP_DEPLOYMENT_NAME}"
+        }
+      }
+    },
+    {
 			"apiVersion": "v1",
 			"kind": "Route",
 			"metadata": {
