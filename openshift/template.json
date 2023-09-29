@@ -197,7 +197,7 @@
                     "name": "file-backup-data"
                   },
                   {
-                    "name": "moodle-env",
+                    "name": "${APP_NAME}-env",
                     "mountPath": ".env",
                     "subPath": ".env"
                   }
@@ -272,13 +272,13 @@
                 }
               },
               {
-                "name": "moodle-env",
+                "name": "${APP_NAME}-env",
                 "configMap": {
                   "name": "${APP_NAME}-env",
                   "items": [
                     {
                       "key": ".env",
-                      "path": ".env"
+                      "path": "./.env"
                     }
                   ]
                 }
@@ -354,7 +354,7 @@
                     "name": "${APP_NAME}-data"
                   },
                   {
-                    "name": "moodle-env",
+                    "name": "${APP_NAME}-env",
                     "mountPath": ".env",
                     "subPath": ".env"
                   }
@@ -401,13 +401,13 @@
                 }
               },
               {
-                "name": "moodle-env",
+                "name": "${APP_NAME}-env",
                 "configMap": {
                   "name": "${APP_NAME}-env",
                   "items": [
                     {
                       "key": ".env",
-                      "path": ".env"
+                      "path": "./.env"
                     }
                   ]
                 }
@@ -476,7 +476,7 @@
                     "name": "${APP_NAME}-data"
                   },
                   {
-                    "name": "moodle-env",
+                    "name": "${APP_NAME}-env",
                     "mountPath": ".env",
                     "subPath": ".env"
                   }
@@ -508,13 +508,13 @@
                 }
               },
               {
-                "name": "moodle-env",
+                "name": "${APP_NAME}-env",
                 "configMap": {
-                  "name": "${WEB_DEPLOYMENT_NAME}-env",
+                  "name": "${APP_NAME}-env",
                   "items": [
                     {
                       "key": ".env",
-                      "path": ".env"
+                      "path": "./.env"
                     }
                   ]
                 }
