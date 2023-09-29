@@ -138,7 +138,7 @@ jobs:
       - name: Deploy Environment ConfigMap (moodle-env)
         if: success()
         run: |
-          oc create configmap moodle-env --from-file=/.env=./example.env
+          oc create configmap moodle-env --from-file=.env=./example.env
 
       - name: 🚀 Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
         if: success()
