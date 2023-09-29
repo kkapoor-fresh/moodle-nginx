@@ -30,6 +30,7 @@ on:
       - '**.ini'
       - '**.php'
       - '**.yml'
+      - '**.json'
       - 'php-fpm-healthcheck.sh'
   pull_request:
     branches:
