@@ -314,7 +314,7 @@
               "from": {
                 "kind": "ImageStreamTag",
                 "name": "${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}",
-                "namespace": "${DEPLOY_NAMESPACE}"
+                "namespace": "${BUILD_NAMESPACE}"
               }
             }
           },
@@ -443,7 +443,7 @@
               "from": {
                 "kind": "ImageStreamTag",
                 "name": "${CRON_DEPLOYMENT_NAME}:${BUILD_TAG}",
-                "namespace": "${DEPLOY_NAMESPACE}"
+                "namespace": "${BUILD_NAMESPACE}"
               }
             }
           },
@@ -540,20 +540,6 @@
           }
         },
         "triggers": [
-          {
-            "type": "ImageChange",
-            "imageChangeParams": {
-              "automatic": true,
-              "containerNames": [
-                "${WEB_DEPLOYMENT_NAME}"
-              ],
-              "from": {
-                "kind": "ImageStreamTag",
-                "name": "${WEB_IMAGE}",
-                "namespace": "${DEPLOY_NAMESPACE}"
-              }
-            }
-          },
           {
             "type": "ConfigChange"
           }
