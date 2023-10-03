@@ -121,6 +121,26 @@
       }
     },
     {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "nfs": {
+        "path": "${MOODLE_APP_MOUNT_PATH}"
+      },
+      "metadata": {
+        "name": "${APP_NAME}-app-data"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${MOODLE_VOLUME_CAPACITY}"
+          }
+        }
+      }
+    },
+    {
       "kind": "PersistentVolumeClaim",
       "apiVersion": "v1",
       "metadata": {
@@ -278,6 +298,13 @@
                 }
               },
               {
+                "name": "${APP_NAME}-app-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${APP_NAME}-app-data",
+                  "defaultMode": 755
+                }
+              },
+              {
                 "name": "file-backup-data",
                 "persistentVolumeClaim": {
                   "claimName": "file-backup-data",
@@ -415,6 +442,13 @@
                 }
               },
               {
+                "name": "${APP_NAME}-app-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${APP_NAME}-app-data",
+                  "defaultMode": 755
+                }
+              },
+              {
                 "name": "${CRON_DEPLOYMENT_NAME}-config",
                 "configMap": {
                   "name": "${CRON_DEPLOYMENT_NAME}-config",
@@ -533,6 +567,13 @@
                 }
               },
               {
+                "name": "${APP_NAME}-app-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${APP_NAME}-app-data",
+                  "defaultMode": 755
+                }
+              },
+              {
                 "name": "${WEB_DEPLOYMENT_NAME}-config",
                 "configMap": {
                   "name": "${WEB_DEPLOYMENT_NAME}-config",
@@ -643,8 +684,15 @@
     },
     {
       "description": "Path where the persistent volume will be mounted",
-      "displayName": "Mount Path",
+      "displayName": "Moodle-data Mount Path",
       "name": "MOODLE_DATA_MOUNT_PATH",
+      "required": true,
+      "value": "/var/moodledata"
+    },
+    {
+      "description": "Path where the persistent volume for web will be mounted",
+      "displayName": "Moodle app Mount Path",
+      "name": "MOODLE_APP_MOUNT_PATH",
       "required": true,
       "value": "/var/www/html"
     },

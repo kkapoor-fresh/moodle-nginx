@@ -36,7 +36,7 @@ $CFG->dboptions =  array (
 );
 
 if (php_sapi_name() == "cli") {
-    $CFG->wwwroot = '/var/www/moodledata';
+    $CFG->wwwroot = '/var/www/html';
 } else {
     $protocol = (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
         && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https://' : 'http://';
@@ -46,7 +46,7 @@ if (php_sapi_name() == "cli") {
     $CFG->wwwroot = $requested_site_url;
 }
 
-$CFG->dataroot  = '/var/www/moodledata';
+$CFG->dataroot  = '/var/moodledata';
 $CFG->admin     = 'admin';
 // $CFG->alternateloginurl  = (isset($_ENV['ALTERNATE_LOGIN_URL'])) ? $_ENV['ALTERNATE_LOGIN_URL'] : '';
 
