@@ -202,7 +202,7 @@
                 },
                 "ports": [
                   {
-                    "containerPort": 8080
+                    "containerPort": 9000
                   }
                 ],
                 "volumeMounts": [
@@ -488,6 +488,11 @@
                 "name": "${WEB_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
+                "ports": [
+                  {
+                    "containerPort": 8081
+                  }
+                ],
                 "volumeMounts": [
                   {
                     "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
