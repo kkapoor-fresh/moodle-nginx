@@ -36,7 +36,7 @@ done
 
 # Migrate build files to web root (/app/public to /var/www/html)
 echo "Copying build files to web root on $PHP_DEPLOYMENT_NAME"
-oc cp $PHP_DEPLOYMENT_NAME:/app/public $PHP_DEPLOYMENT_NAME:/var/www/html -n $DEPLOY_NAMESPACE
+oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'cp -ru /app/public/* /var/www/html' -n $DEPLOY_NAMESPACE
 
 echo "Rolling out $CRON_DEPLOYMENT_NAME..."
 
