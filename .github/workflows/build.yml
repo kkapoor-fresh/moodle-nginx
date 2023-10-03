@@ -72,7 +72,7 @@ jobs:
     name: 🔨 Build Application Images (${{ github.ref_name }})
     needs: [checkEnv]
     runs-on: ubuntu-latest
-    if: (${{ vars.SKIP_BUILD == 'false' }} || ${{ vars.SKIP_BUILD == true }}) && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+    if: (${{ vars.SKIP_BUILD == 'false' }} || ${{ vars.SKIP_BUILD == false }}) && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     steps:
       # Checkout the PR branch
       - name: 📤 Checkout Target Branch
@@ -98,7 +98,7 @@ jobs:
       # Build the PHP image
       - name: 🚧 Build PHP
         id: build-php
-        if: ${{ vars.SKIP_BUILD == 'false' }}
+        if: ${{ vars.SKIP_BUILD != 'false' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
@@ -123,7 +123,7 @@ jobs:
       # Build the Cron image
       - name: 🚧 Build Cron
         id: build-cron
-        if: ${{ vars.SKIP_BUILD == 'false' }}
+        if: ${{ vars.SKIP_BUILD != 'false' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
