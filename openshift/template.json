@@ -646,7 +646,7 @@
       "displayName": "Mount Path",
       "name": "MOODLE_DATA_MOUNT_PATH",
       "required": true,
-      "value": "/var/www/html/moodledata"
+      "value": "/var/www/html"
     },
     {
       "description": "The OpenShift Namespace where the ImageStream resides.",

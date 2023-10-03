@@ -34,7 +34,7 @@ objects:
              image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}
              volumeMounts:
                - name: moodle-data
-                 mountPath: /var/www/html/moodledata
+                 mountPath: /var/www/html
                - name: moodle-env
                  mountPath: .env
                  subPath: .env
