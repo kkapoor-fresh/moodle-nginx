@@ -1,0 +1,59 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: migrate-build-files
+objects:
+ - apiVersion: batch/v1
+   kind: Job
+   metadata:
+     name: migrate-build-files
+     namespace: e66ac2-dev
+   spec:
+     selector: {}
+     template:
+       metadata:
+         name: migrate-build-files
+       spec:
+         volumes:
+           - name: moodle-data
+             persistentVolumeClaim:
+               claimName: moodle-data
+           - name: cron-config
+             configMap:
+               name: cron-config
+               defaultMode: 420
+           - name: moodle-env
+             configMap:
+               name: moodle-env
+               items:
+                 - key: .env
+                   path: ./.env
+               defaultMode: 420
+         containers:
+           - name: migrate-build-files-job
+             image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}
+             volumeMounts:
+               - name: moodle-data
+                 mountPath: /var/www/html/moodledata
+               - name: moodle-env
+                 mountPath: .env
+                 subPath: .env
+             command:
+               - bash
+               - "-c"
+               - |
+                echo "Migrating build fiiles to persistent volume"
+                cp -ru /app/public/* /var/www/html
+         restartPolicy: Never
+parameters:
+  - name: IMAGE_REPO
+    required: true
+  - name: BUILD_NAMESPACE
+    required: true
+  - name: PHP_DEPLOYMENT_NAME
+    required: true
+  - name: IMAGE_NAME
+    required: true
+  - name: BUILD_TAG
+    required: true
+    value: "dev"

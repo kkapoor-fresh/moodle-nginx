@@ -23,13 +23,17 @@ oc rollout latest dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 oc rollout latest dc/$CRON_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 
 # Check PHP deployment rollout status every 10 seconds (max 10 minutes) until complete.
-# ATTEMPTS=0
-# ROLLOUT_STATUS_CMD="oc rollout status dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE"
-# until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
-#   $ROLLOUT_STATUS_CMD
-#   ATTEMPTS=$((attempts + 1))
-#   sleep 10
-# done
+ATTEMPTS=0
+ROLLOUT_STATUS_CMD="oc rollout status dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE"
+until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
+  $ROLLOUT_STATUS_CMD
+  ATTEMPTS=$((attempts + 1))
+  sleep 10
+done
+
+# Migrate build files to web root (/app/public to /var/www/html)
+echo "Copying build files to web root on $PHP_DEPLOYMENT_NAME"
+oc cp $PHP_DEPLOYMENT_NAME:/app/public $PHP_DEPLOYMENT_NAME:/var/www/html -n $DEPLOY_NAMESPACE
 
 # Check CRON deployment rollout status every 10 seconds (max 10 minutes) until complete.
 # ATTEMPTS=0
@@ -40,7 +44,6 @@ oc rollout latest dc/$CRON_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 #   sleep 10
 # done
 
-oc project $DEPLOY_NAMESPACE
 echo "Listing pods..."
 
 # oc get pods|grep $PHP_DEPLOYMENT_NAME
@@ -49,6 +52,7 @@ echo "Listing pods..."
 # sleep 20
 # podNames=$(oc get pods -l deploymentconfig=$PHP_DEPLOYMENT_NAME --field-selector=status.phase=Running -o name)
 # pwd
+echo "$PHP_DEPLOYMENT_NAME is deployed"
 echo "deploy1=$PHP_DEPLOYMENT_NAME is deployed" >> $GITHUB_OUTPUT
 
 # oc get pods|grep $CRON_DEPLOYMENT_NAME
@@ -57,4 +61,5 @@ echo "deploy1=$PHP_DEPLOYMENT_NAME is deployed" >> $GITHUB_OUTPUT
 # sleep 20
 # podNames=$(oc get pods -l deploymentconfig=$CRON_DEPLOYMENT_NAME --field-selector=status.phase=Running -o name)
 # pwd
+echo "$CRON_DEPLOYMENT_NAME is deployed"
 echo "deploy2=$CRON_DEPLOYMENT_NAME is deployed" >> $GITHUB_OUTPUT
