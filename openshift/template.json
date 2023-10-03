@@ -490,7 +490,7 @@
                 "imagePullPolicy": "Always",
                 "ports": [
                   {
-                    "containerPort": 8081
+                    "containerPort": 8080
                   }
                 ],
                 "volumeMounts": [
