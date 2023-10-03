@@ -182,7 +182,7 @@
                 "livenessProbe": {
                   "exec": {
                     "command": [
-                      "php-fpm-healthcheck.sh --listen-queue=10 --accepted-conn=5000 || kill 1"
+                      "php-fpm-healthcheck --listen-queue=10 --accepted-conn=5000 || kill 1"
                     ]
                   },
                   "initialDelaySeconds": 90,
@@ -194,7 +194,7 @@
                 "readinessProbe": {
                   "exec": {
                     "command": [
-                      "php-fpm-healthcheck.sh"
+                      "php-fpm-healthcheck"
                     ]
                   },
                   "initialDelaySeconds": 10,
@@ -273,13 +273,15 @@
               {
                 "name": "${APP_NAME}-data",
                 "persistentVolumeClaim": {
-                  "claimName": "${APP_NAME}-data"
+                  "claimName": "${APP_NAME}-data",
+                  "defaultMode": 755
                 }
               },
               {
                 "name": "file-backup-data",
                 "persistentVolumeClaim": {
-                  "claimName": "file-backup-data"
+                  "claimName": "file-backup-data",
+                  "defaultMode": 755
                 }
               },
               {
@@ -362,7 +364,7 @@
                 "livenessProbe": {
                   "exec": {
                     "command": [
-                      "php-fpm-healthcheck.sh --listen-queue=10 --accepted-conn=5000 || kill 1"
+                      "php-fpm-healthcheck --listen-queue=10 --accepted-conn=5000 || kill 1"
                     ]
                   }
                 },
@@ -408,7 +410,8 @@
               {
                 "name": "${APP_NAME}-data",
                 "persistentVolumeClaim": {
-                  "claimName": "${APP_NAME}-data"
+                  "claimName": "${APP_NAME}-data",
+                  "defaultMode": 755
                 }
               },
               {
@@ -525,7 +528,8 @@
               {
                 "name": "${APP_NAME}-data",
                 "persistentVolumeClaim": {
-                  "claimName": "${APP_NAME}-data"
+                  "claimName": "${APP_NAME}-data",
+                  "defaultMode": 755
                 }
               },
               {

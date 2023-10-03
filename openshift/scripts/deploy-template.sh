@@ -19,21 +19,28 @@ oc -n $DEPLOY_NAMESPACE process -f openshift/template.json \
       -p PHP_DEPLOYMENT_NAME=$PHP_DEPLOYMENT_NAME | \
 oc -n $DEPLOY_NAMESPACE apply -f -
 
+echo "Rolling out $PHP_DEPLOYMENT_NAME..."
+
 oc rollout latest dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
-oc rollout latest dc/$CRON_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 
 # Check PHP deployment rollout status every 10 seconds (max 10 minutes) until complete.
 ATTEMPTS=0
+WAIT_TIME=5
 ROLLOUT_STATUS_CMD="oc rollout status dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE"
-until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
+until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 120 ]; do
   $ROLLOUT_STATUS_CMD
   ATTEMPTS=$((attempts + 1))
-  sleep 10
+  echo "$(($ATTEMPTS * $WAIT_TIME))..."
+  sleep $WAIT_TIME
 done
 
 # Migrate build files to web root (/app/public to /var/www/html)
 echo "Copying build files to web root on $PHP_DEPLOYMENT_NAME"
 oc cp $PHP_DEPLOYMENT_NAME:/app/public $PHP_DEPLOYMENT_NAME:/var/www/html -n $DEPLOY_NAMESPACE
+
+echo "Rolling out $CRON_DEPLOYMENT_NAME..."
+
+oc rollout latest dc/$CRON_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 
 # Check CRON deployment rollout status every 10 seconds (max 10 minutes) until complete.
 # ATTEMPTS=0
