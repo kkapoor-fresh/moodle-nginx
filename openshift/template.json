@@ -231,6 +231,10 @@
                     "name": "${APP_NAME}-data"
                   },
                   {
+                    "mountPath": "${MOODLE_APP_MOUNT_PATH}",
+                    "name": "${APP_NAME}-app-data"
+                  },
+                  {
                     "mountPath": "/tmp/file-backups",
                     "name": "file-backup-data"
                   },
@@ -401,6 +405,10 @@
                     "name": "${APP_NAME}-data"
                   },
                   {
+                    "mountPath": "${MOODLE_APP_MOUNT_PATH}",
+                    "name": "${APP_NAME}-app-data"
+                  },
+                  {
                     "name": "${APP_NAME}-env",
                     "mountPath": ".env",
                     "subPath": ".env"
@@ -534,6 +542,10 @@
                   {
                     "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
                     "name": "${APP_NAME}-data"
+                  },
+                  {
+                    "mountPath": "${MOODLE_APP_MOUNT_PATH}",
+                    "name": "${APP_NAME}-app-data"
                   },
                   {
                     "name": "${APP_NAME}-env",
