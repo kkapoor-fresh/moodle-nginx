@@ -146,6 +146,9 @@ jobs:
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
     outputs:
       APP: ${{ steps.dotenv.outputs.APP }}
+      DB_NAME: ${{ steps.dotenv.outputs.DB_NAME }}
+      DB_USER: ${{ steps.dotenv.outputs.DB_USER }}
+      DB_PASSWORD: ${{ steps.dotenv.outputs.DB_PASSWORD }}
       IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
       WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
       DB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.DB_DEPLOYMENT_NAME }}
