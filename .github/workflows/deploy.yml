@@ -12,6 +12,15 @@ on:
       APP:
         required: true
         type: string
+      DB_NAME:
+        required: true
+        type: string
+      DB_USER:
+        required: true
+        type: string
+      DB_PASSWORD:
+        required: true
+        type: string
       BASE_IMAGE_TAG:
         required: true
         type: string
