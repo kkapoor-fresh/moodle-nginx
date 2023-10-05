@@ -231,6 +231,10 @@
                     "name": "${APP_NAME}-data"
                   },
                   {
+                    "mountPath": "${MOODLE_APP_MOUNT_PATH}/config.php",
+                    "name": "${APP_NAME}-config"
+                  },
+                  {
                     "mountPath": "${MOODLE_APP_MOUNT_PATH}",
                     "name": "${APP_NAME}-app-data"
                   },
