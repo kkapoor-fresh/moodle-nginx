@@ -323,6 +323,13 @@
                 }
               },
               {
+                "name": "${APP_NAME}-config",
+                "configMap": {
+                  "name": "${APP_NAME}-config",
+                  "defaultMode": 420
+                }
+              },
+              {
                 "name": "${APP_NAME}-env",
                 "configMap": {
                   "name": "${APP_NAME}-env",
@@ -403,6 +410,10 @@
                   {
                     "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
                     "name": "${APP_NAME}-data"
+                  },
+                  {
+                    "mountPath": "${MOODLE_APP_MOUNT_PATH}/config.php",
+                    "name": "${APP_NAME}-config"
                   },
                   {
                     "mountPath": "${MOODLE_APP_MOUNT_PATH}",
@@ -761,6 +772,24 @@
       "displayName": "CRON CPU Limit",
       "name": "CRON_CPU_LIMIT",
       "value": "150m"
+    },
+    {
+      "description": "Database password.",
+      "displayName": "DB Password",
+      "name": "DB_PASSWORD",
+      "value": "moodle"
+    },
+    {
+      "description": "Database user.",
+      "displayName": "DB User",
+      "name": "DB_USER",
+      "value": "moodle"
+    },
+    {
+      "description": "Database name.",
+      "displayName": "DB Name",
+      "name": "DB_NAME",
+      "value": "moodle"
     }
   ]
 }

@@ -172,6 +172,7 @@ jobs:
         id: clean-php
         run: |
           configmap_name="${{ inputs.PHP_DEPLOYMENT_NAME }}-config"
+          app_configmap_name="${{ inputs.APP }}-config"
           if [[ `oc describe dc ${{ inputs.PHP_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.PHP_DEPLOYMENT_NAME }} NOT FOUND: Skipping..."
           else
@@ -185,6 +186,12 @@ jobs:
           else
             oc delete configmap $configmap_name
             echo "DELETED configmap $configmap_name"
+          fi
+          if [[ `oc describe configmap $app_configmap_name 2>&1` =~ "NotFound" ]]; then
+            echo "$app_configmap_name NOT FOUND: Skipping..."
+          else
+            oc delete configmap $app_configmap_name
+            echo "DELETED configmap $app_configmap_name"
           fi
           if ! [[ `oc describe pvc moodle-env 2>&1` =~ "NotFound" ]]; then
             oc delete pvc moodle-env

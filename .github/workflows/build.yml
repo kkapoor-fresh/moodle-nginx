@@ -189,6 +189,9 @@ jobs:
     with:
       BASE_IMAGE_TAG: ${{ github.ref_name }}
       APP: ${{ needs.build-images.outputs.APP }}
+      DB_NAME: ${{ needs.build-images.outputs.DB_NAME }}
+      DB_USER: ${{ needs.build-images.outputs.DB_USER }}
+      DB_PASSWORD: ${{ needs.build-images.outputs.DB_PASSWORD }}
       WEB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.WEB_DEPLOYMENT_NAME }}
       WEB_IMAGE: ${{ needs.build-images.outputs.WEB_IMAGE }}
       PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}

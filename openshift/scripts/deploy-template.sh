@@ -4,9 +4,13 @@ echo "Current namespace is $DEPLOY_NAMESPACE"
 
 # Create ConfigMaps
 oc create configmap $WEB_DEPLOYMENT_NAME-config --from-file=./config/nginx/default.conf
+oc create configmap $APP-config --from-file=./config/moodle/config.php
 
 oc -n $DEPLOY_NAMESPACE process -f openshift/template.json \
       -p APP_NAME=$APP \
+      -p APP_NAME=$DB_USER \
+      -p APP_NAME=$DB_NAME \
+      -p APP_NAME=$DB_PASSWORD \
       -p BUILD_TAG=$BUILD_TAG \
       -p SITE_URL=$APP_HOST_URL \
       -p BUILD_NAMESPACE=$BUILD_NAMESPACE \
