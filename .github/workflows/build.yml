@@ -160,6 +160,7 @@ jobs:
       PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
       CRON_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
       CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
+      REDIS_REPO: ${{ steps.dotenv.outputs.REDIS_REPO }}
       REDIS_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }}
       REDIS_IMAGE: ${{ steps.dotenv.outputs.REDIS_IMAGE }}
       WEB_IMAGE: ${{ steps.dotenv.outputs.WEB_IMAGE }}
@@ -207,6 +208,7 @@ jobs:
       DB_IMAGE: ${{ needs.build-images.outputs.DB_IMAGE }}
       CRON_IMAGE: ${{ needs.build-images.outputs.CRON_IMAGE }}
       CRON_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.CRON_DEPLOYMENT_NAME }}
+      REDIS_REPO: ${{ needs.build-images.outputs.REDIS_REPO }}
       REDIS_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.REDIS_DEPLOYMENT_NAME }}
       REDIS_IMAGE: ${{ needs.build-images.outputs.REDIS_IMAGE }}
       APP_HOST_URL: ${{ needs.build-images.outputs.APP_HOST_URL }}

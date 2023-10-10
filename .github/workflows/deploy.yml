@@ -63,6 +63,9 @@ on:
       CRON_DEPLOYMENT_NAME:
         required: true
         type: string
+      REDIS_REPO:
+        required: true
+        type: string
       REDIS_DEPLOYMENT_NAME:
         required: true
         type: string
