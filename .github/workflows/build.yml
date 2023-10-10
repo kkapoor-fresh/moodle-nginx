@@ -101,7 +101,7 @@ jobs:
           keys-case: upper
 
       # Build the PHP image
-      - name: 🚧 Build PHP (SKIP: ${{ vars.SKIP_BUILD }})
+      - name: 🚧 Build PHP (SKIP? ${{ vars.SKIP_BUILD }})
         id: build-php
         if: success() && ${{ vars.SKIP_BUILD == 'false' }}
         working-directory: "./"
@@ -127,7 +127,7 @@ jobs:
           CLEAN_BUILDS_TEXT: ${{ needs.checkEnv.outputs.CLEAN_BUILDS_TEXT }}
 
       # Build the Cron image
-      - name: 🚧 Build Cron (SKIP: ${{ vars.SKIP_BUILD }})
+      - name: 🚧 Build Cron (SKIP? ${{ vars.SKIP_BUILD }})
         id: build-cron
         if: success() && ${{ vars.SKIP_BUILD == 'false' }}
         working-directory: "./"
