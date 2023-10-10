@@ -154,15 +154,15 @@ jobs:
         run: |
           if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning deployment..."
-            helm repo add bitnami https://charts.bitnami.com/bitnami
+            helm repo add bitnami ${{ inputs.REDIS_REPO }}
             helm repo update
             oc apply -f ./config/redis/redis-config.yml
             helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_IMAGE }} --set master.podSecurityContext.enabled=false,master.containerSecurityContext.enabled=false -f ./config/redis/values.yml
           else
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Installation FOUND: Updating..."
-            helm repo add bitnami https://charts.bitnami.com/bitnami
+            helm repo add bitnami ${{ inputs.REDIS_REPO }}
             helm repo update
-            helm upgrade redis bitnami/redis
+            helm upgrade redis ${{ inputs.REDIS_IMAGE }}
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Updates complete."
           fi
 

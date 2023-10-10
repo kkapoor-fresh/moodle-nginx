@@ -1,32 +1,25 @@
 <?php  // Moodle configuration file
-
-// require_once('/vendor/autoload.php');
-
-// $dotenv = Dotenv\Dotenv::createImmutable('/');
-// $dotenv->load();
-
 unset($CFG);
 global $CFG;
 $CFG = new stdClass();
 
 $CFG->dbtype    = 'mariadb';
 $CFG->dblibrary = 'native';
-$CFG->dbhost    = 'DB_HOST';
-$CFG->dbname    = 'DB_NAME';
-$CFG->dbuser    = 'DB_USER';
-$CFG->dbpass    = 'DB_PASSWORD';
+$CFG->dbhost    = 'db';
+$CFG->dbname    = 'moodle';
+$CFG->dbuser    = 'moodle';
+$CFG->dbpass    = 'moodle';
 $CFG->moodleappdir    = '/var/www/html';
 $CFG->prefix    = '';
 $CFG->tool_generator_users_password = 'moodle-gen-PWd';
 
-$CFG->session_redis_host = 'redis';
-$CFG->session_handler_class = '\core\session\redis';
-$CFG->session_redis_port = 6379; // Optional if TCP. For socket use -1
-$CFG->session_redis_database = 0; // Optional, default is db 0.
-// $CFG->session_redis_prefix = 'sess_'; // Optional, default is don't set one.
-$CFG->session_redis_acquire_lock_timeout = 120;
-$CFG->session_redis_lock_expire = 7200;
-$CFG->session_redis_serializer_use_igbinary = true;
+// $CFG->session_redis_host = 'redis';
+// $CFG->session_handler_class = '\core\session\redis';
+// $CFG->session_redis_port = 6379; // Optional if TCP. For socket use -1
+// $CFG->session_redis_database = 0; // Optional, default is db 0.
+// $CFG->session_redis_acquire_lock_timeout = 120;
+// $CFG->session_redis_lock_expire = 7200;
+// $CFG->session_redis_serializer_use_igbinary = true;
 
 $CFG->dboptions =  array (
   'dbpersist' => 0,
