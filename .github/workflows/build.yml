@@ -102,7 +102,7 @@ jobs:
       # Build the PHP image
       - name: 🚧 Build PHP
         id: build-php
-        if: ${{ vars.SKIP_BUILD != 'false' }}
+        if: success() && ${{ vars.SKIP_BUILD == 'false' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
@@ -123,11 +123,12 @@ jobs:
           IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
           IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
+          CLEAN_BUILDS_TEXT: ${{ needs.checkEnv.outputs.CLEAN_BUILDS_TEXT }}
 
       # Build the Cron image
       - name: 🚧 Build Cron
         id: build-cron
-        if: ${{ vars.SKIP_BUILD != 'false' }}
+        if: success() && ${{ vars.SKIP_BUILD == 'false' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
@@ -174,7 +175,7 @@ jobs:
     name: 🧹️ Clean Build ( ${{ needs.checkEnv.CLEAN_BUILDS_TEXT }} )
     uses: ./.github/workflows/cleanup.yml
     needs: [checkEnv, build-images]
-    if: ${{ needs.checkEnv.CLEAN_BUILDS_TEXT != 'FALSE' }}
+    if: success() && ${{ needs.checkEnv.CLEAN_BUILDS_TEXT != 'FALSE' }}
     secrets: inherit
     with:
       APP: ${{ needs.build-images.outputs.APP }}
