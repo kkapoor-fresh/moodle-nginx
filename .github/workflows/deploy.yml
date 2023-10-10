@@ -152,17 +152,15 @@ jobs:
         run: |
           oc create configmap moodle-env --from-file=.env=./example.env
 
-      - name: 🚀 Deploy Redis | ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
+      - name: 🚀 Deploy ${{ inputs.REDIS_DEPLOYMENT_NAME }} | ${{ inputs.REDIS_IMAGE }}
         if: success()
         run: |
           if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME  }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} NOT FOUND: Beginning ${{ inputs.REDIS_DEPLOYMENT_NAME  }} deployment..."
-            helm install redis oci://registry-1.docker.io/bitnamicharts/redis-cluster --set redis.readinessProbe.enabled=false,redis.livenessProbe.enabled=false,podSecurityContext.enabled=false,containerSecurityContext.enabled=false,volumePermissions.containerSecurityContext.enabled=false -f ./config/redis/redis-cluster-values.yml
+            helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_REPO }}${{ inputs.REDIS_IMAGE }} --set redis.readinessProbe.enabled=false,redis.livenessProbe.enabled=false,podSecurityContext.enabled=false,containerSecurityContext.enabled=false,volumePermissions.containerSecurityContext.enabled=false -f ./config/redis/redis-cluster-values.yml
           else
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Installation FOUND: Updating..."
-            helm repo add bitnami ${{ inputs.REDIS_REPO }}
-            helm repo update
-            helm upgrade redis ${{ inputs.REDIS_IMAGE }}
+            helm upgrade ${{ inputs.REDIS_DEPLOYMENT_NAME }}  ${{ inputs.REDIS_REPO }}${{ inputs.REDIS_IMAGE }}
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Updates complete."
           fi
 

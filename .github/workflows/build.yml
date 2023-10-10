@@ -61,7 +61,8 @@ jobs:
           echo "-----------------------"
           echo Deploy to Namespace: ${{ env.DEPLOY_NAMESPACE }}
           echo URL: https://${{ env.APP_HOST_URL }}
-          echo clean_builds: ${{ env.CLEAN_BUILDS }}
+          echo CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}
+          echo SKIP_BUILD: ${{ vars.SKIP_BUILD }}
           if [[ "${{ env.CLEAN_BUILDS }}" != "false" ]]; then
             echo "CLEAN_BUILDS is not false, setting CLEAN_BUILDS_TEXT to TRUE"
             echo CLEAN_BUILDS_TEXT="TRUE" >> $GITHUB_OUTPUT
@@ -100,7 +101,7 @@ jobs:
           keys-case: upper
 
       # Build the PHP image
-      - name: 🚧 Build PHP
+      - name: 🚧 Build PHP (SKIP: ${{ vars.SKIP_BUILD }})
         id: build-php
         if: success() && ${{ vars.SKIP_BUILD == 'false' }}
         working-directory: "./"
@@ -126,7 +127,7 @@ jobs:
           CLEAN_BUILDS_TEXT: ${{ needs.checkEnv.outputs.CLEAN_BUILDS_TEXT }}
 
       # Build the Cron image
-      - name: 🚧 Build Cron
+      - name: 🚧 Build Cron (SKIP: ${{ vars.SKIP_BUILD }})
         id: build-cron
         if: success() && ${{ vars.SKIP_BUILD == 'false' }}
         working-directory: "./"

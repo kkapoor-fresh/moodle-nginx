@@ -33,6 +33,64 @@
     },
     {
       "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "nfs": {
+        "path": "${MOODLE_DATA_MOUNT_PATH}"
+      },
+      "metadata": {
+        "name": "${APP_NAME}-data"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${MOODLE_VOLUME_CAPACITY}"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "nfs": {
+        "path": "${MOODLE_APP_MOUNT_PATH}"
+      },
+      "metadata": {
+        "name": "${APP_NAME}-app-data"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${MOODLE_VOLUME_CAPACITY}"
+          }
+        }
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "file-backup-data"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${BACKUP_VOLUME_SIZE}"
+          }
+        },
+        "storageClassName": "netapp-file-backup"
+      }
+    },
+    {
+      "apiVersion": "v1",
       "kind": "Service",
       "metadata": {
         "name": "${WEB_DEPLOYMENT_NAME}"
@@ -100,64 +158,6 @@
         "wildcardPolicy": "None"
       }
 		},
-    {
-      "apiVersion": "v1",
-      "kind": "PersistentVolumeClaim",
-      "nfs": {
-        "path": "${MOODLE_DATA_MOUNT_PATH}"
-      },
-      "metadata": {
-        "name": "${APP_NAME}-data"
-      },
-      "spec": {
-        "accessModes": [
-          "ReadWriteMany"
-        ],
-        "resources": {
-          "requests": {
-            "storage": "${MOODLE_VOLUME_CAPACITY}"
-          }
-        }
-      }
-    },
-    {
-      "apiVersion": "v1",
-      "kind": "PersistentVolumeClaim",
-      "nfs": {
-        "path": "${MOODLE_APP_MOUNT_PATH}"
-      },
-      "metadata": {
-        "name": "${APP_NAME}-app-data"
-      },
-      "spec": {
-        "accessModes": [
-          "ReadWriteMany"
-        ],
-        "resources": {
-          "requests": {
-            "storage": "${MOODLE_VOLUME_CAPACITY}"
-          }
-        }
-      }
-    },
-    {
-      "kind": "PersistentVolumeClaim",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "file-backup-data"
-      },
-      "spec": {
-        "accessModes": [
-          "ReadWriteMany"
-        ],
-        "resources": {
-          "requests": {
-            "storage": "${BACKUP_VOLUME_SIZE}"
-          }
-        },
-        "storageClassName": "netapp-file-backup"
-      }
-    },
     {
       "apiVersion": "v1",
       "kind": "DeploymentConfig",
