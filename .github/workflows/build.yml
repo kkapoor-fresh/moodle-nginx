@@ -17,7 +17,7 @@ env:
   BRANCH: ${{ github.ref_name }}
   SOURCE_REPOSITORY_URL: "https://github.com/${{ github.repository }}"
   INSPECT_JOB_URL: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-  SKIP_BUILD_ENV: "${{ vars.SKIP_BUILD }}"
+  SKIP_BUILD_ENV: $SKIP_BUILD
 
   BUILD_ICON_URL: https://cdn-icons-png.flaticon.com/128/5110/5110294.png
   SUCCESS_ICON_URL: https://cdn-icons-png.flaticon.com/128/1356/1356479.png
@@ -70,8 +70,8 @@ jobs:
             echo "CLEAN_BUILDS is false, setting CLEAN_BUILDS_TEXT to FALSE"
             echo CLEAN_BUILDS_TEXT="FALSE" >> $GITHUB_OUTPUT
           fi
-          echo SKIP_BUILD: ${{ env.SKIP_BUILD }} OR "${{ env.SKIP_BUILD }}" OR $SKIP_BUILD_ENV OR ${{ env.SKIP_BUILD_ENV }}
-          if [[ "${{ env.SKIP_BUILD }}" == "YES" ]]; then
+          echo SKIP_BUILD: $SKIP_BUILD OR "${{ env.SKIP_BUILD_ENV }}" OR $SKIP_BUILD_ENV OR ${{ env.SKIP_BUILD_ENV }}
+          if [[ $SKIP_BUILD == "YES" ]]; then
             echo "SKIP_BUILD is TRUE, setting SKIP_BUILD_TEXT to TRUE"
             echo SKIP_BUILD_TEXT="TRUE" >> $GITHUB_OUTPUT
           else
