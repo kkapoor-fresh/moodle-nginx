@@ -822,7 +822,7 @@ cluster:
     addNodes: false
     ## @param cluster.update.currentNumberOfNodes Number of currently deployed Redis&reg; nodes
     ##
-    currentNumberOfNodes: 6
+    currentNumberOfNodes: 3
     ## @param cluster.update.currentNumberOfReplicas Number of currently deployed Redis&reg; replicas
     ##
     currentNumberOfReplicas: 1

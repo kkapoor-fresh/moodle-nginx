@@ -106,12 +106,16 @@ jobs:
           else
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME }} FOUND: Cleaning..."
             helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
-            echo "Uninstalled helm ${{ inputs.REDIS_DEPLOYMENT_NAME }}"
           fi
-          if [[ `oc describe configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-config 2>&1` =~ "NotFound" ]]; then
-            echo "${{ inputs.REDIS_DEPLOYMENT_NAME }}-config NOT FOUND: Skipping..."
+          if [[ `oc describe configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-redis-cluster-default 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME }}-redis-cluster-default NOT FOUND: Skipping..."
           else
-            oc delete configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-config
+            oc delete configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-redis-cluster-default
+          fi
+          if [[ `oc describe configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-redis-cluster-scripts 2>&1` =~ "NotFound" ]]; then
+            echo "${{ inputs.REDIS_DEPLOYMENT_NAME }}-redis-cluster-scripts NOT FOUND: Skipping..."
+          else
+            oc delete configmap ${{ inputs.REDIS_DEPLOYMENT_NAME }}-redis-cluster-scripts
           fi
 
       - name: 🧹️ Clean ${{ inputs.DB_DEPLOYMENT_NAME }}
