@@ -248,13 +248,13 @@ jobs:
             echo "DELETED secret ${{ inputs.APP }}-secrets"
           fi
 
-      - name: 🧹️ Clean Backups
-        id: clean-backups
-        run: |
-          if [[ `oc describe pvc file-backup-data 2>&1` =~ "NotFound" ]]; then
-            echo "file-backup-data NOT FOUND: Skipping..."
-          else
-            echo "file-backup-data FOUND: Cleaning resources..."
-            oc delete pvc file-backup-data
-            echo "DELETED pvc file-backup-data"
-          fi
+      # - name: 🧹️ Clean Backups
+      #   id: clean-backups
+      #   run: |
+      #     if [[ `oc describe pvc file-backup-data 2>&1` =~ "NotFound" ]]; then
+      #       echo "file-backup-data NOT FOUND: Skipping..."
+      #     else
+      #       echo "file-backup-data FOUND: Cleaning resources..."
+      #       oc delete pvc file-backup-data
+      #       echo "DELETED pvc file-backup-data"
+      #     fi

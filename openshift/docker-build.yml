@@ -61,6 +61,7 @@ objects:
       strategy:
         dockerStrategy:
           dockerfilePath: "${DOCKER_FILE_PATH}"
+          incremental: true
           buildArgs:
             - name: "DOCKER_FROM_IMAGE"
               value: "${DOCKER_FROM_IMAGE}"
