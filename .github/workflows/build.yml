@@ -201,8 +201,8 @@ jobs:
   call-deploy-workflow:
     name: 🚀 Deploy to OpenShift
     uses: ./.github/workflows/deploy.yml
-    needs: [build-images, call-cleanup-workflow]
-    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ env.SKIP_BUILD == 'false' }}
+    needs: [checkEnv, build-images, call-cleanup-workflow]
+    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ needs.checckEnv.SKIP_BUILD_TEXT == 'FALSE' }}
     secrets: inherit
     with:
       BASE_IMAGE_TAG: ${{ github.ref_name }}
