@@ -99,7 +99,7 @@ jobs:
       # - name: Uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }}
       #   run: helm uninstall ${{ inputs.REDIS_DEPLOYMENT_NAME }} -n ${{ inputs.DEPLOY_NAMESPACE }}
 
-      - name: 🧹️ Clean ${{ inputs.REDIS_DEPLOYMENT_NAME }}
+      - name: 🧹️ Clean ${{ inputs.REDIS_DEPLOYMENT_NAME }}-redis
         run: |
           if [[ `oc describe sts ${{ inputs.REDIS_DEPLOYMENT_NAME }} 2>&1` =~ "NotFound" ]]; then
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME }} NOT FOUND: Skipping..."
