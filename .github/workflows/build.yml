@@ -71,7 +71,7 @@ jobs:
             echo CLEAN_BUILDS_TEXT="FALSE" >> $GITHUB_OUTPUT
           fi
           echo SKIP_BUILD: ${{ env.SKIP_BUILD }}
-          if [[ "${{ env.SKIP_BUILD }}" == true ]]; then
+          if [[ "${{ env.SKIP_BUILD }}" == "true" ]]; then
             echo "SKIP_BUILD is TRUE, setting SKIP_BUILD_TEXT to TRUE"
             echo SKIP_BUILD_TEXT="TRUE" >> $GITHUB_OUTPUT
           else
