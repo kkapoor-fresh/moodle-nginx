@@ -17,6 +17,7 @@ env:
   BRANCH: ${{ github.ref_name }}
   SOURCE_REPOSITORY_URL: "https://github.com/${{ github.repository }}"
   INSPECT_JOB_URL: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+  SKIP_BUILD: ${{ vars.SKIP_BUILD }}
 
   BUILD_ICON_URL: https://cdn-icons-png.flaticon.com/128/5110/5110294.png
   SUCCESS_ICON_URL: https://cdn-icons-png.flaticon.com/128/1356/1356479.png
@@ -62,13 +63,20 @@ jobs:
           echo Deploy to Namespace: ${{ env.DEPLOY_NAMESPACE }}
           echo URL: https://${{ env.APP_HOST_URL }}
           echo CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}
-          echo SKIP_BUILD: ${{ vars.SKIP_BUILD }}
           if [[ "${{ env.CLEAN_BUILDS }}" != "false" ]]; then
             echo "CLEAN_BUILDS is not false, setting CLEAN_BUILDS_TEXT to TRUE"
             echo CLEAN_BUILDS_TEXT="TRUE" >> $GITHUB_OUTPUT
           else
             echo "CLEAN_BUILDS is false, setting CLEAN_BUILDS_TEXT to FALSE"
             echo CLEAN_BUILDS_TEXT="FALSE" >> $GITHUB_OUTPUT
+          fi
+          echo SKIP_BUILD: ${{ env.SKIP_BUILD }}
+          if [[ "${{ env.SKIP_BUILD }}" != "false" ]]; then
+            echo "SKIP_BUILD is not false, setting SKIP_BUILD_TEXT to TRUE"
+            echo SKIP_BUILD_TEXT="TRUE" >> $GITHUB_OUTPUT
+          else
+            echo "SKIP_BUILD is false, setting SKIP_BUILD_TEXT to FALSE"
+            echo SKIP_BUILD_TEXT="FALSE" >> $GITHUB_OUTPUT
           fi
 
   # Build PHP Image
@@ -77,7 +85,7 @@ jobs:
     name: 🔨 Build Application Images (${{ github.ref_name }})
     needs: [checkEnv]
     runs-on: ubuntu-latest
-    if: (${{ vars.SKIP_BUILD == 'false' }} || ${{ vars.SKIP_BUILD == false }}) && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+    if: ${{ needs.checkEnv.SKIP_BUILD_TEXT == 'FALSE' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     steps:
       # Checkout the PR branch
       - name: 📤 Checkout Target Branch
@@ -101,14 +109,14 @@ jobs:
           keys-case: upper
 
       # Build the PHP image
-      - name: 🚧 Build PHP (SKIP? ${{ vars.SKIP_BUILD }})
+      - name: 🚧 Build PHP (SKIP? ${{ env.SKIP_BUILD }})
         id: build-php
-        if: success() && ${{ vars.SKIP_BUILD == 'false' }}
+        if: success() && ${{ needs.checkEnv.SKIP_BUILD_TEXT == 'FALSE' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
           echo "Using ${{ steps.dotenv.outputs.PHP_IMAGE }}"
-          if [ ${{ vars.SKIP_BUILD == false }} == true ]; then
+          if [ ${{ env.SKIP_BUILD == false }} == true ]; then
             echo "STARTING BUILD..."
           else
             echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
@@ -127,14 +135,14 @@ jobs:
           CLEAN_BUILDS_TEXT: ${{ needs.checkEnv.outputs.CLEAN_BUILDS_TEXT }}
 
       # Build the Cron image
-      - name: 🚧 Build Cron (SKIP? ${{ vars.SKIP_BUILD }})
+      - name: 🚧 Build Cron (SKIP? ${{ env.SKIP_BUILD }})
         id: build-cron
-        if: success() && ${{ vars.SKIP_BUILD == 'false' }}
+        if: success() && ${{ needs.checkEnv.SKIP_BUILD_TEXT == 'FALSE' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
           echo "Using ${{ steps.dotenv.outputs.CRON_IMAGE }}"
-          if [ ${{ vars.SKIP_BUILD == false }} == true ]; then
+          if [ ${{ env.SKIP_BUILD == false }} == true ]; then
             echo "STARTING BUILD..."
           else
             echo "SKIPPING BUILD (Environment variable SKIP_BUILD=true)"
@@ -194,7 +202,7 @@ jobs:
     name: 🚀 Deploy to OpenShift
     uses: ./.github/workflows/deploy.yml
     needs: [build-images, call-cleanup-workflow]
-    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ vars.SKIP_BUILD == 'false' }}
+    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ env.SKIP_BUILD == 'false' }}
     secrets: inherit
     with:
       BASE_IMAGE_TAG: ${{ github.ref_name }}
