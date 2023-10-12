@@ -72,9 +72,9 @@ jobs:
             echo "CLEAN_BUILDS is false, setting CLEAN_BUILDS_TEXT to FALSE"
             echo CLEAN_BUILDS_TEXT="FALSE" >> $GITHUB_OUTPUT
           fi
-          echo "SKIP_BUILDS: $SKIP_BUILDS OR ${{ env.SKIP_BUILDS }}"
+          echo "SKIP_BUILDS: $SKIP_BUILDS"
           if [[ $SKIP_BUILDS == "YES" ]]; then
-            echo "SKIP_BUILDS is YES, setting SKIP_BUILDS_TEXT to YES"
+            echo "SKIP_BUILDS is YES, setting SKIP_BUILDS to YES"
             echo SKIP_BUILDS="YES" >> $GITHUB_OUTPUT
           else
             echo "SKIP_BUILDS is NOT YES, setting SKIP_BUILDS to NO"
@@ -111,9 +111,9 @@ jobs:
           keys-case: upper
 
       # Build the PHP image
-      - name: 🚧 Build PHP (SKIP? ${{ env.SKIP_BUILDS }} OR $SKIP_BUILDS)
+      - name: 🚧 Build PHP (SKIP? ${{ env.SKIP_BUILDS }})
         id: build-php
-        if: success() && ${{ env.SKIP_BUILDS == 'YES' }}
+        if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
@@ -139,7 +139,7 @@ jobs:
       # Build the Cron image
       - name: 🚧 Build Cron (SKIP? ${{ env.SKIP_BUILDS }})
         id: build-cron
-        if: success() && ${{ env.SKIP_BUILDS == 'YES' }}
+        if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
@@ -204,7 +204,7 @@ jobs:
     name: 🚀 Deploy to OpenShift
     uses: ./.github/workflows/deploy.yml
     needs: [checkEnv, build-images, call-cleanup-workflow]
-    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ needs.checckEnv.SKIP_BUILDS_TEXT == 'FALSE' }}
+    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ needs.checckEnv.SKIP_BUILDS == 'FALSE' }}
     secrets: inherit
     with:
       BASE_IMAGE_TAG: ${{ github.ref_name }}
