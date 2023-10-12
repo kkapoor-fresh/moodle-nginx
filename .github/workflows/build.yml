@@ -65,20 +65,13 @@ jobs:
           echo Deploy to Namespace: ${{ env.DEPLOY_NAMESPACE }}
           echo URL: https://${{ env.APP_HOST_URL }}
           echo "CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}"
+          echo "SKIP_BUILDS: $SKIP_BUILDS OR ${{ env.SKIP_BUILDS }}"
           if [[ "${{ env.CLEAN_BUILDS }}" != "false" ]]; then
             echo "CLEAN_BUILDS is not false, setting CLEAN_BUILDS_TEXT to TRUE"
             echo CLEAN_BUILDS_TEXT="TRUE" >> $GITHUB_OUTPUT
           else
             echo "CLEAN_BUILDS is false, setting CLEAN_BUILDS_TEXT to FALSE"
             echo CLEAN_BUILDS_TEXT="FALSE" >> $GITHUB_OUTPUT
-          fi
-          echo "SKIP_BUILDS: $SKIP_BUILDS OR ${{ env.SKIP_BUILDS }}"
-          if [[ $SKIP_BUILDS == "YES" ]]; then
-            echo "SKIP_BUILDS is TRUE, setting SKIP_BUILDS_TEXT to TRUE"
-            echo SKIP_BUILDS_TEXT="TRUE" >> $GITHUB_OUTPUT
-          else
-            echo "SKIP_BUILDS is FALSE, setting SKIP_BUILDS_TEXT to FALSE"
-            echo SKIP_BUILDS_TEXT="FALSE" >> $GITHUB_OUTPUT
           fi
 
   # Build PHP Image
@@ -87,7 +80,7 @@ jobs:
     name: 🔨 Build Application Images (${{ github.ref_name }})
     needs: [checkEnv]
     runs-on: ubuntu-latest
-    if: ${{ needs.checkEnv.SKIP_BUILDS_TEXT != "YES" }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+    if: ${{ env.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     steps:
       # Checkout the PR branch
       - name: 📤 Checkout Target Branch
@@ -111,9 +104,9 @@ jobs:
           keys-case: upper
 
       # Build the PHP image
-      - name: 🚧 Build PHP (SKIP? ${{ needs.checkEnv.SKIP_BUILDS_TEXT }} OR ${{ env.SKIP_BUILDS }} OR $SKIP_BUILDS)
+      - name: 🚧 Build PHP (SKIP? ${{ env.SKIP_BUILDS }} OR $SKIP_BUILDS)
         id: build-php
-        if: success() && ${{ needs.checkEnv.SKIP_BUILDS_TEXT == 'FALSE' }}
+        if: success() && ${{ env.SKIP_BUILDS == 'YES' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
@@ -137,9 +130,9 @@ jobs:
           CLEAN_BUILDS_TEXT: ${{ needs.checkEnv.outputs.CLEAN_BUILDS_TEXT }}
 
       # Build the Cron image
-      - name: 🚧 Build Cron (SKIP? ${{ needs.checkEnv.SKIP_BUILDS_TEXT }})
+      - name: 🚧 Build Cron (SKIP? ${{ env.SKIP_BUILDS }})
         id: build-cron
-        if: success() && ${{ needs.checkEnv.SKIP_BUILDS_TEXT == 'FALSE' }}
+        if: success() && ${{ env.SKIP_BUILDS == 'YES' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
