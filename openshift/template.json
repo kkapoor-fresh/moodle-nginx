@@ -202,7 +202,7 @@
                 "livenessProbe": {
                   "exec": {
                     "command": [
-                      "php-fpm-healthcheck --listen-queue=10 --accepted-conn=5000 || kill 1"
+                      "/bin/sh -c /usr/local/bin/php-fpm-healthcheck --listen-queue=10 --accepted-conn=5000 || kill 1"
                     ]
                   },
                   "initialDelaySeconds": 90,
@@ -214,7 +214,7 @@
                 "readinessProbe": {
                   "exec": {
                     "command": [
-                      "php-fpm-healthcheck"
+                      "/usr/local/bin/php-fpm-healthcheck"
                     ]
                   },
                   "initialDelaySeconds": 10,
@@ -242,6 +242,11 @@
                     "name": "${APP_NAME}-env",
                     "mountPath": ".env",
                     "subPath": ".env"
+                  },
+                  {
+                    "name": "${APP_NAME}-config",
+                    "mountPath": "/var/www/html/config.php",
+                    "subPath": "config.php"
                   }
                 ],
                 "resources": {
@@ -408,7 +413,7 @@
                 "livenessProbe": {
                   "exec": {
                     "command": [
-                      "php-fpm-healthcheck --listen-queue=10 --accepted-conn=5000 || kill 1"
+                      "/bin/sh -c /usr/local/bin/php-fpm-healthcheck --listen-queue=10 --accepted-conn=5000 || kill 1"
                     ]
                   }
                 },
@@ -425,6 +430,11 @@
                     "name": "${APP_NAME}-env",
                     "mountPath": ".env",
                     "subPath": ".env"
+                  },
+                  {
+                    "name": "${APP_NAME}-config",
+                    "mountPath": "/var/www/html/config.php",
+                    "subPath": "config.php"
                   }
                 ],
                 "resources": {
