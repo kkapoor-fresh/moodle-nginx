@@ -199,27 +199,6 @@
                 "name": "${PHP_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
-                "livenessProbe": {
-                  "exec": {
-                    "command": [
-                      "/bin/sh -c /usr/local/bin/php-fpm-healthcheck --listen-queue=10 --accepted-conn=5000 || kill 1"
-                    ]
-                  },
-                  "initialDelaySeconds": 90,
-                  "periodSeconds": 60,
-                  "timeoutSeconds": 180,
-                  "successThreshold": 1,
-                  "failureThreshold": 3
-                },
-                "readinessProbe": {
-                  "exec": {
-                    "command": [
-                      "/usr/local/bin/php-fpm-healthcheck"
-                    ]
-                  },
-                  "initialDelaySeconds": 10,
-                  "periodSeconds": 5
-                },
                 "ports": [
                   {
                     "containerPort": 9000
@@ -245,7 +224,7 @@
                   },
                   {
                     "name": "${APP_NAME}-config",
-                    "mountPath": "/var/www/html/config.php",
+                    "mountPath": "${MOODLE_APP_MOUNT_PATH}/config.php",
                     "subPath": "config.php"
                   }
                 ],
@@ -331,13 +310,7 @@
                 "name": "${APP_NAME}-config",
                 "configMap": {
                   "name": "${APP_NAME}-config",
-                  "defaultMode": 420,
-                  "items": [
-                    {
-                      "key": "config.php",
-                      "path": "./var/www/html/config.php"
-                    }
-                  ]
+                  "defaultMode": 420
                 }
               },
               {
@@ -410,13 +383,6 @@
                 "name": "${CRON_DEPLOYMENT_NAME}",
                 "restartPolicy": "Always",
                 "imagePullPolicy": "Always",
-                "livenessProbe": {
-                  "exec": {
-                    "command": [
-                      "/bin/sh -c /usr/local/bin/php-fpm-healthcheck --listen-queue=10 --accepted-conn=5000 || kill 1"
-                    ]
-                  }
-                },
                 "volumeMounts": [
                   {
                     "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
@@ -433,7 +399,7 @@
                   },
                   {
                     "name": "${APP_NAME}-config",
-                    "mountPath": "/var/www/html/config.php",
+                    "mountPath": "${MOODLE_APP_MOUNT_PATH}/config.php",
                     "subPath": "config.php"
                   }
                 ],
@@ -483,6 +449,13 @@
                 "name": "${CRON_DEPLOYMENT_NAME}-config",
                 "configMap": {
                   "name": "${CRON_DEPLOYMENT_NAME}-config",
+                  "defaultMode": 420
+                }
+              },
+              {
+                "name": "${APP_NAME}-config",
+                "configMap": {
+                  "name": "${APP_NAME}-config",
                   "defaultMode": 420
                 }
               },
