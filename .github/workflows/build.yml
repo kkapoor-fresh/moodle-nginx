@@ -167,12 +167,13 @@ jobs:
       BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
       DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
       BRANCH: ${{ env.BRANCH }}
+      CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}
 
   call-cleanup-workflow:
-    name: 🧹️ Clean Build ( ${{ env.CLEAN_BUILDS }} )
+    name: 🧹️ Clean Build ( ${{ needs.build-images.outputs.CLEAN_BUILDS }} )
     uses: ./.github/workflows/cleanup.yml
     needs: [checkEnv, build-images]
-    if: success() && ${{ needs.checkEnv.CLEAN_BUILDS == 'YES' }}
+    if: success() && ${{ needs.build-images.outputs == 'YES' }}
     secrets: inherit
     with:
       APP: ${{ needs.build-images.outputs.APP }}
