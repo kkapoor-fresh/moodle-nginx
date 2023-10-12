@@ -111,7 +111,7 @@ jobs:
           keys-case: upper
 
       # Build the PHP image
-      - name: 🚧 Build PHP (SKIP? ${{ env.SKIP_BUILDS }})
+      - name: "🚧 Build ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} (SKIP? ${{ env.SKIP_BUILDS }})"
         id: build-php
         if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
         working-directory: "./"
@@ -137,7 +137,7 @@ jobs:
           CLEAN_BUILDS_TEXT: ${{ needs.checkEnv.outputs.CLEAN_BUILDS_TEXT }}
 
       # Build the Cron image
-      - name: 🚧 Build Cron (SKIP? ${{ env.SKIP_BUILDS }})
+      - name: "🚧 Build ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }} (SKIP? ${{ env.SKIP_BUILDS }})"
         id: build-cron
         if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
         working-directory: "./"
