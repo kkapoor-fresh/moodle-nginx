@@ -326,7 +326,13 @@
                 "name": "${APP_NAME}-config",
                 "configMap": {
                   "name": "${APP_NAME}-config",
-                  "defaultMode": 420
+                  "defaultMode": 420,
+                  "items": [
+                    {
+                      "key": "config.php",
+                      "path": "./var/www/html/config.php"
+                    }
+                  ]
                 }
               },
               {
