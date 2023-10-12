@@ -40,6 +40,9 @@ done
 
 # Migrate build files to web root (/app/public to /var/www/html)
 echo "Copying build files to web root on $PHP_DEPLOYMENT_NAME"
+# Ensure moodle config is cleared
+oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'rm -I /var/www/html/config.php' -n $DEPLOY_NAMESPACE
+# Copy / update all files from docker build to shared PVC
 oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'cp -ru /app/public/* /var/www/html' -n $DEPLOY_NAMESPACE
 
 echo "Rolling out $CRON_DEPLOYMENT_NAME..."
