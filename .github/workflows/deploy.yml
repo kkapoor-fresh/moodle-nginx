@@ -169,9 +169,6 @@ jobs:
           if [[ `oc describe sts backup 2>&1` =~ "NotFound" ]]; then
             echo "Backup container NOT FOUND. Begin backup container deployment..."
             helm repo add bcgov http://bcgov.github.io/helm-charts
-            helm upgrade --install backup -f config.yaml bcgov/backup-storage
-          else
-            echo "Backup container installation FOUND. Updating..."
             echo '
               backupConfig: |
                 mariadb=db/moodle
@@ -190,7 +187,10 @@ jobs:
                 ENVIRONMENT_FRIENDLY_NAME:
                   value: "DB Backups"
               ' > config.yaml
-            helm upgrade backup  bcgov/backup-storage
+            helm upgrade --install backup -f config.yaml bcgov/backup-storage
+          else
+            echo "Backup container installation FOUND. Updating..."
+            helm upgrade backup bcgov/backup-storage
             echo "Backup container updates completed."
           fi
 
