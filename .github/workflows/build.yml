@@ -98,7 +98,7 @@ jobs:
           keys-case: upper
 
       # Build the PHP image
-      - name: "🚧 Build ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }} (SKIP? ${{ env.SKIP_BUILDS }})"
+      - name: 🚧 Build ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}
         id: build-php
         if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
         working-directory: "./"
@@ -123,7 +123,7 @@ jobs:
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
 
       # Build the Cron image
-      - name: "🚧 Build ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }} (SKIP? ${{ env.SKIP_BUILDS }})"
+      - name: 🚧 Build ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}
         id: build-cron
         if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
         working-directory: "./"
