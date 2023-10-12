@@ -77,3 +77,7 @@ echo "deploy1=$PHP_DEPLOYMENT_NAME is deployed" >> $GITHUB_OUTPUT
 # pwd
 echo "$CRON_DEPLOYMENT_NAME is deployed"
 echo "deploy2=$CRON_DEPLOYMENT_NAME is deployed" >> $GITHUB_OUTPUT
+
+# Deploy backups
+helm repo add bcgov http://bcgov.github.io/helm-charts
+helm upgrade --install db-backup-storage bcgov/backup-storage

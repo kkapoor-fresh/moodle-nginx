@@ -13,8 +13,9 @@ ARG DATAFLOWS_BRANCH_VERSION=MOODLE_35_STABLE
 
 # Moodle App directory
 ENV MOODLE_APP_DIR /app/public
-# ENV PHP_INI_DIR $ETC_DIR/php
-ENV PHP_INI_FILE /usr/local/etc/php/php.ini
+ENV ETC_DIR=/usr/local/etc
+ENV PHP_INI_DIR $ETC_DIR/php
+ENV PHP_INI_FILE /php.ini
 
 RUN echo "Building Moodle version: $MOODLE_BRANCH_VERSION for $PHP_INI_ENVIRONMENT environment"
 
@@ -64,7 +65,7 @@ RUN docker-php-ext-enable redis
 RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_APP_DIR
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_FILE"
-COPY ./config/php/php.ini "$PHP_INI_DIR/moodlephp.ini"
+COPY ./config/php/php.ini "$PHP_INI_DIR/conf.d/moodlephp.ini"
 COPY ./config/php/php-fpm.conf "/usr/local/etc/php-fpm.d"
 COPY ./config/moodle/config.php "/app/public/config.php"
 
