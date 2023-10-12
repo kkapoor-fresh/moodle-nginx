@@ -10,6 +10,8 @@ env:
 
   # Skip builds for faster deployments / testing ("YES" or build)
   SKIP_BUILDS: "YES"
+  # Clean builds before deployments (delete all resources, other than backups) ("YES" or allow collisions)
+  CLEAN_BUILDS: "YES"
 
   PROJECT: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}
   APP_HOST_URL: moodle-${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
@@ -60,26 +62,11 @@ jobs:
     steps:
       - name: Print Env Vars
         run: |
-          echo Deploying ${{ env.APP }} on ${{ env.PROJECT }}
+          echo Deploying ${{ env.PROJECT }} > ${{ env.APP }} on ${{ env.DEPLOY_NAMESPACE }}
           echo "-----------------------"
-          echo Deploy to Namespace: ${{ env.DEPLOY_NAMESPACE }}
           echo URL: https://${{ env.APP_HOST_URL }}
           echo "CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}"
-          if [[ "${{ env.CLEAN_BUILDS }}" != "false" ]]; then
-            echo "CLEAN_BUILDS is not false, setting CLEAN_BUILDS_TEXT to TRUE"
-            echo CLEAN_BUILDS_TEXT="TRUE" >> $GITHUB_OUTPUT
-          else
-            echo "CLEAN_BUILDS is false, setting CLEAN_BUILDS_TEXT to FALSE"
-            echo CLEAN_BUILDS_TEXT="FALSE" >> $GITHUB_OUTPUT
-          fi
-          echo "SKIP_BUILDS: $SKIP_BUILDS"
-          if [[ $SKIP_BUILDS == "YES" ]]; then
-            echo "SKIP_BUILDS is YES, setting SKIP_BUILDS to YES"
-            echo SKIP_BUILDS="YES" >> $GITHUB_OUTPUT
-          else
-            echo "SKIP_BUILDS is NOT YES, setting SKIP_BUILDS to NO"
-            echo SKIP_BUILDS="NO" >> $GITHUB_OUTPUT
-          fi
+          echo "SKIP_BUILDS: ${{ env.SKIP_BUILDS }}"
 
   # Build PHP Image
 
@@ -134,7 +121,7 @@ jobs:
           IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
           IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
-          CLEAN_BUILDS_TEXT: ${{ needs.checkEnv.outputs.CLEAN_BUILDS_TEXT }}
+          CLEAN_BUILDS: ${{ needs.checkEnv.outputs.CLEAN_BUILDS }}
 
       # Build the Cron image
       - name: "🚧 Build ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }} (SKIP? ${{ env.SKIP_BUILDS }})"
@@ -183,10 +170,10 @@ jobs:
       BRANCH: ${{ env.BRANCH }}
 
   call-cleanup-workflow:
-    name: 🧹️ Clean Build ( ${{ needs.checkEnv.CLEAN_BUILDS_TEXT }} )
+    name: 🧹️ Clean Build ( ${{ needs.checkEnv.CLEAN_BUILDS }} )
     uses: ./.github/workflows/cleanup.yml
     needs: [checkEnv, build-images]
-    if: success() && ${{ needs.checkEnv.CLEAN_BUILDS_TEXT != 'FALSE' }}
+    if: success() && ${{ needs.checkEnv.CLEAN_BUILDS != 'FALSE' }}
     secrets: inherit
     with:
       APP: ${{ needs.build-images.outputs.APP }}
