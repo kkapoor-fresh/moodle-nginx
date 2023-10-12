@@ -61,12 +61,12 @@ RUN pecl install -o -f redis
 RUN rm -rf /tmp/pear
 RUN docker-php-ext-enable redis
 
+RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_APP_DIR
+
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_FILE"
 COPY ./config/php/php.ini "$PHP_INI_DIR/moodlephp.ini"
 COPY ./config/php/php-fpm.conf "/usr/local/etc/php-fpm.d"
 COPY ./config/moodle/config.php "/app/public/config.php"
-
-RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_APP_DIR
 
 RUN mkdir -p $MOODLE_APP_DIR/admin/tool/trigger && \
     mkdir -p $MOODLE_APP_DIR/admin/tool/dataflows && \
@@ -75,9 +75,7 @@ RUN mkdir -p $MOODLE_APP_DIR/admin/tool/trigger && \
     mkdir -p $MOODLE_APP_DIR/course/format/topcoll  && \
     mkdir -p $MOODLE_APP_DIR/mod/certificate  && \
     mkdir -p $MOODLE_APP_DIR/mod/customcert  && \
-    chown -R www-data:www-data $MOODLE_APP_DIR/admin/tool/ && \
-    chown -R www-data:www-data $MOODLE_APP_DIR/mod/ && \
-    chown -R www-data:www-data $MOODLE_APP_DIR/course/format/
+    chown -R www-data:www-data $MOODLE_APP_DIR
 
 RUN git clone --recurse-submodules --jobs 8 https://github.com/catalyst/moodle-tool_trigger $MOODLE_APP_DIR/admin/tool/trigger && \
     git clone --recurse-submodules --jobs 8 --branch $DATAFLOWS_BRANCH_VERSION --single-branch https://github.com/catalyst/moodle-tool_dataflows.git $MOODLE_APP_DIR/admin/tool/dataflows && \
