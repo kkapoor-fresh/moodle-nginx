@@ -121,7 +121,6 @@ jobs:
           IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
           IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
           SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
-          CLEAN_BUILDS: ${{ needs.checkEnv.outputs.CLEAN_BUILDS }}
 
       # Build the Cron image
       - name: "🚧 Build ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }} (SKIP? ${{ env.SKIP_BUILDS }})"
@@ -170,10 +169,10 @@ jobs:
       BRANCH: ${{ env.BRANCH }}
 
   call-cleanup-workflow:
-    name: 🧹️ Clean Build ( ${{ needs.checkEnv.CLEAN_BUILDS }} )
+    name: 🧹️ Clean Build ( ${{ env.CLEAN_BUILDS }} )
     uses: ./.github/workflows/cleanup.yml
     needs: [checkEnv, build-images]
-    if: success() && ${{ needs.checkEnv.CLEAN_BUILDS != 'FALSE' }}
+    if: success() && ${{ needs.checkEnv.CLEAN_BUILDS == 'YES' }}
     secrets: inherit
     with:
       APP: ${{ needs.build-images.outputs.APP }}
