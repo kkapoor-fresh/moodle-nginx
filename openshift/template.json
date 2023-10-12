@@ -221,11 +221,6 @@
                     "name": "${APP_NAME}-env",
                     "mountPath": ".env",
                     "subPath": ".env"
-                  },
-                  {
-                    "name": "${APP_NAME}-config",
-                    "mountPath": "${MOODLE_APP_MOUNT_PATH}/config.php",
-                    "subPath": "config.php"
                   }
                 ],
                 "resources": {
@@ -303,13 +298,6 @@
                 "name": "${PHP_DEPLOYMENT_NAME}-config",
                 "configMap": {
                   "name": "${PHP_DEPLOYMENT_NAME}-config",
-                  "defaultMode": 420
-                }
-              },
-              {
-                "name": "${APP_NAME}-config",
-                "configMap": {
-                  "name": "${APP_NAME}-config",
                   "defaultMode": 420
                 }
               },
@@ -396,11 +384,6 @@
                     "name": "${APP_NAME}-env",
                     "mountPath": ".env",
                     "subPath": ".env"
-                  },
-                  {
-                    "name": "${APP_NAME}-config",
-                    "mountPath": "${MOODLE_APP_MOUNT_PATH}/config.php",
-                    "subPath": "config.php"
                   }
                 ],
                 "resources": {
@@ -449,13 +432,6 @@
                 "name": "${CRON_DEPLOYMENT_NAME}-config",
                 "configMap": {
                   "name": "${CRON_DEPLOYMENT_NAME}-config",
-                  "defaultMode": 420
-                }
-              },
-              {
-                "name": "${APP_NAME}-config",
-                "configMap": {
-                  "name": "${APP_NAME}-config",
                   "defaultMode": 420
                 }
               },

@@ -64,6 +64,7 @@ RUN docker-php-ext-enable redis
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_FILE"
 COPY ./config/php/php.ini "$PHP_INI_DIR/moodlephp.ini"
 COPY ./config/php/php-fpm.conf "/usr/local/etc/php-fpm.d"
+COPY ./config/moodle/config.php "/var/www/html/config.php"
 
 RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_APP_DIR
 
