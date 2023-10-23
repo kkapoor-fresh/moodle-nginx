@@ -88,6 +88,4 @@ jobs:
               "text":"Successful ${{ github.job }} in ${{ github.workflow }} of ${{ github.repository }}:${{ github.ref_name }}",
               "thumb_url":"$SUCCESS_ICON_URL",
               "color":"#764FA5"
-              }]
-            }]
-            }'
+            }]}'
