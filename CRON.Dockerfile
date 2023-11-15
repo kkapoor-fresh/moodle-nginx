@@ -38,6 +38,7 @@ RUN touch /var/log/schedule.log
 RUN chmod 0777 /var/log/schedule.log
 
 # Setup and run cron
-RUN (crontab -l -u root; echo "* * * * * su -c '/usr/local/bin/php /app/public/admin/cli/cron.php >&1'") | crontab
-
 RUN adduser www-data crontab
+RUN chown www-data:crontab /usr/bin/crontab
+RUN chmod 2755 /usr/bin/crontab
+RUN (crontab -l -u root; echo "* * * * * su -c '/usr/local/bin/php /app/public/admin/cli/cron.php >&1'") | crontab
