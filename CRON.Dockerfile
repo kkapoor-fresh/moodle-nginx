@@ -40,4 +40,4 @@ RUN chmod 0777 /var/log/schedule.log
 # Setup and run cron
 RUN (crontab -l -u root; echo "* * * * * su -c '/usr/local/bin/php /app/public/admin/cli/cron.php >&1'") | crontab
 
-RUN adduser wwwroot crontab
+RUN adduser www-data crontab

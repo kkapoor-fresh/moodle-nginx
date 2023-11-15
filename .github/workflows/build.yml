@@ -100,7 +100,7 @@ jobs:
       # Build the PHP image
       - name: 🚧 Build ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}
         id: build-php
-        if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
+        if: false == true && success() && ${{ env.SKIP_BUILDS != 'YES' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
