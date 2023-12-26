@@ -1,6 +1,5 @@
-ARG DOCKER_FROM_IMAGE=php:7.4-fpm
-
-FROM $DOCKER_FROM_IMAGE
+ARG CRON_IMAGE=php:php:8.3.0-cli
+FROM $CRON_IMAGE
 
 # Environment uses ONLY production or development
 ARG PHP_INI_ENVIRONMENT=production
@@ -16,29 +15,34 @@ ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/do
 RUN chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions pdo pdo_mysql mysqli gd soap intl zip xsl opcache ldap
 
-RUN apt-get update && apt-get install -y cron supervisor zlib1g-dev libpng-dev libxml2-dev libzip-dev libxslt-dev wget libfcgi-bin
+RUN apt-get update && apt-get install -y --no-install-recommends cron supervisor zlib1g-dev libpng-dev libxml2-dev libzip-dev libxslt-dev wget libfcgi-bin \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN pecl install -o -f redis &&  rm -rf /tmp/pear &&  docker-php-ext-enable redis
 
 # Add healthcheck
-RUN wget -O /usr/local/bin/php-fpm-healthcheck \
+RUN wget --progress=dot:giga -O /usr/local/bin/php-fpm-healthcheck \
     https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck \
     && chmod +x /usr/local/bin/php-fpm-healthcheck
 # Update healthcheck
-RUN wget -O $(which php-fpm-healthcheck) \
-    https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck \
-    && chmod +x $(which php-fpm-healthcheck)
+RUN wget --progress=dot:giga -O "$(which php-fpm-healthcheck)" \
+  https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck \
+  && chmod +x $(which php-fpm-healthcheck)
 
 RUN mv "$PHP_INI_DIR/php.ini-$PHP_INI_ENVIRONMENT" "$PHP_INI_FILE"
-COPY ./config/php/php.ini "$PHP_INI_DIR/moodlephp.ini"
+COPY ./config/php/php.ini "$PHP_INI_DIR/moodle-php.ini"
 COPY ./config/php/php-fpm.conf "/usr/local/etc/php-fpm.d"
 
-# Create cron log file
-RUN touch /var/log/schedule.log
-RUN chmod 0777 /var/log/schedule.log
-
 # Setup and run cron
-RUN adduser www-data crontab
-RUN chown www-data:crontab /usr/bin/crontab
-RUN chmod 2755 /usr/bin/crontab
-RUN (crontab -l -u root; echo "* * * * * su -c '/usr/local/bin/php /app/public/admin/cli/cron.php >&1'") | crontab
+RUN touch /var/log/cron.log \
+  && chmod 0777 /var/log/cron.log \
+  && adduser www-data crontab \
+  && chown www-data:crontab /usr/bin/crontab \
+  && chmod 2755 /usr/bin/crontab
+#SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+#RUN (crontab -l -u www-data; echo "* * * * * su -c '/usr/local/bin/php /app/public/admin/cli/cron.php >&1'") | crontab
+COPY ./config/cron/crontab.txt /etc/cron.d/moodle-cron
+RUN chmod 0644 /etc/cron.d/moodle-cron \
+  && crontab /etc/cron.d/moodle-cron
+CMD ["sh", "-c", "cron && tail -f /dev/null"]

@@ -158,6 +158,189 @@
         "wildcardPolicy": "None"
       }
 		},
+
+    {
+      "apiVersion": "v1",
+      "kind": "DeploymentConfig",
+      "metadata": {
+        "annotations": {
+          "template.alpha.openshift.io/wait-for-ready": "true"
+        },
+        "name": "${MOODLE_DEPLOYMENT_NAME}",
+        "namespace": "${DEPLOY_NAMESPACE}",
+        "labels": {
+          "service": "${MOODLE_DEPLOYMENT_NAME}"
+        }
+      },
+      "spec": {
+        "replicas": 1,
+        "selector": {
+          "deploymentconfig": "${MOODLE_DEPLOYMENT_NAME}"
+        },
+        "strategy": {
+          "type": "Rolling",
+          "rollingParams": {
+            "updatePeriodSeconds": 1,
+            "intervalSeconds": 1,
+            "timeoutSeconds": 600,
+            "maxUnavailable": "100%",
+            "maxSurge": "25%"
+          }
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "deploymentconfig": "${MOODLE_DEPLOYMENT_NAME}"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "image": "${IMAGE_REPO}${BUILD_NAMESPACE}/${MOODLE_DEPLOYMENT_NAME}:${BUILD_TAG}",
+                "name": "${MOODLE_DEPLOYMENT_NAME}",
+                "restartPolicy": "Always",
+                "imagePullPolicy": "Always",
+                "ports": [
+                  {
+                    "containerPort": 9000
+                  }
+                ],
+                "volumeMounts": [
+                  {
+                    "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
+                    "name": "${APP_NAME}-data"
+                  },
+                  {
+                    "mountPath": "${MOODLE_APP_MOUNT_PATH}",
+                    "name": "${APP_NAME}-app-data"
+                  },
+                  {
+                    "mountPath": "/tmp/file-backups",
+                    "name": "file-backup-data"
+                  },
+                  {
+                    "name": "${APP_NAME}-env",
+                    "mountPath": ".env",
+                    "subPath": ".env"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "memory": "${PHP_MEMORY_LIMIT}",
+                    "cpu": "${PHP_CPU_LIMIT}"
+                  },
+                  "requests": {
+                    "memory": "${PHP_MEMORY_REQUEST}",
+                    "cpu": "${PHP_CPU_REQUEST}"
+                  }
+                },
+                "env": [
+                  {
+                    "name": "APP_NAME",
+                    "value": "${APP_NAME}"
+                  },
+                  {
+                    "name": "SITE_URL",
+                    "value": "https://${SITE_URL}"
+                  },
+                  {
+                    "name": "DB_USER",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${APP_NAME}-secrets",
+                        "key": "database-user"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DB_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${APP_NAME}-secrets",
+                        "key": "database-password"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DB_NAME",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${APP_NAME}-secrets",
+                        "key": "database-name"
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "${APP_NAME}-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${APP_NAME}-data",
+                  "defaultMode": 755
+                }
+              },
+              {
+                "name": "${APP_NAME}-app-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${APP_NAME}-app-data",
+                  "defaultMode": 755
+                }
+              },
+              {
+                "name": "file-backup-data",
+                "persistentVolumeClaim": {
+                  "claimName": "file-backup-data",
+                  "defaultMode": 755
+                }
+              },
+              {
+                "name": "${MOODLE_DEPLOYMENT_NAME}-config",
+                "configMap": {
+                  "name": "${MOODLE_DEPLOYMENT_NAME}-config",
+                  "defaultMode": 420
+                }
+              },
+              {
+                "name": "${APP_NAME}-env",
+                "configMap": {
+                  "name": "${APP_NAME}-env",
+                  "items": [
+                    {
+                      "key": ".env",
+                      "path": "./.env"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${MOODLE_DEPLOYMENT_NAME}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${MOODLE_DEPLOYMENT_NAME}:${BUILD_TAG}",
+                "namespace": "${BUILD_NAMESPACE}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "revisionHistoryLimit": 10,
+        "test": false
+      }
+    },
+
     {
       "apiVersion": "v1",
       "kind": "DeploymentConfig",
@@ -605,6 +788,12 @@
       "value": "${SITE_URL}"
     },
     {
+      "description": "Application Build Name",
+      "displayName": "Application Build Name",
+      "name": "MOODLE_DEPLOYMENT_NAME",
+      "value": "moodle"
+    },
+    {
       "description": "Web Service Name",
       "displayName": "Web Service",
       "name": "WEB_DEPLOYMENT_NAME",
@@ -671,7 +860,7 @@
       "displayName": "Moodle-data Mount Path",
       "name": "MOODLE_DATA_MOUNT_PATH",
       "required": true,
-      "value": "/var/moodledata"
+      "value": "/var/www/moodledata"
     },
     {
       "description": "Path where the persistent volume for web will be mounted",

@@ -97,10 +97,35 @@ jobs:
           log-variables: true
           keys-case: upper
 
+      # Build the Moodle image
+      - name: 🚧 Build ${{ steps.dotenv.outputs.MOODLE_DEPLOYMENT_NAME }}:${{ env.BRANCH }}
+        id: build-moodle
+        if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
+        working-directory: "./"
+        run: |
+          echo "Building ${{ steps.dotenv.outputs.MOODLE_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
+          echo "Using ${{ steps.dotenv.outputs.PHP_IMAGE }}"
+          if ${{ env.SKIP_BUILDS != 'YES' }}; then
+            echo "STARTING BUILD..."
+            sh ./openshift/scripts/build-docker-image.sh
+          else
+            echo "SKIPPING BUILD (Environment variable SKIP_BUILDS=YES)"
+          fi
+        env:
+          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
+          DOCKER_FILE_PATH: ${{ env.MOODLE_DOCKER_FILE_PATH }}
+          DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.MOODLE_DEPLOYMENT_NAME }}
+          SOURCE_CONTEXT_DIR: ${{ env.PHP_SOURCE_CONTEXT_DIR }}
+          BRANCH: ${{ env.BRANCH }}
+          BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
+          IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
+          IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
+          SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
+
       # Build the PHP image
       - name: 🚧 Build ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}
         id: build-php
-        if: false == true && success() && ${{ env.SKIP_BUILDS != 'YES' }}
+        if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
         working-directory: "./"
         run: |
           echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"

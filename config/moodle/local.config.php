@@ -13,7 +13,7 @@ $CFG->moodleappdir    = '/var/www/html';
 $CFG->prefix    = '';
 $CFG->tool_generator_users_password = 'moodle-gen-PWd';
 
-$CFG->session_redis_host = 'moodle-redis-cluster';
+$CFG->session_redis_host = 'redis';
 $CFG->session_handler_class = '\core\session\redis';
 $CFG->session_redis_port = 6379; // Optional if TCP. For socket use -1
 $CFG->session_redis_database = 0; // Optional, default is db 0.
@@ -31,14 +31,14 @@ $CFG->dboptions =  array (
 if (php_sapi_name() == "cli") {
     $CFG->wwwroot = '/var/www/html';
 } else {
-    $protocol = 'https://';
+    $protocol = 'http://';
     $moodle_dir = stripos($_SERVER['REQUEST_URI'], '/moodle') === 0 ? '/moodle' : ''; // for local dev in /moodle folder
     $requested_site_url = $protocol.$_SERVER['HTTP_HOST'].$moodle_dir;
 
     $CFG->wwwroot = $requested_site_url;
 }
 
-$CFG->dataroot  = '/var/moodledata';
+$CFG->dataroot  = '/var/www/moodledata';
 $CFG->admin     = 'admin';
 // $CFG->alternateloginurl  = (isset($_ENV['ALTERNATE_LOGIN_URL'])) ? $_ENV['ALTERNATE_LOGIN_URL'] : '';
 

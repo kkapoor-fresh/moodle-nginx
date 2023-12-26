@@ -1,5 +1,33 @@
 version: '3'
 services:
+    # Build moodle and plugins from repo, then save to shared volume on startup
+    moodle:
+        tty: true
+        restart: "no"
+        build:
+            context: .
+            dockerfile: Moodle.Dockerfile
+            args:
+              MOODLE_ENVIRONMENT: ${MOODLE_ENVIRONMENT:-remote}
+              DOCKER_FROM_IMAGE: ${PHP_IMAGE:-php:8.0-fpm}
+              MOODLE_BRANCH_VERSION: ${MOODLE_BRANCH_VERSION:-MOODLE_311_STABLE}
+              F2F_BRANCH_VERSION: ${F2F_BRANCH_VERSION:-MOODLE_400_STABLE}
+              HVP_BRANCH_VERSION: ${HVP_BRANCH_VERSION:-stable}
+              FORMAT_BRANCH_VERSION: ${FORMAT_BRANCH_VERSION:-MOODLE_311}
+              CERTIFICATE_BRANCH_VERSION: ${CERTIFICATE_BRANCH_VERSION:-MOODLE_311_STABLE}
+              CUSTOMCERT_BRANCH_VERSION: ${CUSTOMCERT_BRANCH_VERSION:-MOODLE_311_STABLE}
+              DATAFLOWS_BRANCH_VERSION: ${DATAFLOWS_BRANCH_VERSION:-MOODLE_35_STABLE}
+        volumes:
+            - ./temp/var/www:/var/www:delegated
+        # Copy files from build directory to www/html to mimic shared PVC copy in OpenShift (allows for multiple container instances)
+        # Note: THis will add a few minutes to startup.
+        # command: bash -c "cp /app/public /var/www/html -p -r && chown -R www-data:www-data /var/www && stdout_logfile=/dev/stdout && stdout_logfile_maxbytes=0 && stderr_logfile=/dev/stderr && stderr_logfile_maxbytes=0 && /usr/local/bin/docker-php-entrypoint && tail -F anything"
+        # command: bash -c "cp /app/public/* /var/www/html -p -r && stdout_logfile=/dev/stdout && stdout_logfile_maxbytes=0 && stderr_logfile=/dev/stderr && stderr_logfile_maxbytes=0"
+        command:  tail -F anything
+        # command: echo "Moodle service disabled"
+        # or Without copy (to save some time if it doesn't need to be rebuilt)
+        # command: bash -c "stdout_logfile=/dev/stdout && stdout_logfile_maxbytes=0 && stderr_logfile=/dev/stderr && stderr_logfile_maxbytes=0 && /usr/local/bin/docker-php-entrypoint"
+        # command: tail -F anything # (to keep the container running)
     web:
         depends_on:
           php:
@@ -10,11 +38,14 @@ services:
         volumes:
             - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf:delegated
             - ./temp/var/www:/var/www:delegated
+        links:
+          - php
     db:
-        image: ${DB_IMAGE:-mariadb:10.5}
+        image: ${DB_IMAGE:-mariadb:10}
         env_file: .env
         volumes:
             - mysqldata:/var/lib/mysql:delegated
+            - ./temp/db-backups:/tmp/db-backups:delegated
         ports:
             - 3307:3306
         healthcheck:
@@ -29,8 +60,13 @@ services:
         depends_on:
           db:
             condition: service_healthy
+        tty: true
+        restart: "no"
         env_file:
           - .env
+        environment:
+          XDEBUG_MODE: debug
+          XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
         build:
             context: .
             dockerfile: PHP.Dockerfile
@@ -46,7 +82,13 @@ services:
               DATAFLOWS_BRANCH_VERSION: ${DATAFLOWS_BRANCH_VERSION:-MOODLE_35_STABLE}
         volumes:
             - ./temp/var/www:/var/www:delegated
-        restart: "unless-stopped"
+        # Copy files from build directory to www/html to mimic shared PVC copy in OpenShift (allows for multiple container instances)
+        # Note: THis will add a few minutes to startup.
+          # command: bash -c "cp /app/public /var/www/html -r && stdout_logfile=/dev/stdout && stdout_logfile_maxbytes=0 && stderr_logfile=/dev/stderr && stderr_logfile_maxbytes=0 && /usr/local/bin/docker-php-entrypoint"
+        # or Without copy (to save some time if it doesn't need to be rebuilt)
+        # command: bash -c "stdout_logfile=/dev/stdout && stdout_logfile_maxbytes=0 && stderr_logfile=/dev/stderr && stderr_logfile_maxbytes=0 && /usr/local/bin/docker-php-entrypoint"
+        # command: tail -F anything # (to keep the container running)
+        command: php-fpm
         healthcheck:
           # test: [
           #   "CMD-SHELL",
@@ -54,7 +96,7 @@ services:
           # ]
           test: [
             "CMD-SHELL",
-            "php-fpm-healthcheck.sh"
+            "php-fpm-healthcheck"
           ]
           interval: 10s
           timeout: 5s
@@ -68,7 +110,7 @@ services:
             context: .
             dockerfile: CRON.Dockerfile
             args:
-              CRON_IMAGE: ${CRON_IMAGE:-php:7.4-fpm}
+              CRON_IMAGE: ${CRON_IMAGE:-php:7.4-cli}
               PHP_INI_ENVIRONMENT: ${PHP_INI_ENVIRONMENT:-production}
         volumes:
             - ./temp/var/www:/var/www:delegated
