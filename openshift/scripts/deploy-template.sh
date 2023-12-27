@@ -6,7 +6,7 @@ echo "Current namespace is $DEPLOY_NAMESPACE"
 oc create configmap $WEB_DEPLOYMENT_NAME-config --from-file=./config/nginx/default.conf
 oc create configmap $APP-config --from-file=./config/moodle/$MOODLE_ENVIRONMENT.config.php
 
-oc -n $DEPLOY_NAMESPACE process -f openshift/template.json \
+oc -n $DEPLOY_NAMESPACE process -f ./openshift/template.json \
       -p APP_NAME=$APP \
       -p DB_USER=$DB_USER \
       -p DB_NAME=$DB_NAME \
@@ -25,10 +25,10 @@ oc -n $DEPLOY_NAMESPACE process -f openshift/template.json \
 oc -n $DEPLOY_NAMESPACE apply -f -
 
 echo "Rolling out $MOODLE_DEPLOYMENT_NAME..."
-oc rollout latest dc/$MOODLE_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE --wait
+oc rollout latest dc/$MOODLE_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 
 echo "Rolling out $PHP_DEPLOYMENT_NAME..."
-oc rollout latest dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE --wait
+oc rollout latest dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 
 echo "Rolling out $CRON_DEPLOYMENT_NAME..."
 oc rollout latest dc/$CRON_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
