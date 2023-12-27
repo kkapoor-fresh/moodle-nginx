@@ -41,7 +41,7 @@ on:
       - '**.php'
       - '**.yml'
       - '**.json'
-      - 'php-fpm-healthcheck.sh'
+      - '**.sh'
   pull_request:
     branches:
       - dev
