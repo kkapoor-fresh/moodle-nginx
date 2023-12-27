@@ -3,7 +3,7 @@ FROM ${DOCKER_FROM_IMAGE}
 
 # Moodle Configs
 ENV MOODLE_APP_DIR /app/public
-ARG MOODLE_ENVIRONMENT=""
+ARG MOODLE_ENVIRONMENT="remote"
 
 # PHP Configs
 ENV ETC_DIR=/usr/local/etc
@@ -52,7 +52,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 RUN git clone --recurse-submodules --jobs 8 --branch $MOODLE_BRANCH_VERSION --single-branch https://github.com/moodle/moodle $MOODLE_APP_DIR
 
-COPY ./config/moodle/${MOODLE_ENVIRONMENT}.config.php "$MOODLE_APP_DIR/config.php"
+COPY ./config/moodle/$MOODLE_ENVIRONMENT.config.php "$MOODLE_APP_DIR/config.php"
 # Add PHP info (debugging)
 RUN mkdir $MOODLE_APP_DIR/info
 COPY ./config/php/info.php "$MOODLE_APP_DIR/info/info.php"
