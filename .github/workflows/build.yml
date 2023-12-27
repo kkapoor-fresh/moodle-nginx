@@ -45,8 +45,8 @@ on:
   pull_request:
     branches:
       - dev
-      - test
-      - prod
+      #- test
+      #- prod
     paths:
       - '**.Dockerfile'
       - '**.conf'
