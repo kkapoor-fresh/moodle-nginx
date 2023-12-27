@@ -4,6 +4,10 @@ services:
     moodle:
         tty: true
         restart: "no"
+        environment:
+          DB_PASSWORD: ${DB_PASSWORD:-moodle}
+          DB_USER: ${DB_USER:-moodle}
+          DB_NAME: ${DB_NAME:-moodle}
         build:
             context: .
             dockerfile: Moodle.Dockerfile
@@ -67,6 +71,9 @@ services:
         environment:
           XDEBUG_MODE: debug
           XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+          DB_PASSWORD: ${DB_PASSWORD:-moodle}
+          DB_USER: ${DB_USER:-moodle}
+          DB_NAME: ${DB_NAME:-moodle}
         build:
             context: .
             dockerfile: PHP.Dockerfile
