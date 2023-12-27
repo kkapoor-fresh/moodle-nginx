@@ -1,4 +1,4 @@
-ARG CRON_IMAGE=php:php:8.3.0-cli
+ARG CRON_IMAGE=php:8.3.0-cli
 FROM $CRON_IMAGE
 
 # Environment uses ONLY production or development
