@@ -33,16 +33,16 @@ oc rollout latest dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 echo "Rolling out $CRON_DEPLOYMENT_NAME..."
 oc rollout latest dc/$CRON_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 
-# Check PHP deployment rollout status until complete.
-# ATTEMPTS=0
-# WAIT_TIME=5
-# ROLLOUT_STATUS_CMD="oc rollout status dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE"
-# until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 120 ]; do
-#   $ROLLOUT_STATUS_CMD
-#   ATTEMPTS=$((attempts + 1))
-#   echo "Waited: $(($ATTEMPTS * $WAIT_TIME)) seconds..."
-#   sleep $WAIT_TIME
-# done
+Check PHP deployment rollout status until complete.
+ATTEMPTS=0
+WAIT_TIME=5
+ROLLOUT_STATUS_CMD="oc rollout status dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE"
+until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 120 ]; do
+  $ROLLOUT_STATUS_CMD
+  ATTEMPTS=$((attempts + 1))
+  echo "Waited: $(($ATTEMPTS * $WAIT_TIME)) seconds..."
+  sleep $WAIT_TIME
+done
 
 # Check Moodle deployment rollout status until complete.
 # ATTEMPTS=0

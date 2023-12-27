@@ -39,7 +39,7 @@ RUN touch /var/log/cron.log \
   && chmod 0777 /var/log/cron.log \
   && adduser www-data crontab \
   && chown www-data:crontab /usr/bin/crontab \
-  && chmod 2755 /usr/bin/crontab
+  && chmod 4755 /usr/bin/crontab
 #SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 #RUN (crontab -l -u www-data; echo "* * * * * su -c '/usr/local/bin/php /app/public/admin/cli/cron.php >&1'") | crontab
 COPY ./config/cron/crontab.txt /etc/cron.d/moodle-cron
