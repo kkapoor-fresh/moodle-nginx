@@ -8,7 +8,7 @@ services:
             context: .
             dockerfile: Moodle.Dockerfile
             args:
-              MOODLE_ENVIRONMENT: ${MOODLE_ENVIRONMENT:-remote}
+              MOODLE_ENVIRONMENT: ${MOODLE_ENVIRONMENT:-local}
               DOCKER_FROM_IMAGE: ${PHP_IMAGE:-php:8.0-fpm}
               MOODLE_BRANCH_VERSION: ${MOODLE_BRANCH_VERSION:-MOODLE_311_STABLE}
               F2F_BRANCH_VERSION: ${F2F_BRANCH_VERSION:-MOODLE_400_STABLE}
