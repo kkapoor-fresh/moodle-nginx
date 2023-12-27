@@ -220,7 +220,7 @@ jobs:
           APP: ${{ inputs.APP }}
           DB_NAME: ${{ inputs.DB_NAME }}
           DB_USER: ${{ inputs.DB_USER }}
-          DB_PASSWORD: ${{ inputs.DB_PASSWORD }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           BUILD_TAG: ${{ inputs.BRANCH }}
           APP_HOST_URL: ${{ inputs.APP_HOST_URL }}
           BUILD_NAMESPACE: ${{ inputs.BUILD_NAMESPACE }}
