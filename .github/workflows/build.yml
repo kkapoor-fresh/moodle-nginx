@@ -36,6 +36,7 @@ on:
     paths:
       - '**.Dockerfile'
       - '**.conf'
+      - '**.env'
       - '**.ini'
       - '**.php'
       - '**.yml'
