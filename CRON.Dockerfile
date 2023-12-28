@@ -45,6 +45,6 @@ RUN touch /var/log/cron.log \
 COPY ./config/cron/crontab.txt /etc/cron.d/moodle-cron
 RUN chown www-data:crontab /etc/cron.d/moodle-cron
 RUN chmod 0644 /etc/cron.d/moodle-cron
-RUN crontab /etc/cron.d/moodle-cron
+# RUN crontab /etc/cron.d/moodle-cron
 
 CMD ["sh", "-c", "cron && tail -f /dev/null"]
