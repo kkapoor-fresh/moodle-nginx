@@ -43,6 +43,8 @@ RUN touch /var/log/cron.log \
 #SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 #RUN (crontab -l -u www-data; echo "* * * * * su -c '/usr/local/bin/php /app/public/admin/cli/cron.php >&1'") | crontab
 COPY ./config/cron/crontab.txt /etc/cron.d/moodle-cron
-RUN chmod 0644 /etc/cron.d/moodle-cron \
-  && crontab /etc/cron.d/moodle-cron
+RUN chown www-data:crontab /etc/cron.d/moodle-cron
+RUN chmod 0644 /etc/cron.d/moodle-cron
+RUN crontab /etc/cron.d/moodle-cron
+
 CMD ["sh", "-c", "cron && tail -f /dev/null"]
