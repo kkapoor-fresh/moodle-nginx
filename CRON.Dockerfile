@@ -35,16 +35,19 @@ COPY ./config/php/php.ini "$PHP_INI_DIR/moodle-php.ini"
 COPY ./config/php/php-fpm.conf "/usr/local/etc/php-fpm.d"
 
 # Setup and run cron
-RUN touch /var/log/cron.log \
-  && chmod 0777 /var/log/cron.log \
-  && adduser www-data crontab \
-  && chown www-data:crontab /usr/bin/crontab \
-  && chmod 4755 /usr/bin/crontab
+# RUN touch /var/log/cron.log \
+#   && chmod 0777 /var/log/cron.log \
+#   && adduser www-data crontab \
+#   && chown www-data:crontab /usr/bin/crontab \
+#   && chmod 4755 /usr/bin/crontab
 #SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 #RUN (crontab -l -u www-data; echo "* * * * * su -c '/usr/local/bin/php /app/public/admin/cli/cron.php >&1'") | crontab
-COPY ./config/cron/crontab.txt /etc/cron.d/moodle-cron
-RUN chown www-data:crontab /etc/cron.d/moodle-cron
-RUN chmod 0644 /etc/cron.d/moodle-cron
+# COPY ./config/cron/crontab.txt /etc/cron.d/moodle-cron
+# RUN chown www-data:crontab /etc/cron.d/moodle-cron
+# RUN chmod 0644 /etc/cron.d/moodle-cron
 # RUN crontab /etc/cron.d/moodle-cron
 
-CMD ["sh", "-c", "cron && tail -f /dev/null"]
+# CMD ["sh", "-c", "cron && tail -f /dev/null"]
+
+COPY ./config/cron/moodlle-cron.sh /moodle-cron.sh
+CMD ["/bin/bash", "/moodle-cron.sh"]
