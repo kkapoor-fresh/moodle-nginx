@@ -24,4 +24,4 @@ cp /app/public/* /var/www/html -p -r
 # mkdir /var/www/html
 # rsync -a --delete empty/ /tmp/old
 
-sh /test-migration-complete.sh
+sh /usr/local/bin/test-migration-complete.sh
