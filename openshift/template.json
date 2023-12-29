@@ -192,7 +192,7 @@
               {
                 "image": "${IMAGE_REPO}${BUILD_NAMESPACE}/${MOODLE_DEPLOYMENT_NAME}:${BUILD_TAG}",
                 "name": "${MOODLE_DEPLOYMENT_NAME}",
-                "restartPolicy": "Always",
+                "restartPolicy": "Never",
                 "imagePullPolicy": "Always",
                 "ports": [
                   {
@@ -579,11 +579,29 @@
                     "value": "${CRON_DEPLOYMENT_NAME}"
                   },
                   {
+                    "name": "DB_USER",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${APP_NAME}-secrets",
+                        "key": "database-user"
+                      }
+                    }
+                  },
+                  {
                     "name": "DB_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
                         "name": "${APP_NAME}-secrets",
                         "key": "database-password"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DB_NAME",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${APP_NAME}-secrets",
+                        "key": "database-name"
                       }
                     }
                   }

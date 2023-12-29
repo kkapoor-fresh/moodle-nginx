@@ -9,7 +9,9 @@ objects:
      name: migrate-build-files
      namespace: e66ac2-dev
    spec:
-     selector: {}
+     parallelism: 1
+     completions: 1
+     backoffLimit: 6
      template:
        metadata:
          name: migrate-build-files
@@ -22,6 +24,9 @@ objects:
              configMap:
                name: cron-config
                defaultMode: 420
+               items:
+                 - key: config.php
+                   path: config.php
            - name: moodle-env
              configMap:
                name: moodle-env
@@ -31,29 +36,34 @@ objects:
                defaultMode: 420
          containers:
            - name: migrate-build-files-job
-             image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${PHP_DEPLOYMENT_NAME}:${BUILD_TAG}
+             image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${BUILD_NAME}:${BUILD_TAG}
              volumeMounts:
                - name: moodle-data
                  mountPath: /var/www/html
                - name: moodle-env
                  mountPath: .env
                  subPath: .env
+               - name: cron-config
+                 mountPath: /var/www/html/config.php
+                 subPath: config.php
              command:
                - bash
                - "-c"
                - |
                 echo "Migrating build fiiles to persistent volume"
                 cp -ru /app/public/* /var/www/html
+             imagePullPolicy: Always
          restartPolicy: Never
 parameters:
   - name: IMAGE_REPO
     required: true
+    value: "image-registry.openshift-image-registry.svc:5000/"
   - name: BUILD_NAMESPACE
     required: true
-  - name: PHP_DEPLOYMENT_NAME
+    value: "e66ac2-tools"
+  - name: BUILD_NAME
     required: true
-  - name: IMAGE_NAME
-    required: true
+    value: "moodle"
   - name: BUILD_TAG
     required: true
     value: "dev"
