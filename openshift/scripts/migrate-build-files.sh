@@ -23,3 +23,5 @@ cp /app/public/* /var/www/html -p -r
 # mv /var/www/html /var/www/html_old
 # mkdir /var/www/html
 # rsync -a --delete empty/ /tmp/old
+
+sh /test-migration-complete.sh

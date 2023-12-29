@@ -87,5 +87,7 @@ RUN git clone --recurse-submodules --jobs 8 --branch $HVP_BRANCH_VERSION --singl
 
 # Add commands for site upgrades / migrations
 COPY ./config/moodle/moodle_index_during_maintenance.php /tmp/moodle_index_during_maintenance.php
-COPY ./openshift/scripts/migrate-build-files.sh /usr/local/bin/migrate-build-files.sh
-COPY ./openshift/scripts/test-migration-complete.sh /usr/local/bin/test-migration-complete.sh
+COPY ./openshift/scripts/migrate-build-files.sh /migrate-build-files.sh
+COPY ./openshift/scripts/test-migration-complete.sh /test-migration-complete.sh
+
+CMD ["/bin/bash", "/usr/local/bin/migrate-build-files.sh"]
