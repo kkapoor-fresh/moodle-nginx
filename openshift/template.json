@@ -216,6 +216,11 @@
                     "name": "${APP_NAME}-env",
                     "mountPath": ".env",
                     "subPath": ".env"
+                  },
+                  {
+                    "name": "${APP_NAME}-config",
+                    "mountPath": "/var/www/html/config.php",
+                    "subPath": "config.php"
                   }
                 ],
                 "resources": {
@@ -383,6 +388,11 @@
                 ],
                 "volumeMounts": [
                   {
+                    "name": "${APP_NAME}-config",
+                    "mountPath": "/var/www/html/config.php",
+                    "subPath": "config.php"
+                  },
+                  {
                     "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
                     "name": "${APP_NAME}-data"
                   },
@@ -450,6 +460,19 @@
               }
             ],
             "volumes": [
+              {
+                "name": "${APP_NAME}-config",
+                "configMap": {
+                  "name": "${APP_NAME}-config",
+                  "defaultMode": 420,
+                  "items": [
+                    {
+                      "key": "config.php",
+                      "path": "config.php"
+                    }
+                  ]
+                }
+              },
               {
                 "name": "${APP_NAME}-data",
                 "persistentVolumeClaim": {
@@ -550,6 +573,11 @@
                 "imagePullPolicy": "Always",
                 "volumeMounts": [
                   {
+                    "name": "cron-config",
+                    "mountPath": "/var/www/html/config.php",
+                    "subPath": "config.php"
+                  },
+                  {
                     "mountPath": "${MOODLE_DATA_MOUNT_PATH}",
                     "name": "${APP_NAME}-data"
                   },
@@ -609,6 +637,19 @@
               }
             ],
             "volumes": [
+              {
+                "name": "cron-config",
+                "configMap": {
+                  "name": "cron-config",
+                  "defaultMode": 420,
+                  "items": [
+                    {
+                      "key": "config.php",
+                      "path": "config.php"
+                    }
+                  ]
+                }
+              },
               {
                 "name": "${APP_NAME}-data",
                 "persistentVolumeClaim": {

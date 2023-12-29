@@ -1,0 +1,69 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: moodlle-upgrade-job
+objects:
+ - apiVersion: batch/v1
+   kind: Job
+   metadata:
+     name: moodlle-upgrade-job
+     namespace: e66ac2-dev
+   spec:
+     parallelism: 1
+     completions: 1
+     backoffLimit: 6
+     template:
+       metadata:
+         name: moodlle-upgrade-job
+       spec:
+         volumes:
+           - name: moodle-data
+             persistentVolumeClaim:
+               claimName: moodle-data
+           - name: cron-config
+             configMap:
+               name: cron-config
+               defaultMode: 420
+               items:
+                 - key: config.php
+                   path: config.php
+           - name: moodle-env
+             configMap:
+               name: moodle-env
+               items:
+                 - key: .env
+                   path: ./.env
+               defaultMode: 420
+         containers:
+           - name: moodlle-upgrade-job-job
+             image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${BUILD_NAME}:${BUILD_TAG}
+             volumeMounts:
+               - name: moodle-data
+                 mountPath: /var/www/html
+               - name: moodle-env
+                 mountPath: .env
+                 subPath: .env
+               - name: cron-config
+                 mountPath: /var/www/html/config.php
+                 subPath: config.php
+             command:
+               - bash
+               - "-c"
+               - |
+                echo "Upgrading Moodle..."
+                sh /usr/local/bin/moodlle-upgrade-job.sh
+             imagePullPolicy: Always
+         restartPolicy: OnFailure
+parameters:
+  - name: IMAGE_REPO
+    required: true
+    value: "image-registry.openshift-image-registry.svc:5000/"
+  - name: BUILD_NAMESPACE
+    required: true
+    value: "e66ac2-tools"
+  - name: BUILD_NAME
+    required: true
+    value: "php"
+  - name: BUILD_TAG
+    required: true
+    value: "dev"

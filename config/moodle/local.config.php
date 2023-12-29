@@ -6,9 +6,9 @@ $CFG = new stdClass();
 $CFG->dbtype    = 'mariadb';
 $CFG->dblibrary = 'native';
 $CFG->dbhost    = 'db';
-$CFG->dbname    = $_ENV['DB_NAME'];
-$CFG->dbuser    = $_ENV['DB_USER'];
-$CFG->dbpass    = $_ENV['DB_PASSWORD'];
+$CFG->dbname    = $_SERVER['DB_NAME'];
+$CFG->dbuser    = $_SERVER['DB_USER'];
+$CFG->dbpass    = $_SERVER['DB_PASSWORD'];
 $CFG->moodleappdir    = '/var/www/html';
 $CFG->prefix    = '';
 $CFG->tool_generator_users_password = 'moodle-gen-PWd';
@@ -40,7 +40,7 @@ if (php_sapi_name() == "cli") {
 
 $CFG->dataroot  = '/var/www/moodledata';
 $CFG->admin     = 'admin';
-// $CFG->alternateloginurl  = (isset($_ENV['ALTERNATE_LOGIN_URL'])) ? $_ENV['ALTERNATE_LOGIN_URL'] : '';
+// $CFG->alternateloginurl  = (isset($_SERVER['ALTERNATE_LOGIN_URL'])) ? $_SERVER['ALTERNATE_LOGIN_URL'] : '';
 
 $CFG->directorypermissions = 0777;
 
