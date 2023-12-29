@@ -62,22 +62,26 @@ oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'php /var/www/html/admin/cli/maintena
 
 echo "Copying build files to web root (PVC): $MOODLE_DEPLOYMENT_NAME > $PHP_DEPLOYMENT_NAME"
 
-# Ensure moodle config is cleared (Moodle)
-oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c 'rm -f /var/www/html/config.php' -n $DEPLOY_NAMESPACE
 
-MOODLE_APP_DIR=/var/www/html
+echo "Create and run Migration job..."
+oc process -f ./openshift/migrate-build-files-job.yml | oc create -f -
 
-# Delete existing plugins (PHP)
-oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/admin/tool/trigger" -n $DEPLOY_NAMESPACE
-oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/admin/tool/dataflows" -n $DEPLOY_NAMESPACE
-oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/mod/facetoface" -n $DEPLOY_NAMESPACE
-oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/mod/hvp" -n $DEPLOY_NAMESPACE
-oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/course/format/topcoll" -n $DEPLOY_NAMESPACE
-oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/mod/customcert" -n $DEPLOY_NAMESPACE
-oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/mod/certificate" -n $DEPLOY_NAMESPACE
+# # Ensure moodle config is cleared (Moodle)
+# oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c 'rm -f /var/www/html/config.php' -n $DEPLOY_NAMESPACE
 
-# Copy / update all files from docker build to shared PVC (Moodle)
-oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c 'cp -ru /app/public/* /var/www/html' -n $DEPLOY_NAMESPACE
+# MOODLE_APP_DIR=/var/www/html
+
+# # Delete existing plugins (PHP)
+# oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/admin/tool/trigger" -n $DEPLOY_NAMESPACE
+# oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/admin/tool/dataflows" -n $DEPLOY_NAMESPACE
+# oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/mod/facetoface" -n $DEPLOY_NAMESPACE
+# oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/mod/hvp" -n $DEPLOY_NAMESPACE
+# oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/course/format/topcoll" -n $DEPLOY_NAMESPACE
+# oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/mod/customcert" -n $DEPLOY_NAMESPACE
+# oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c "rm -f $MOODLE_APP_DIR/mod/certificate" -n $DEPLOY_NAMESPACE
+
+# # Copy / update all files from docker build to shared PVC (Moodle)
+# oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c 'cp -ru /app/public/* /var/www/html' -n $DEPLOY_NAMESPACE
 
 echo "Purging caches..."
 oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'php /var/www/html/admin/cli/purge_caches.php' -n $DEPLOY_NAMESPACE

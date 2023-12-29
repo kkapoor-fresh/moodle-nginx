@@ -1,7 +1,7 @@
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
+# stdout_logfile=/dev/stdout
+# stdout_logfile_maxbytes=0
+# stderr_logfile=/dev/stderr
+# stderr_logfile_maxbytes=0
 
 # echo "Delete Moodle config..."
 
