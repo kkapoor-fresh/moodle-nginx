@@ -60,11 +60,22 @@ done
 echo "Enabling Moodle maintenance mode..."
 oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'php /var/www/html/admin/cli/maintenance.php --enable' -n $DEPLOY_NAMESPACE --wait
 
-echo "Copying build files to web root (PVC): $MOODLE_DEPLOYMENT_NAME > $PHP_DEPLOYMENT_NAME"
-
-
-echo "Create and run Migration job..."
+echo "Create and Moodle build migration job..."
 oc process -f ./openshift/migrate-build-files-job.yml | oc create -f -
+
+echo "Waiting for Moodle build migration job status to complete..."
+ATTEMPTS=0
+WAIT_TIME=5
+MIGRATE_STATUS_CMD="oc get job/migrate-build-files | find /i '1/1'"
+until $MIGRATE_STATUS_CMD || [ $ATTEMPTS -eq 120 ]; do
+  $MIGRATE_STATUS_CMD
+  ATTEMPTS=$((attempts + 1))
+  echo "Waited: $(($ATTEMPTS * $WAIT_TIME)) seconds..."
+  sleep $WAIT_TIME
+done
+
+echo "Create and run Moodle upgrade job..."
+oc process -f ./openshift/moodle-upgrade-job.yml | oc create -f -
 
 # # Ensure moodle config is cleared (Moodle)
 # oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c 'rm -f /var/www/html/config.php' -n $DEPLOY_NAMESPACE
