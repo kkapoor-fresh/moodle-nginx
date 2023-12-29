@@ -90,4 +90,4 @@ COPY ./config/moodle/moodle_index_during_maintenance.php /tmp/moodle_index_durin
 COPY ./openshift/scripts/migrate-build-files.sh /usr/local/bin/migrate-build-files.sh
 COPY ./openshift/scripts/test-migration-complete.sh /usr/local/bin/test-migration-complete.sh
 
-CMD ["/bin/bash", "/usr/local/bin/migrate-build-files.sh"]
+# CMD ["/bin/bash", "/usr/local/bin/migrate-build-files.sh"]
