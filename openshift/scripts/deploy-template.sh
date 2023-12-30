@@ -106,8 +106,12 @@ oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'php /var/www/html/admin/cli/upgrade.
 echo "Disabling maintenance mode..."
 oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'php /var/www/html/admin/cli/maintenance.php --disable' -n $DEPLOY_NAMESPACE
 
-echo "Run first cron..."
-oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'php /var/www/html/admin/cli/cron.php' -n $DEPLOY_NAMESPACE
+
+echo "Create and run Moodle cron job..."
+oc process -f ./openshift/moodle-cron-job.yml | oc create -f -
+
+# echo "Run first cron..."
+# oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'php /var/www/html/admin/cli/cron.php' -n $DEPLOY_NAMESPACE
 
 # echo "Listing pods..."
 # oc get pods|grep $PHP_DEPLOYMENT_NAME

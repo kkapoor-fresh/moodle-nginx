@@ -217,6 +217,17 @@ jobs:
             echo "DELETED job migrate-build-files"
           fi
 
+      - name: 🧹️ Clean Cron Job
+        id: clean-cron-job
+        run: |
+          if [[ `oc describe job moodle-cron-job 2>&1` =~ "NotFound" ]]; then
+            echo "moodle-cron-job NOT FOUND: Skipping..."
+          else
+            echo "moodle-cron-job FOUND: Cleaning resources..."
+            oc delete job moodle-cron-job
+            echo "DELETED job moodle-cron-job"
+          fi
+
       - name: 🧹️ Clean ${{ inputs.APP }}-${{ inputs.WEB_DEPLOYMENT_NAME }} | ${{ inputs.APP_HOST_URL }}
         id: clean-route
         run: |
