@@ -69,7 +69,7 @@ WAIT_TIME=5
 MIGRATE_STATUS_CMD="oc get job | findstr /i 'migrate-build-files 1/1'"
 until $MIGRATE_STATUS_CMD || [ $ATTEMPTS -eq 120 ]; do
   $MIGRATE_STATUS_CMD
-  ATTEMPTS=$((attempts + 1))
+  ATTEMPTS=$(( ATTEMPTS++ ))
   echo "Waited: $(($ATTEMPTS * $WAIT_TIME)) seconds..."
   sleep $WAIT_TIME
 done
