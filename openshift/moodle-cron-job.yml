@@ -37,6 +37,13 @@ objects:
          containers:
            - name: moodle-cron-job-job
              image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${BUILD_NAME}:${BUILD_TAG}
+             env:
+               - name: DB_NAME
+                 value: ${DB_NAME}
+               - name: DB_USER
+                 value: ${DB_USER}
+               - name: DB_PASSWORD
+                 value: ${DB_PASSWORD}
              volumeMounts:
                - name: moodle-data
                  mountPath: /var/www/html
@@ -53,6 +60,13 @@ objects:
                 echo "Running Moodle Cron..."
                 sh /usr/local/bin/moodle-cron-job.sh
              imagePullPolicy: Always
+             resources:
+               limits:
+                 memory: '0'
+                 cpu: '0'
+               requests:
+                 memory: '0'
+                 cpu: '0'
          restartPolicy: OnFailure
 parameters:
   - name: IMAGE_REPO
@@ -67,3 +81,12 @@ parameters:
   - name: BUILD_TAG
     required: true
     value: "dev"
+  - name: DB_USER
+    required: true
+    value: "moodle"
+  - name: DB_NAME
+    required: true
+    value: "moodle"
+  - name: DB_PASSWORD
+    required: true
+    value: "CHANGE_ME"

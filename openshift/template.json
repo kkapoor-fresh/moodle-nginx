@@ -411,12 +411,12 @@
                 ],
                 "resources": {
                   "limits": {
-                    "memory": "${CRON_MEMORY_LIMIT}",
+                    "memory": "${WEB_MEMORY_LIMIT}",
                     "cpu": "${CRON_CPU_LIMIT}"
                   },
                   "requests": {
                     "memory": "${CRON_MEMORY_REQUEST}",
-                    "cpu": "${CRON_CPU_REQUEST}"
+                    "cpu": "${WEB_CPU_REQUEST}"
                   }
                 }
               }
@@ -604,13 +604,13 @@
     {
       "description": "Maximum amount of memory the CRON container can use.",
       "displayName": "CRON Memory Limit",
-      "name": "CRON_MEMORY_LIMIT",
+      "name": "WEB_MEMORY_LIMIT",
       "value": "128Mi"
     },
     {
       "description": "Requested amount of CPU for the CRON container.",
       "displayName": "CRON CPU Request",
-      "name": "CRON_CPU_REQUEST",
+      "name": "WEB_CPU_REQUEST",
       "value": "30m"
     },
     {

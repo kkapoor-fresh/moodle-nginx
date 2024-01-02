@@ -75,7 +75,11 @@ until $MIGRATE_STATUS_CMD || [ $ATTEMPTS -eq 120 ]; do
 done
 
 echo "Create and run Moodle upgrade job..."
-oc process -f ./openshift/moodle-upgrade-job.yml | oc create -f -
+oc process -f ./openshift/moodle-upgrade-job.yml \
+  -p DB_USER=$DB_USER \
+  -p DB_NAME=$DB_NAME \
+  -p DB_PASSWORD=$DB_PASSWORD \
+ | oc create -f -
 
 # # Ensure moodle config is cleared (Moodle)
 # oc exec dc/$MOODLE_DEPLOYMENT_NAME -- bash -c 'rm -f /var/www/html/config.php' -n $DEPLOY_NAMESPACE
