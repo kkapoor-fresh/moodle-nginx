@@ -66,7 +66,7 @@ oc process -f ./openshift/migrate-build-files-job.yml | oc create -f -
 echo "Waiting for Moodle build migration job status to complete..."
 ATTEMPTS=0
 WAIT_TIME=5
-MIGRATE_STATUS_CMD="oc get job/migrate-build-files | findstr /i 1/1"
+MIGRATE_STATUS_CMD="oc get job | findstr /i 'migrate-build-files 1/1'"
 until $MIGRATE_STATUS_CMD || [ $ATTEMPTS -eq 120 ]; do
   $MIGRATE_STATUS_CMD
   ATTEMPTS=$((attempts + 1))
