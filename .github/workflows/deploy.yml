@@ -215,7 +215,7 @@ jobs:
 
       - name: 🚀 Deploy OpenShift Template ( ${{ inputs.DEPLOY_NAMESPACE }} ) ${{ inputs.WEB_DEPLOYMENT_NAME }}, ${{ inputs.PHP_DEPLOYMENT_NAME }}, ${{ inputs.CRON_DEPLOYMENT_NAME }} - with routes, secrets, configmaps
         if: success()
-        run: sh ./openshift/scripts/deploy-template.sh
+        run: ./openshift/scripts/deploy-template.sh
         env:
           APP: ${{ inputs.APP }}
           DB_NAME: ${{ inputs.DB_NAME }}
