@@ -25,14 +25,14 @@ oc -n $DEPLOY_NAMESPACE process -f ./openshift/template.json \
       -p MOODLE_DEPLOYMENT_NAME=$MOODLE_DEPLOYMENT_NAME | \
 oc -n $DEPLOY_NAMESPACE apply -f -
 
-echo "Rolling out $MOODLE_DEPLOYMENT_NAME..."
-oc rollout latest dc/$MOODLE_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
+# echo "Rolling out $MOODLE_DEPLOYMENT_NAME..."
+# oc rollout latest dc/$MOODLE_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 
 echo "Rolling out $PHP_DEPLOYMENT_NAME..."
 oc rollout latest dc/$PHP_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 
-echo "Rolling out $CRON_DEPLOYMENT_NAME..."
-oc rollout latest dc/$CRON_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
+# echo "Rolling out $CRON_DEPLOYMENT_NAME..."
+# oc rollout latest dc/$CRON_DEPLOYMENT_NAME -n $DEPLOY_NAMESPACE
 
 Check PHP deployment rollout status until complete.
 ATTEMPTS=0
