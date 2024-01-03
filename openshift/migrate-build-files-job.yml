@@ -46,6 +46,22 @@ objects:
                - name: cron-config
                  mountPath: /var/www/html/config.php
                  subPath: config.php
+             env:
+               - name: DB_USER
+                 valueFrom:
+                   secretKeyRef:
+                     name: moodle-secrets
+                     key: database-user
+               - name: DB_NAME
+                 valueFrom:
+                   secretKeyRef:
+                     name: moodle-secrets
+                     key: database-name
+               - name: DB_PASSWORD
+                 valueFrom:
+                   secretKeyRef:
+                     name: moodle-secrets
+                     key: database-password
              command:
                - bash
                - "-c"

@@ -6,7 +6,8 @@
 # echo "Delete Moodle config..."
 
 # rm -f /var/www/html/config.php
-echo "Deleting shared Moodle files..."
+echo "Deleting shared Moodle files... in 10...9...8..."
+sleep 10
 rm -rf /var/www/html/*
 # echo "Move Moodle web files to /tmp/old..."
 # mv /var/www/html/* /tmp/old
