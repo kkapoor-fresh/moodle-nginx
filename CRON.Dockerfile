@@ -5,7 +5,7 @@ FROM $CRON_IMAGE
 ARG PHP_INI_ENVIRONMENT=production
 
 # Moodle App directory
-ENV MOODLE_APP_DIR /app/public
+ENV MOODLE_APP_DIR /var/www/html
 ENV PHP_INI_DIR /usr/local/etc/php
 ENV PHP_INI_FILE $PHP_INI_DIR/php.ini
 
