@@ -17,6 +17,9 @@ cp /tmp/moodle_index_during_maintenance.php /var/www/html/index.php
 echo "Copying files..."
 cp /app/public/* /var/www/html -p -r || true
 
+echo "Changing file ownership to www-data..."
+chown -R www-data:www-data /var/www/html || true
+
 # echo "Delete [/tmp/old] Moodle web files..."
 # rm -rf /var/www/html/*
 # mv /var/www/html /var/www/html_old
