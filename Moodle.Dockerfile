@@ -74,8 +74,7 @@ RUN mkdir -p $HVP_DIR  && \
   # mkdir -p $F2F_DIR && \
     mkdir -p $FORMAT_DIR  && \
   # mkdir -p $CERTIFICATE  && \
-    mkdir -p $CUSTOMCERT_DIR  && \
-    chown -R www-data:www-data $MOODLE_APP_DIR
+    mkdir -p $CUSTOMCERT_DIR
 
 RUN git clone --recurse-submodules --jobs 8 --branch $HVP_BRANCH_VERSION --single-branch $HVP_URL $HVP_DIR && \
   # git clone --recurse-submodules --jobs 8 --branch $DATAFLOWS_BRANCH_VERSION --single-branch $DATAFLOWS_URL $DATAFLOWS_DIR && \
@@ -89,5 +88,7 @@ RUN git clone --recurse-submodules --jobs 8 --branch $HVP_BRANCH_VERSION --singl
 COPY ./config/moodle/moodle_index_during_maintenance.php /tmp/moodle_index_during_maintenance.php
 COPY ./openshift/scripts/migrate-build-files.sh /usr/local/bin/migrate-build-files.sh
 COPY ./openshift/scripts/test-migration-complete.sh /usr/local/bin/test-migration-complete.sh
+
+RUN chown -R www-data:www-data $MOODLE_APP_DIR
 
 # CMD ["/bin/bash", "/usr/local/bin/migrate-build-files.sh"]

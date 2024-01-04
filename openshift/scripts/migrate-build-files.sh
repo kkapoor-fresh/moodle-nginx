@@ -15,7 +15,7 @@ echo "Replace Moodle index with maintenance page..."
 cp /tmp/moodle_index_during_maintenance.php /var/www/html/index.php
 
 echo "Copying files..."
-cp /app/public/* /var/www/html -p -r || true
+cp /app/public/* /var/www/html -rp || true
 
 echo "Changing file ownership to www-data..."
 chown -R www-data:www-data /var/www/html || true
