@@ -3,12 +3,10 @@
 # stderr_logfile=/dev/stderr
 # stderr_logfile_maxbytes=0
 
-# echo "Delete Moodle config..."
-
-# rm -f /var/www/html/config.php
-echo "Deleting shared Moodle files... in 10...9...8..."
-sleep 10
+echo "Deleting shared Moodle files... in 30...29...28..."
+sleep 30
 rm -rf /var/www/html/*
+
 # echo "Move Moodle web files to /tmp/old..."
 # mv /var/www/html/* /tmp/old
 # mkdir /var/www/html

@@ -227,6 +227,11 @@ jobs:
             oc delete job moodle-cron-job
             echo "DELETED job moodle-cron-job"
           fi
+          if [[ `oc describe configmap cron-config 2>&1` =~ "NotFound" ]]; then
+            echo "cron-config NOT FOUND: Skipping..."
+          else
+            oc delete configmap cron-config
+          fi
 
       - name: 🧹️ Clean ${{ inputs.APP }}-${{ inputs.WEB_DEPLOYMENT_NAME }} | ${{ inputs.APP_HOST_URL }}
         id: clean-route
