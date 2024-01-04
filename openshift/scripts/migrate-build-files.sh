@@ -5,7 +5,7 @@
 
 echo "Deleting shared Moodle files... in 30...29...28..."
 sleep 30
-rm -rf /var/www/html/*
+rm -rf /var/www/html/* || true
 
 # echo "Move Moodle web files to /tmp/old..."
 # mv /var/www/html/* /tmp/old
@@ -15,7 +15,7 @@ echo "Replace Moodle index with maintenance page..."
 cp /tmp/moodle_index_during_maintenance.php /var/www/html/index.php
 
 echo "Copying files..."
-cp /app/public/* /var/www/html -p -r
+cp /app/public/* /var/www/html -p -r || true
 
 # echo "Delete [/tmp/old] Moodle web files..."
 # rm -rf /var/www/html/*

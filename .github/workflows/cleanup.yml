@@ -233,6 +233,17 @@ jobs:
             oc delete configmap cron-config
           fi
 
+      - name: 🧹️ Clean Upgrade Job
+        id: clean-upgrade-job
+        run: |
+          if [[ `oc describe job moodlle-upgrade-job 2>&1` =~ "NotFound" ]]; then
+            echo "moodlle-upgrade-job NOT FOUND: Skipping..."
+          else
+            echo "moodlle-upgrade-job FOUND: Cleaning resources..."
+            oc delete job moodlle-upgrade-job
+            echo "DELETED job moodlle-upgrade-job"
+          fi
+
       - name: 🧹️ Clean ${{ inputs.APP }}-${{ inputs.WEB_DEPLOYMENT_NAME }} | ${{ inputs.APP_HOST_URL }}
         id: clean-route
         run: |
