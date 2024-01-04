@@ -28,16 +28,7 @@ $CFG->dboptions =  array (
   'dbcollation' => 'utf8mb4_unicode_ci',
 );
 
-if (php_sapi_name() == "cli") {
-    $CFG->wwwroot = '/var/www/html';
-} else {
-    $protocol = 'http://';
-    $moodle_dir = stripos($_SERVER['REQUEST_URI'], '/moodle') === 0 ? '/moodle' : ''; // for local dev in /moodle folder
-    $requested_site_url = $protocol.$_SERVER['HTTP_HOST'].$moodle_dir;
-
-    $CFG->wwwroot = $requested_site_url;
-}
-
+$CFG->wwwroot = '/var/www/html';
 $CFG->dataroot  = '/var/www/moodledata';
 $CFG->admin     = 'admin';
 // $CFG->alternateloginurl  = (isset($_SERVER['ALTERNATE_LOGIN_URL'])) ? $_SERVER['ALTERNATE_LOGIN_URL'] : '';
