@@ -60,7 +60,7 @@ done
 echo "Enabling Moodle maintenance mode..."
 oc exec dc/$PHP_DEPLOYMENT_NAME -- bash -c 'php /var/www/html/admin/cli/maintenance.php --enable' -n $DEPLOY_NAMESPACE --wait
 
-echo "Create and Moodle build migration job..."
+echo "Create and run Moodle build migration job..."
 oc process -f ./openshift/migrate-build-files-job.yml | oc create -f -
 
 echo "Waiting for Moodle build migration job status to complete..."

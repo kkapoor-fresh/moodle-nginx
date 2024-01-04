@@ -20,6 +20,9 @@ objects:
            - name: moodle-data
              persistentVolumeClaim:
                claimName: moodle-data
+           - name: moodle-app-data
+             persistentVolumeClaim:
+               claimName: moodle-app-data
            - name: cron-config
              configMap:
                name: cron-config
@@ -54,8 +57,10 @@ objects:
                      name: moodle-secrets
                      key: database-password
              volumeMounts:
-               - name: moodle-data
+               - name: moodle-app-data
                  mountPath: /var/www/html
+               - name: moodle-data
+                 mountPath: /var/www/moodledata
                - name: moodle-env
                  mountPath: .env
                  subPath: .env
