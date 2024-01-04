@@ -17,6 +17,9 @@ objects:
          name: moodlle-upgrade-job
        spec:
          volumes:
+           - name: moodle-app-data
+             persistentVolumeClaim:
+               claimName: moodle-app-data
            - name: moodle-data
              persistentVolumeClaim:
                claimName: moodle-data
@@ -38,8 +41,10 @@ objects:
            - name: moodlle-upgrade-job-job
              image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${BUILD_NAME}:${BUILD_TAG}
              volumeMounts:
-               - name: moodle-data
+               - name: moodle-app-data
                  mountPath: /var/www/html
+               - name: moodle-data
+                 mountPath: /var/www/moodledata
                - name: moodle-env
                  mountPath: .env
                  subPath: .env
