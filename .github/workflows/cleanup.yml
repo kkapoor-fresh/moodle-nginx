@@ -127,13 +127,13 @@ jobs:
             echo "${{ inputs.DB_DEPLOYMENT_NAME }} FOUND: Cleaning..."
             oc scale sts ${{ inputs.DB_DEPLOYMENT_NAME }} --replicas=0
             oc delete sts ${{ inputs.DB_DEPLOYMENT_NAME }}
-            for i in 0 1 2; do
-              if ! [[ `oc describe pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i 2>&1` =~ "NotFound" ]]; then
-                kubectl delete pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i;
-              else
-                echo "pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i NOT FOUND: Skipping..."
-              fi
-            done
+            # for i in 0 1 2; do
+            #   if ! [[ `oc describe pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i 2>&1` =~ "NotFound" ]]; then
+            #     kubectl delete pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i;
+            #   else
+            #     echo "pvc datadir-${{ inputs.DB_DEPLOYMENT_NAME }}-$i NOT FOUND: Skipping..."
+            #   fi
+            # done
           fi
           if ! [[ `oc describe configmap $configmap_name 2>&1` =~ "NotFound" ]]; then
             oc delete configmap $configmap_name
