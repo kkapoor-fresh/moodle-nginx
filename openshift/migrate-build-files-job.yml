@@ -20,13 +20,9 @@ objects:
            - name: moodle-data
              persistentVolumeClaim:
                claimName: moodle-data
-           - name: cron-config
-             configMap:
-               name: cron-config
-               defaultMode: 420
-               items:
-                 - key: config.php
-                   path: config.php
+           - name: moodle-app-data
+             persistentVolumeClaim:
+               claimName: moodle-app-data
            - name: moodle-env
              configMap:
                name: moodle-env
@@ -38,14 +34,13 @@ objects:
            - name: migrate-build-files-job
              image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${BUILD_NAME}:${BUILD_TAG}
              volumeMounts:
-               - name: moodle-data
+               - name: moodle-app-data
                  mountPath: /var/www/html
+               - name: moodle-data
+                 mountPath: /var/www/moodledata
                - name: moodle-env
                  mountPath: .env
                  subPath: .env
-               - name: cron-config
-                 mountPath: /var/www/html/config.php
-                 subPath: config.php
              env:
                - name: DB_USER
                  valueFrom:
