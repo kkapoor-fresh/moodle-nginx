@@ -741,14 +741,14 @@ updateJob:
   resources:
     ## Example:
     ## limits:
-    cpu: 50m
-    memory: 256Mi
+    cpu: '0'
+    memory: '0'
     ##
     limits:
     ## Examples:
     ## requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: '0'
+      memory: '0'
     ##
     requests: {}
 
@@ -770,7 +770,7 @@ cluster:
   ##
   ## @param cluster.nodes The number of master nodes should always be >= 3, otherwise cluster creation will fail
   ##
-  nodes: 3
+  nodes: 6
   ## @param cluster.replicas Number of replicas for every master in the cluster
   ## Parameter to be passed as --cluster-replicas to the redis-cli --cluster create
   ## 1 means that we want a replica for every master created

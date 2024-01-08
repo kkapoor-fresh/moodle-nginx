@@ -165,7 +165,7 @@ jobs:
             helm install ${{ inputs.REDIS_DEPLOYMENT_NAME }} ${{ inputs.REDIS_REPO }}${{ inputs.REDIS_IMAGE }} --set redis.readinessProbe.enabled=false,redis.livenessProbe.enabled=false,podSecurityContext.enabled=false,containerSecurityContext.enabled=false,volumePermissions.containerSecurityContext.enabled=false -f ./config/redis/redis-cluster-values.yml
           else
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Installation FOUND: Updating..."
-            helm upgrade ${{ inputs.REDIS_DEPLOYMENT_NAME }}  ${{ inputs.REDIS_REPO }}${{ inputs.REDIS_IMAGE }}
+            helm upgrade --install ${{ inputs.REDIS_DEPLOYMENT_NAME }}  ${{ inputs.REDIS_REPO }}${{ inputs.REDIS_IMAGE }}
             echo "${{ inputs.REDIS_DEPLOYMENT_NAME  }} Updates complete."
           fi
 

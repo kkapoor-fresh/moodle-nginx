@@ -56,9 +56,9 @@ objects:
                - "-c"
                - |
                 echo "Upgrading Moodle..."
-                sh /usr/local/bin/moodlle-upgrade-job.sh
+                sh /usr/local/bin/moodle-upgrade-job.sh
              imagePullPolicy: Always
-         restartPolicy: OnFailure
+         restartPolicy: Never
 parameters:
   - name: IMAGE_REPO
     required: true
