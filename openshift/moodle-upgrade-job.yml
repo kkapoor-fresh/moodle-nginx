@@ -40,6 +40,22 @@ objects:
          containers:
            - name: moodlle-upgrade-job-job
              image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${BUILD_NAME}:${BUILD_TAG}
+             env:
+               - name: DB_USER
+                 valueFrom:
+                   secretKeyRef:
+                     name: moodle-secrets
+                     key: database-user
+               - name: DB_NAME
+                 valueFrom:
+                   secretKeyRef:
+                     name: moodle-secrets
+                     key: database-name
+               - name: DB_PASSWORD
+                 valueFrom:
+                   secretKeyRef:
+                     name: moodle-secrets
+                     key: database-password
              volumeMounts:
                - name: moodle-app-data
                  mountPath: /var/www/html
@@ -56,7 +72,7 @@ objects:
                - "-c"
                - |
                 echo "Upgrading Moodle..."
-                sh /usr/local/bin/moodle-upgrade-job.sh
+                sh /usr/local/bin/moodlle-upgrade-job.sh
              imagePullPolicy: Always
          restartPolicy: Never
 parameters:
