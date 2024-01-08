@@ -1,12 +1,12 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: moodlle-upgrade-job
+  name: moodle-upgrade-job
 objects:
  - apiVersion: batch/v1
    kind: Job
    metadata:
-     name: moodlle-upgrade-job
+     name: moodle-upgrade-job
      namespace: e66ac2-dev
    spec:
      parallelism: 1
@@ -14,7 +14,7 @@ objects:
      backoffLimit: 6
      template:
        metadata:
-         name: moodlle-upgrade-job
+         name: moodle-upgrade-job
        spec:
          volumes:
            - name: moodle-app-data
@@ -38,7 +38,7 @@ objects:
                    path: ./.env
                defaultMode: 420
          containers:
-           - name: moodlle-upgrade-job-job
+           - name: moodle-upgrade-job-job
              image: ${IMAGE_REPO}${BUILD_NAMESPACE}/${BUILD_NAME}:${BUILD_TAG}
              env:
                - name: DB_USER
@@ -72,7 +72,7 @@ objects:
                - "-c"
                - |
                 echo "Upgrading Moodle..."
-                sh /usr/local/bin/moodlle-upgrade-job.sh
+                sh /usr/local/bin/moodle-upgrade-job.sh
              imagePullPolicy: Always
          restartPolicy: Never
 parameters:
