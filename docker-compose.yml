@@ -1,5 +1,15 @@
 version: '3'
 services:
+    # Setup act for testing GitGub Actionsl locally
+    act:
+        build:
+            context: .
+            dockerfile: ACT.Dockerfile
+            args:
+              TEST: 123
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./:/github/workspace
     # Build moodle and plugins from repo, then save to shared volume on startup
     moodle:
         tty: true

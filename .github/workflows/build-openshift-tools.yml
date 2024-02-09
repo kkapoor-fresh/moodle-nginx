@@ -29,31 +29,31 @@ env:
 
 on:
   push:
-    branches:
-      - dev
-      - test
-      - prod
-    paths:
-      - '**.Dockerfile'
-      - '**.conf'
-      - '**.env'
-      - '**.ini'
-      - '**.php'
-      - '**.yml'
-      - '**.json'
-      - '**.sh'
+    # branches:
+      # - dev
+      # - test
+      # - prod
+    # paths:
+    #   - '**.Dockerfile'
+    #   - '**.conf'
+    #   - '**.env'
+    #   - '**.ini'
+    #   - '**.php'
+    #   - '**.yml'
+    #   - '**.json'
+    #   - '**.sh'
   pull_request:
-    branches:
-      - dev
+    #branches:
+      #- dev
       #- test
       #- prod
-    paths:
-      - '**.Dockerfile'
-      - '**.conf'
-      - '**.ini'
-      - '**.php'
-      - '**.yml'
-      - 'php-fpm-healthcheck.sh'
+    # paths:
+    #   - '**.Dockerfile'
+    #   - '**.conf'
+    #   - '**.ini'
+    #   - '**.php'
+    #   - '**.yml'
+    #   - 'php-fpm-healthcheck.sh'
 
 jobs:
   #Print variables for logging and debugging purposes
@@ -69,17 +69,130 @@ jobs:
           echo "CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}"
           echo "SKIP_BUILDS: ${{ env.SKIP_BUILDS }}"
 
-  # Build Moodle Image in JFrog
-  build-moodle-jfrog:
-    name: 🔨 Build Moodle Image in JFrog
-    needs: [checkEnv]
-    uses: /.github/workflows/build-moodle-jfrog.yml
-
   # Build PHP Image
-  build-php-jfrog:
-    name: 🔨 Build PHP Image in JFrog
+  build-images:
+    name: 🔨 Build Application Images (${{ github.ref_name }})
     needs: [checkEnv]
-    uses: ./.github/workflows/build-php-jfrog.yml
+    runs-on: ubuntu-latest
+    if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+    steps:
+      # Checkout the PR branch
+      - name: 📤 Checkout Target Branch
+        uses: actions/checkout@v2
+
+        # Log in to OpenShift.
+      # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
+      # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
+      - name: 🔑 Log in to OpenShift
+        run: |
+          oc login --token=${{ secrets.SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
+
+      # Get Environment Variables from file
+      - name: 📋 Setup Environment from File
+        id: dotenv
+        uses: falti/dotenv-action@v1
+        with:
+          path: example.env
+          export-variables: true
+          log-variables: true
+          keys-case: upper
+
+      # Build the Moodle image
+      - name: 🚧 Build ${{ steps.dotenv.outputs.MOODLE_DEPLOYMENT_NAME }}:${{ env.BRANCH }}
+        id: build-moodle
+        if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
+        working-directory: "./"
+        run: |
+          echo "Building ${{ steps.dotenv.outputs.MOODLE_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
+          echo "Using ${{ steps.dotenv.outputs.PHP_IMAGE }}"
+          if ${{ env.SKIP_BUILDS != 'YES' }}; then
+            echo "STARTING BUILD..."
+            sh ./openshift/scripts/build-docker-image.sh
+          else
+            echo "SKIPPING BUILD (Environment variable SKIP_BUILDS=YES)"
+          fi
+        env:
+          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
+          DOCKER_FILE_PATH: ${{ env.MOODLE_DOCKER_FILE_PATH }}
+          DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.MOODLE_DEPLOYMENT_NAME }}
+          SOURCE_CONTEXT_DIR: ${{ env.PHP_SOURCE_CONTEXT_DIR }}
+          BRANCH: ${{ env.BRANCH }}
+          BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
+          IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
+          IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
+          SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
+
+      # Build the PHP image
+      - name: 🚧 Build ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}
+        id: build-php
+        if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
+        working-directory: "./"
+        run: |
+          echo "Building ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
+          echo "Using ${{ steps.dotenv.outputs.PHP_IMAGE }}"
+          if ${{ env.SKIP_BUILDS != 'YES' }}; then
+            echo "STARTING BUILD..."
+            sh ./openshift/scripts/build-docker-image.sh
+          else
+            echo "SKIPPING BUILD (Environment variable SKIP_BUILDS=YES)"
+          fi
+        env:
+          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
+          DOCKER_FILE_PATH: ${{ env.PHP_DOCKER_FILE_PATH }}
+          DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
+          SOURCE_CONTEXT_DIR: ${{ env.PHP_SOURCE_CONTEXT_DIR }}
+          BRANCH: ${{ env.BRANCH }}
+          BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
+          IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
+          IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
+          SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
+
+      # Build the Cron image
+      - name: 🚧 Build ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}
+        id: build-cron
+        if: success() && ${{ env.SKIP_BUILDS != 'YES' }}
+        working-directory: "./"
+        run: |
+          echo "Building ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}:${{ env.BRANCH }}"
+          echo "Using ${{ steps.dotenv.outputs.CRON_IMAGE }}"
+          if ${{ env.SKIP_BUILDS != 'YES' }}; then
+            echo "STARTING BUILD..."
+            sh ./openshift/scripts/build-docker-image.sh
+          else
+            echo "SKIPPING BUILD (Environment variable SKIP_BUILDS=YES)"
+          fi
+        env:
+          DOCKER_FROM_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
+          DOCKER_FILE_PATH: ${{ env.CRON_DOCKER_FILE_PATH }}
+          DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
+          SOURCE_CONTEXT_DIR: ${{ env.CRON_SOURCE_CONTEXT_DIR }}
+          BRANCH: ${{ env.BRANCH }}
+          BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
+          IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
+          IMAGE_TAG: ${{ env.BASE_IMAGE_TAG }}
+          SOURCE_REPOSITORY_URL: ${{ env.SOURCE_REPOSITORY_URL }}
+    outputs:
+      APP: ${{ steps.dotenv.outputs.APP }}
+      DB_NAME: ${{ steps.dotenv.outputs.DB_NAME }}
+      DB_USER: ${{ steps.dotenv.outputs.DB_USER }}
+      DB_PASSWORD: ${{ steps.dotenv.outputs.DB_PASSWORD }}
+      IMAGE_REPO: ${{ steps.dotenv.outputs.IMAGE_REPO }}
+      WEB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.WEB_DEPLOYMENT_NAME }}
+      DB_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.DB_DEPLOYMENT_NAME }}
+      PHP_IMAGE: ${{ steps.dotenv.outputs.PHP_IMAGE }}
+      PHP_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.PHP_DEPLOYMENT_NAME }}
+      CRON_IMAGE: ${{ steps.dotenv.outputs.CRON_IMAGE }}
+      CRON_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.CRON_DEPLOYMENT_NAME }}
+      REDIS_REPO: ${{ steps.dotenv.outputs.REDIS_REPO }}
+      REDIS_DEPLOYMENT_NAME: ${{ steps.dotenv.outputs.REDIS_DEPLOYMENT_NAME }}
+      REDIS_IMAGE: ${{ steps.dotenv.outputs.REDIS_IMAGE }}
+      WEB_IMAGE: ${{ steps.dotenv.outputs.WEB_IMAGE }}
+      DB_IMAGE: ${{ steps.dotenv.outputs.DB_IMAGE }}
+      APP_HOST_URL: ${{ env.APP_HOST_URL }}
+      BUILD_NAMESPACE: ${{ env.BUILD_NAMESPACE }}
+      DEPLOY_NAMESPACE: ${{ env.DEPLOY_NAMESPACE }}
+      BRANCH: ${{ env.BRANCH }}
+      CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}
 
   call-cleanup-workflow:
     name: 🧹️ Clean Build ( ${{ needs.build-images.outputs.CLEAN_BUILDS }} )

@@ -6,3 +6,4 @@ README.Moodle.DevOps.md
 *tenant-gitops*
 .dccache
 var/*
+*.secrets

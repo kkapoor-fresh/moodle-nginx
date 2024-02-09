@@ -1,3 +1,6 @@
+echo "Enabling maintenance mode..."
+php /var/www/html/admin/cli/maintenance.php --enable
+
 echo "Purging cache..."
 php /var/www/html/admin/cli/purge_caches.php
 
