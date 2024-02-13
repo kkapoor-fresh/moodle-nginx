@@ -1,0 +1,69 @@
+name: 🔨 Build PHP and push to Artifactory
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP: moodle
+  USER: ${{ github.actor }}
+
+on:
+  push:
+    branches:
+      - dev
+      #- test
+      #- prod
+    paths:
+      - 'PHP.Dockerfile'
+      - '**/config/**'
+      - '**/workflows/build-moodle-jfrog.yml'
+  pull_request:
+    branches:
+      - dev
+      #- test
+      #- prod
+    paths:
+      - '**.Dockerfile'
+      - '**/config/**'
+      - '**/workflows/build-moodle-jfrog.yml'
+jobs:
+  #Print variables for logging and debugging purposes
+  checkEnv:
+    name: 📋 Environment Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Env Vars
+        run: |
+          echo Building ${{ env.APP }}:${{ github.ref_name }}
+
+  # Build Images
+
+  build-images:
+    name: '🔨 Build Moodle and PHP images'
+    needs: [checkEnv]
+    runs-on: ubuntu-latest
+    if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+    steps:
+      # Checkout the PR branch
+      - name: 📤 Checkout Target Branch
+        uses: actions/checkout@v2
+
+      # Login to Artifactory
+      - name: 🔑 Login to Artifactory
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ARTIFACTORY_URL }}
+          username: ${{ secrets.ARTIFACTORY_USER }}
+          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
+      # Pull latest PHP base image and push to Artifactory
+      - name: 🛠️ Pull PHP base image and push to Artifactory
+        run: |
+          docker pull ${{env.PHP_IMAGE}}
+          docker tag ${{env.PHP_IMAGE}} ${{ secrets.ARTIFACTORY_URL }}/${{env.PHP_IMAGE}}
+          docker push ${{ secrets.ARTIFACTORY_URL }}/${{env.PHP_IMAGE}}
+
+      # Build PHP Image and push to Artifactory
+      - name: 🛠️ Build PHP Image and push to Artifactory
+        run: docker buildx -t ${{ secrets.ARTIFACTORY_URL }}/${{ needs.checkEnv.PHP_DEPLOYMENT_NAME }}:${{ needs.checkEnv.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }} --output=type=image,push=true --push -f ${{ env.PHP_DOCKER_FILE_PATH }} .

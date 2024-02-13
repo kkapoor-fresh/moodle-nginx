@@ -69,68 +69,62 @@ jobs:
           echo "CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}"
           echo "SKIP_BUILDS: ${{ env.SKIP_BUILDS }}"
 
-  # Build Moodle Image in JFrog
-  build-moodle-jfrog:
-    name: 🔨 Build Moodle Image in JFrog
+  # Build Images in JFrog
+  build-jfrog-images:
+    name: 🔨 Build Images in JFrog
     needs: [checkEnv]
-    uses: /.github/workflows/build-moodle-jfrog.yml
-
-  # Build PHP Image
-  build-php-jfrog:
-    name: 🔨 Build PHP Image in JFrog
-    needs: [checkEnv]
-    uses: ./.github/workflows/build-php-jfrog.yml
+    uses: ./.github/workflows/build-jfrog-images.yml
 
   call-cleanup-workflow:
-    name: 🧹️ Clean Build ( ${{ needs.build-images.outputs.CLEAN_BUILDS }} )
+    name: 🧹️ Clean Build ( ${{ needs.build-jfrog-images.outputs.CLEAN_BUILDS }} )
     uses: ./.github/workflows/cleanup.yml
-    needs: [checkEnv, build-images]
-    if: success() && ${{ needs.build-images.outputs == 'YES' }}
+    needs: [checkEnv, build-jfrog-images]
+    if: success() && ${{ needs.build-jfrog-images.outputs == 'YES' }}
     secrets: inherit
     with:
-      APP: ${{ needs.build-images.outputs.APP }}
-      APP_HOST_URL: ${{ needs.build-images.outputs.APP_HOST_URL }}
-      BRANCH: ${{ needs.build-images.outputs.BRANCH }}
-      BUILD_NAMESPACE: ${{ needs.build-images.outputs.BUILD_NAMESPACE }}
-      DEPLOY_NAMESPACE: ${{ needs.build-images.outputs.DEPLOY_NAMESPACE }}
-      DB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.DB_DEPLOYMENT_NAME }}
-      WEB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.WEB_DEPLOYMENT_NAME }}
-      PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}
-      CRON_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.CRON_DEPLOYMENT_NAME }}
-      REDIS_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.REDIS_DEPLOYMENT_NAME }}
+      APP: ${{ needs.build-jfrog-images.outputs.APP }}
+      APP_HOST_URL: ${{ needs.build-jfrog-images.outputs.APP_HOST_URL }}
+      BRANCH: ${{ needs.build-jfrog-images.outputs.BRANCH }}
+      BUILD_NAMESPACE: ${{ needs.build-jfrog-images.outputs.BUILD_NAMESPACE }}
+      DEPLOY_NAMESPACE: ${{ needs.build-jfrog-images.outputs.DEPLOY_NAMESPACE }}
+      DB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.DB_DEPLOYMENT_NAME }}
+      WEB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.WEB_DEPLOYMENT_NAME }}
+      PHP_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.PHP_DEPLOYMENT_NAME }}
+      CRON_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.CRON_DEPLOYMENT_NAME }}
+      REDIS_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.REDIS_DEPLOYMENT_NAME }}
 
   call-deploy-workflow:
     name: 🚀 Deploy to OpenShift
     uses: ./.github/workflows/deploy.yml
-    needs: [checkEnv, build-images, call-cleanup-workflow]
-    if: needs.build-images.outcome == 'success' || needs.build-images.outcome == 'skipped' || ${{ needs.checckEnv.SKIP_BUILDS == 'FALSE' }}
+    needs: [checkEnv, build-jfrog-images, call-cleanup-workflow]
+    if: needs.build-jfrog-images.result == 'success' || needs.build-jfrog-images.result == 'skipped' || needs.checkEnv.outputs.SKIP_BUILDS == 'FALSE'
     secrets: inherit
     with:
       BASE_IMAGE_TAG: ${{ github.ref_name }}
-      APP: ${{ needs.build-images.outputs.APP }}
-      DB_NAME: ${{ needs.build-images.outputs.DB_NAME }}
-      DB_USER: ${{ needs.build-images.outputs.DB_USER }}
-      DB_PASSWORD: ${{ needs.build-images.outputs.DB_PASSWORD }}
-      WEB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.WEB_DEPLOYMENT_NAME }}
-      WEB_IMAGE: ${{ needs.build-images.outputs.WEB_IMAGE }}
-      PHP_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.PHP_DEPLOYMENT_NAME }}
-      PHP_IMAGE: ${{ needs.build-images.outputs.PHP_IMAGE }}
-      DB_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.DB_DEPLOYMENT_NAME }}
-      DB_IMAGE: ${{ needs.build-images.outputs.DB_IMAGE }}
-      CRON_IMAGE: ${{ needs.build-images.outputs.CRON_IMAGE }}
-      CRON_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.CRON_DEPLOYMENT_NAME }}
-      REDIS_REPO: ${{ needs.build-images.outputs.REDIS_REPO }}
-      REDIS_DEPLOYMENT_NAME: ${{ needs.build-images.outputs.REDIS_DEPLOYMENT_NAME }}
-      REDIS_IMAGE: ${{ needs.build-images.outputs.REDIS_IMAGE }}
-      APP_HOST_URL: ${{ needs.build-images.outputs.APP_HOST_URL }}
-      BUILD_NAMESPACE: ${{ needs.build-images.outputs.BUILD_NAMESPACE }}
-      DEPLOY_NAMESPACE: ${{ needs.build-images.outputs.DEPLOY_NAMESPACE }}
-      IMAGE_REPO: ${{ needs.build-images.outputs.IMAGE_REPO }}
-      BRANCH: ${{ needs.build-images.outputs.BRANCH }}
+      APP: ${{ needs.build-jfrog-images.outputs.APP }}
+      DB_NAME: ${{ needs.build-jfrog-images.outputs.DB_NAME }}
+      DB_USER: ${{ needs.build-jfrog-images.outputs.DB_USER }}
+      DB_PASSWORD: ${{ needs.build-jfrog-images.outputs.DB_PASSWORD }}
+      WEB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.WEB_DEPLOYMENT_NAME }}
+      WEB_IMAGE: ${{ needs.build-jfrog-images.outputs.WEB_IMAGE }}
+      PHP_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.PHP_DEPLOYMENT_NAME }}
+      PHP_IMAGE: ${{ needs.build-jfrog-images.outputs.PHP_IMAGE }}
+      DB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.DB_DEPLOYMENT_NAME }}
+      DB_IMAGE: ${{ needs.build-jfrog-images.outputs.DB_IMAGE }}
+      CRON_IMAGE: ${{ needs.build-jfrog-images.outputs.CRON_IMAGE }}
+      CRON_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.CRON_DEPLOYMENT_NAME }}
+      REDIS_REPO: ${{ needs.build-jfrog-images.outputs.REDIS_REPO }}
+      REDIS_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.REDIS_DEPLOYMENT_NAME }}
+      REDIS_IMAGE: ${{ needs.build-jfrog-images.outputs.REDIS_IMAGE }}
+      APP_HOST_URL: ${{ needs.build-jfrog-images.outputs.APP_HOST_URL }}
+      BUILD_NAMESPACE: ${{ needs.build-jfrog-images.outputs.BUILD_NAMESPACE }}
+      DEPLOY_NAMESPACE: ${{ needs.build-jfrog-images.outputs.DEPLOY_NAMESPACE }}
+      IMAGE_REPO: ${{ needs.build-jfrog-images.outputs.IMAGE_REPO }}
+      BRANCH: ${{ needs.build-jfrog-images.outputs.BRANCH }}
 
   notify:
     name: 📫 Send Notifications (via Rocket.Chat)
-    needs: [build-images, call-deploy-workflow]
+    needs: [build-jfrog-images, call-deploy-workflow]
     if: success() || failure()
     runs-on: ubuntu-latest
     steps:

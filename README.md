@@ -44,3 +44,9 @@ docker-compose -p moodle up -d --env-file ./example.env
 ## Deployment
 
 Deployment to OpenShift is handled using GitHub Actions. The workflow is defined in .github/workflows/deploy-branch.yml. Build / deploy notifications to Rocket.Chat are addressed in .github/workflows/notify-rocket-chat.yml.
+
+## Test GitHub Actions deployment locally using Act
+
+### Note: Act must be installed locally, or run in a container
+
+act -s GITHUB_TOKEN="$(gh auth token)" --env-file example.env --secret-file example.secrets -W './.github/workflows/build-push-php-image.yml'

@@ -1,6 +1,6 @@
 version: '3'
 services:
-    # Setup act for testing GitGub Actionsl locally
+    # OPTIONAL: Setup act for testing GitGub Actions locally
     act:
         build:
             context: .
@@ -11,6 +11,8 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
             - ./:/github/workspace
     # Build moodle and plugins from repo, then save to shared volume on startup
+    # After build, the moodle files need to be copied to the shared volume,
+    # where they can be accessed by the php, cron and web containers.
     moodle:
         tty: true
         restart: "no"
@@ -33,15 +35,8 @@ services:
               DATAFLOWS_BRANCH_VERSION: ${DATAFLOWS_BRANCH_VERSION:-MOODLE_35_STABLE}
         volumes:
             - ./temp/var/www:/var/www:delegated
-        # Copy files from build directory to www/html to mimic shared PVC copy in OpenShift (allows for multiple container instances)
-        # Note: THis will add a few minutes to startup.
-        # command: bash -c "cp /app/public /var/www/html -p -r && chown -R www-data:www-data /var/www && stdout_logfile=/dev/stdout && stdout_logfile_maxbytes=0 && stderr_logfile=/dev/stderr && stderr_logfile_maxbytes=0 && /usr/local/bin/docker-php-entrypoint && tail -F anything"
-        # command: bash -c "cp /app/public/* /var/www/html -p -r && stdout_logfile=/dev/stdout && stdout_logfile_maxbytes=0 && stderr_logfile=/dev/stderr && stderr_logfile_maxbytes=0"
+        # Keep the container running so we can run the migration scripts and copy the files to the shared volume
         command:  tail -F anything
-        # command: echo "Moodle service disabled"
-        # or Without copy (to save some time if it doesn't need to be rebuilt)
-        # command: bash -c "stdout_logfile=/dev/stdout && stdout_logfile_maxbytes=0 && stderr_logfile=/dev/stderr && stderr_logfile_maxbytes=0 && /usr/local/bin/docker-php-entrypoint"
-        # command: tail -F anything # (to keep the container running)
     web:
         depends_on:
           php:
@@ -127,11 +122,11 @@ services:
             context: .
             dockerfile: CRON.Dockerfile
             args:
-              CRON_IMAGE: ${CRON_IMAGE:-php:7.4-cli}
+              DOCKER_FROM_IMAGE: ${CRON_IMAGE:-php:8.0-cli}
               PHP_INI_ENVIRONMENT: ${PHP_INI_ENVIRONMENT:-production}
         volumes:
             - ./temp/var/www:/var/www:delegated
     redis:
-        image: redis:latest
+        image: ${REDIS_IMAGE:-redis:latest}
 volumes:
     mysqldata: {}

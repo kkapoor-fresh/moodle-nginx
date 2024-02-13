@@ -7,3 +7,4 @@ README.Moodle.DevOps.md
 .dccache
 var/*
 *.secrets
+!example.secrets

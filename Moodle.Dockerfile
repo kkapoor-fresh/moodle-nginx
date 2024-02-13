@@ -1,5 +1,6 @@
 ARG DOCKER_FROM_IMAGE=php:8.0-fpm
-FROM ${DOCKER_FROM_IMAGE}
+ARG IMAGE_REPO="artifacts.developer.gov.bc.ca/m950-learning/"
+FROM ${IMAGE_REPO}${DOCKER_FROM_IMAGE}
 
 # Moodle Configs
 ENV MOODLE_APP_DIR /app/public

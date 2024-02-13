@@ -505,7 +505,7 @@
       "description": "Image registry",
       "displayName": "Image Registry",
       "name": "IMAGE_REPO",
-      "value": "image-registry.openshift-image-registry.svc:5000/"
+      "value": "artifacts.developer.gov.bc.ca/m950-learning/"
     },
     {
       "description": "Build namespace.",
