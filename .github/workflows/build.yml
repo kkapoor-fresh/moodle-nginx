@@ -17,7 +17,7 @@ env:
   APP_HOST_URL: moodle-${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}.apps.silver.devops.gov.bc.ca
   BASE_IMAGE_TAG: ${{ github.ref_name }}
   BUILD_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-tools
-  DEPLOY_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+  DEPLOY_NAMESPACE: ${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-prod
   BUILD_ID: ${{ github.event.number }}
   BRANCH: ${{ github.ref_name }}
   SOURCE_REPOSITORY_URL: "https://github.com/${{ github.repository }}"
@@ -70,95 +70,112 @@ jobs:
           echo "SKIP_BUILDS: ${{ env.SKIP_BUILDS }}"
 
   # Build Images in JFrog
-  build-jfrog-images:
+  build-jfrog-moodle:
     name: 🔨 Build Images in JFrog
     needs: [checkEnv]
-    uses: ./.github/workflows/build-jfrog-images.yml
+    uses: ./.github/workflows/build-push-moodle-image.yml
+  
+  build-jfrog-php:
+    name: 🔨 Build Images in JFrog
+    needs: [checkEnv]
+    uses: ./.github/workflows/build-psh-php-image.yml
 
-  call-cleanup-workflow:
-    name: 🧹️ Clean Build ( ${{ needs.build-jfrog-images.outputs.CLEAN_BUILDS }} )
-    uses: ./.github/workflows/cleanup.yml
-    needs: [checkEnv, build-jfrog-images]
-    if: success() && ${{ needs.build-jfrog-images.outputs == 'YES' }}
-    secrets: inherit
-    with:
-      APP: ${{ needs.build-jfrog-images.outputs.APP }}
-      APP_HOST_URL: ${{ needs.build-jfrog-images.outputs.APP_HOST_URL }}
-      BRANCH: ${{ needs.build-jfrog-images.outputs.BRANCH }}
-      BUILD_NAMESPACE: ${{ needs.build-jfrog-images.outputs.BUILD_NAMESPACE }}
-      DEPLOY_NAMESPACE: ${{ needs.build-jfrog-images.outputs.DEPLOY_NAMESPACE }}
-      DB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.DB_DEPLOYMENT_NAME }}
-      WEB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.WEB_DEPLOYMENT_NAME }}
-      PHP_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.PHP_DEPLOYMENT_NAME }}
-      CRON_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.CRON_DEPLOYMENT_NAME }}
-      REDIS_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.REDIS_DEPLOYMENT_NAME }}
+  # build-jfrog-db:
+  #   name: 🔨 Build Images in JFrog
+  #   needs: [checkEnv]
+  #   uses: ./.github/workflows/build-push-db-image.yml
+  
+  # build-jfrog-images:
+  #    name: 🔨 Build Images in JFrog
+  #    needs: [checkEnv]
+  #    uses: ./.github/workflows/build-push-cron-image.yml
 
-  call-deploy-workflow:
-    name: 🚀 Deploy to OpenShift
-    uses: ./.github/workflows/deploy.yml
-    needs: [checkEnv, build-jfrog-images, call-cleanup-workflow]
-    if: needs.build-jfrog-images.result == 'success' || needs.build-jfrog-images.result == 'skipped' || needs.checkEnv.outputs.SKIP_BUILDS == 'FALSE'
-    secrets: inherit
-    with:
-      BASE_IMAGE_TAG: ${{ github.ref_name }}
-      APP: ${{ needs.build-jfrog-images.outputs.APP }}
-      DB_NAME: ${{ needs.build-jfrog-images.outputs.DB_NAME }}
-      DB_USER: ${{ needs.build-jfrog-images.outputs.DB_USER }}
-      DB_PASSWORD: ${{ needs.build-jfrog-images.outputs.DB_PASSWORD }}
-      WEB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.WEB_DEPLOYMENT_NAME }}
-      WEB_IMAGE: ${{ needs.build-jfrog-images.outputs.WEB_IMAGE }}
-      PHP_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.PHP_DEPLOYMENT_NAME }}
-      PHP_IMAGE: ${{ needs.build-jfrog-images.outputs.PHP_IMAGE }}
-      DB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.DB_DEPLOYMENT_NAME }}
-      DB_IMAGE: ${{ needs.build-jfrog-images.outputs.DB_IMAGE }}
-      CRON_IMAGE: ${{ needs.build-jfrog-images.outputs.CRON_IMAGE }}
-      CRON_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.CRON_DEPLOYMENT_NAME }}
-      REDIS_REPO: ${{ needs.build-jfrog-images.outputs.REDIS_REPO }}
-      REDIS_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.REDIS_DEPLOYMENT_NAME }}
-      REDIS_IMAGE: ${{ needs.build-jfrog-images.outputs.REDIS_IMAGE }}
-      APP_HOST_URL: ${{ needs.build-jfrog-images.outputs.APP_HOST_URL }}
-      BUILD_NAMESPACE: ${{ needs.build-jfrog-images.outputs.BUILD_NAMESPACE }}
-      DEPLOY_NAMESPACE: ${{ needs.build-jfrog-images.outputs.DEPLOY_NAMESPACE }}
-      IMAGE_REPO: ${{ needs.build-jfrog-images.outputs.IMAGE_REPO }}
-      BRANCH: ${{ needs.build-jfrog-images.outputs.BRANCH }}
+  # #Buid 
 
-  notify:
-    name: 📫 Send Notifications (via Rocket.Chat)
-    needs: [build-jfrog-images, call-deploy-workflow]
-    if: success() || failure()
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⚠️ Failure
-        if: failure()
-        uses: muinmomin/webhook-action@v1.0.0
-        with:
-          url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
-          data: '{
-            "alias":"FAILED GitHub Action by ${{ env.USER }}",
-            "text":"Job: ${{ github.job }} in
-              ${{ github.workflow }} of
-              ${{ github.repository }}:${{ github.ref_name }} >>
-              Deploy1: ${{ needs.call-deploy-workflow.outputs.deploy1 }}
-              Deploy2: ${{ needs.call-deploy-workflow.outputs.deploy2 }}",
-            "attachments":[{
-              "title":"${{ github.job }} ${{ job.status }} to ${{ github.ref_name }}",
-              "title_link": "${{ env.INSPECT_JOB_URL }}",
-              "text":"Failure detected in ${{ github.repository }}:${{ github.ref_name }}",
-              "image_url": "${{ env.FAIL_ICON_URL }}",
-              "color":"#e7e076"
-            }]}'
-      - name: ✅ Success
-        uses: muinmomin/webhook-action@v1.0.0
-        with:
-          url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
-          data: '{
-            "alias":"Successful ${{ github.job }} by ${{ env.USER }}",
-            "text":"${{ github.job }} in ${{ github.workflow }}
-              of ${{ github.repository }}:${{ github.ref_name }}",
-            "attachments":[{
-              "title":"${{ github.job }} ${{ job.status }} to ${{ github.ref_name }}",
-              "title_link": "${{ env.INSPECT_JOB_URL }}",
-              "text":"Successful deployment of: ${{ github.repository }}:${{ github.ref_name }}",
-              "image_url": "${{ env.SUCCESS_ICON_URL }}",
-              "color":"#05a227"
-            }]}'
+  # call-cleanup-workflow:
+  #   name: 🧹️ Clean Build ( ${{ needs.build-jfrog-images.outputs.CLEAN_BUILDS }} )
+  #   uses: ./.github/workflows/cleanup.yml
+  #   needs: [checkEnv, build-jfrog-images]
+  #   if: success() && ${{ needs.build-jfrog-images.outputs == 'YES' }}
+  #   secrets: inherit
+  #   with:
+  #     APP: ${{ needs.build-jfrog-images.outputs.APP }}
+  #     APP_HOST_URL: ${{ needs.build-jfrog-images.outputs.APP_HOST_URL }}
+  #     BRANCH: ${{ needs.build-jfrog-images.outputs.BRANCH }}
+  #     BUILD_NAMESPACE: ${{ needs.build-jfrog-images.outputs.BUILD_NAMESPACE }}
+  #     DEPLOY_NAMESPACE: ${{ needs.build-jfrog-images.outputs.DEPLOY_NAMESPACE }}
+  #     DB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.DB_DEPLOYMENT_NAME }}
+  #     WEB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.WEB_DEPLOYMENT_NAME }}
+  #     PHP_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.PHP_DEPLOYMENT_NAME }}
+  #     CRON_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.CRON_DEPLOYMENT_NAME }}
+  #     REDIS_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.REDIS_DEPLOYMENT_NAME }}
+
+  # call-deploy-workflow:
+  #   name: 🚀 Deploy to OpenShift
+  #   uses: ./.github/workflows/deploy.yml
+  #   needs: [checkEnv, build-jfrog-images, call-cleanup-workflow]
+  #   if: needs.build-jfrog-images.result == 'success' || needs.build-jfrog-images.result == 'skipped' || needs.checkEnv.outputs.SKIP_BUILDS == 'FALSE'
+  #   secrets: inherit
+  #   with:
+  #     BASE_IMAGE_TAG: ${{ github.ref_name }}
+  #     APP: ${{ needs.build-jfrog-images.outputs.APP }}
+  #     DB_NAME: ${{ needs.build-jfrog-images.outputs.DB_NAME }}
+  #     DB_USER: ${{ needs.build-jfrog-images.outputs.DB_USER }}
+  #     DB_PASSWORD: ${{ needs.build-jfrog-images.outputs.DB_PASSWORD }}
+  #     WEB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.WEB_DEPLOYMENT_NAME }}
+  #     WEB_IMAGE: ${{ needs.build-jfrog-images.outputs.WEB_IMAGE }}
+  #     PHP_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.PHP_DEPLOYMENT_NAME }}
+  #     PHP_IMAGE: ${{ needs.build-jfrog-images.outputs.PHP_IMAGE }}
+  #     DB_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.DB_DEPLOYMENT_NAME }}
+  #     DB_IMAGE: ${{ needs.build-jfrog-images.outputs.DB_IMAGE }}
+  #     CRON_IMAGE: ${{ needs.build-jfrog-images.outputs.CRON_IMAGE }}
+  #     CRON_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.CRON_DEPLOYMENT_NAME }}
+  #     REDIS_REPO: ${{ needs.build-jfrog-images.outputs.REDIS_REPO }}
+  #     REDIS_DEPLOYMENT_NAME: ${{ needs.build-jfrog-images.outputs.REDIS_DEPLOYMENT_NAME }}
+  #     REDIS_IMAGE: ${{ needs.build-jfrog-images.outputs.REDIS_IMAGE }}
+  #     APP_HOST_URL: ${{ needs.build-jfrog-images.outputs.APP_HOST_URL }}
+  #     BUILD_NAMESPACE: ${{ needs.build-jfrog-images.outputs.BUILD_NAMESPACE }}
+  #     DEPLOY_NAMESPACE: ${{ needs.build-jfrog-images.outputs.DEPLOY_NAMESPACE }}
+  #     IMAGE_REPO: ${{ needs.build-jfrog-images.outputs.IMAGE_REPO }}
+  #     BRANCH: ${{ needs.build-jfrog-images.outputs.BRANCH }}
+
+  # notify:
+  #   name: 📫 Send Notifications (via Rocket.Chat)
+  #   needs: [build-jfrog-images, call-deploy-workflow]
+  #   if: success() || failure()
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: ⚠️ Failure
+  #       if: failure()
+  #       uses: muinmomin/webhook-action@v1.0.0
+  #       with:
+  #         url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+  #         data: '{
+  #           "alias":"FAILED GitHub Action by ${{ env.USER }}",
+  #           "text":"Job: ${{ github.job }} in
+  #             ${{ github.workflow }} of
+  #             ${{ github.repository }}:${{ github.ref_name }} >>
+  #             Deploy1: ${{ needs.call-deploy-workflow.outputs.deploy1 }}
+  #             Deploy2: ${{ needs.call-deploy-workflow.outputs.deploy2 }}",
+  #           "attachments":[{
+  #             "title":"${{ github.job }} ${{ job.status }} to ${{ github.ref_name }}",
+  #             "title_link": "${{ env.INSPECT_JOB_URL }}",
+  #             "text":"Failure detected in ${{ github.repository }}:${{ github.ref_name }}",
+  #             "image_url": "${{ env.FAIL_ICON_URL }}",
+  #             "color":"#e7e076"
+  #           }]}'
+  #     - name: ✅ Success
+  #       uses: muinmomin/webhook-action@v1.0.0
+  #       with:
+  #         url: ${{ secrets.ROCKETCHAT_WEBHOOK_URL }}
+  #         data: '{
+  #           "alias":"Successful ${{ github.job }} by ${{ env.USER }}",
+  #           "text":"${{ github.job }} in ${{ github.workflow }}
+  #             of ${{ github.repository }}:${{ github.ref_name }}",
+  #           "attachments":[{
+  #             "title":"${{ github.job }} ${{ job.status }} to ${{ github.ref_name }}",
+  #             "title_link": "${{ env.INSPECT_JOB_URL }}",
+  #             "text":"Successful deployment of: ${{ github.repository }}:${{ github.ref_name }}",
+  #             "image_url": "${{ env.SUCCESS_ICON_URL }}",
+  #             "color":"#05a227"
+  #           }]}'
