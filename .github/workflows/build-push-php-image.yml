@@ -10,26 +10,26 @@ env:
 
 on:
   workflow_call:
-    
-on:
-  push:
-    branches:
-      - dev
-      #- test
-      #- prod
-    paths:
-      - 'PHP.Dockerfile'
-      - '**/config/**'
-      - '**/workflows/build-moodle-jfrog.yml'
-  pull_request:
-    branches:
-      - dev
-      #- test
-      #- prod
-    paths:
-      - '**.Dockerfile'
-      - '**/config/**'
-      - '**/workflows/build-moodle-jfrog.yml'
+
+# on:
+#   push:
+#     branches:
+#       - dev
+#       #- test
+#       #- prod
+#     paths:
+#       - 'PHP.Dockerfile'
+#       - '**/config/**'
+#       - '**/workflows/build-moodle-jfrog.yml'
+#   pull_request:
+#     branches:
+#       - dev
+#       #- test
+#       #- prod
+#     paths:
+#       - '**.Dockerfile'
+#       - '**/config/**'
+#       - '**/workflows/build-moodle-jfrog.yml'
 jobs:
   #Print variables for logging and debugging purposes
   checkEnv:
