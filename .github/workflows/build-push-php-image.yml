@@ -9,6 +9,9 @@ env:
   USER: ${{ github.actor }}
 
 on:
+  workflow_call:
+    
+on:
   push:
     branches:
       - dev
