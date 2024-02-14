@@ -39,7 +39,7 @@ on:
       - '**.env'
       - '**.ini'
       - '**.php'
-      - '**.yml'
+      - '**/workflows/**.yml'
       - '**.json'
       - '**.sh'
   pull_request:
