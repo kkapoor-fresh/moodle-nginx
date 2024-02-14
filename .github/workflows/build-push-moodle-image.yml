@@ -9,24 +9,26 @@ env:
   USER: ${{ github.actor }}
 
 on:
-  push:
-    branches:
-      - dev
-      #- test
-      #- prod
-    paths:
-      - 'Moodle.Dockerfile'
-      - '**/config/moodle/**'
-      - '**/workflows/build-push-moodle-image.yml'
-  pull_request:
-    branches:
-      - dev
-      #- test
-      #- prod
-    paths:
-      - 'Moodle.Dockerfile'
-      - '**/config/moodle/**'
-      - '**/workflows/build-push-moodle-image.yml'
+  workflow_call:
+# on:
+#   push:
+#     branches:
+#       - dev
+#       #- test
+#       #- prod
+#     paths:
+#       - 'Moodle.Dockerfile'
+#       - '**/config/moodle/**'
+#       - '**/workflows/build-push-moodle-image.yml'
+#   pull_request:
+#     branches:
+#       - dev
+#       #- test
+#       #- prod
+#     paths:
+#       - 'Moodle.Dockerfile'
+#       - '**/config/moodle/**'
+#       - '**/workflows/build-push-moodle-image.yml'
 jobs:
   #Print variables for logging and debugging purposes
   checkEnv:

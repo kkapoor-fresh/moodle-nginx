@@ -71,14 +71,14 @@ jobs:
 
   # Build Images in JFrog
   build-jfrog-moodle:
-    name: 🔨 Build Images in JFrog
+    name: 🔨 Build moodle Images in JFrog
     needs: [checkEnv]
     uses: ./.github/workflows/build-push-moodle-image.yml
   
   build-jfrog-php:
-    name: 🔨 Build Images in JFrog
+    name: 🔨 Build php Images in JFrog
     needs: [checkEnv]
-    uses: ./.github/workflows/build-psh-php-image.yml
+    uses: ./.github/workflows/build-push-php-image.yml
 
   # build-jfrog-db:
   #   name: 🔨 Build Images in JFrog
