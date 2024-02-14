@@ -1,8 +1,8 @@
 name: 🔨 Build and publish Moodle images to Artifactory
 
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.ref }}
+#   cancel-in-progress: true
 
 env:
   APP: moodle
@@ -41,30 +41,30 @@ jobs:
 
   # Build Images
 
-  build-images:
-    name: '🔨 Build Moodle image and push to Artifactory'
-    needs: [checkEnv]
-    runs-on: ubuntu-latest
-    if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
-    steps:
-      # Checkout the PR branch
-      - name: 📤 Checkout Target Branch
-        uses: actions/checkout@v2
+  # build-images:
+  #   name: '🔨 Build Moodle image and push to Artifactory'
+  #   needs: [checkEnv]
+  #   runs-on: ubuntu-latest
+  #   if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+  #   steps:
+  #     # Checkout the PR branch
+  #     - name: 📤 Checkout Target Branch
+  #       uses: actions/checkout@v2
 
-      # Login to Artifactory
-      - name: 🔑 Login to Artifactory
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ secrets.ARTIFACTORY_URL }}
-          username: ${{ secrets.ARTIFACTORY_USER }}
-          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+  #     # Login to Artifactory
+  #     - name: 🔑 Login to Artifactory
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ${{ secrets.ARTIFACTORY_URL }}
+  #         username: ${{ secrets.ARTIFACTORY_USER }}
+  #         password: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
-      - name: 🛠️ Pull PHP base image
-        run: |
-          docker pull ${{env.PHP_IMAGE}}
-          docker tag ${{env.PHP_IMAGE}} ${{ secrets.ARTIFACTORY_URL }}/${{env.PHP_IMAGE}}
-          docker push ${{ secrets.ARTIFACTORY_URL }}/${{env.PHP_IMAGE}}
+  #     - name: 🛠️ Pull PHP base image
+  #       run: |
+  #         docker pull ${{env.PHP_IMAGE}}
+  #         docker tag ${{env.PHP_IMAGE}} ${{ secrets.ARTIFACTORY_URL }}/${{env.PHP_IMAGE}}
+  #         docker push ${{ secrets.ARTIFACTORY_URL }}/${{env.PHP_IMAGE}}
 
-      - name: 🛠️ Build Moodle Image and push to Artifactory
-        run: docker buildx build -t ${{ secrets.ARTIFACTORY_URL }}/${{ env.MOODLE_DEPLOYMENT_NAME }}:${{ env.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }} --output=type=image,push=true --push -f ${{ env.MOODLE_DOCKER_FILE_PATH }} .
+  #     - name: 🛠️ Build Moodle Image and push to Artifactory
+  #       run: docker buildx build -t ${{ secrets.ARTIFACTORY_URL }}/${{ env.MOODLE_DEPLOYMENT_NAME }}:${{ env.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }} --output=type=image,push=true --push -f ${{ env.MOODLE_DOCKER_FILE_PATH }} .
 
