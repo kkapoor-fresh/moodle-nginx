@@ -11,7 +11,7 @@ env:
   USER: ${{ github.actor }}
 
   # Skip builds for faster deployments / testing ("YES" or build)
-  SKIP_BUILDS: "NO"
+  #SKIP_BUILDS: "NO"
   # Clean builds before deployments (delete all resources, other than backups) ("YES" or allow collisions)
   CLEAN_BUILDS: "YES"
 
@@ -71,7 +71,7 @@ jobs:
           echo "-----------------------"
           echo URL: https://${{ env.APP_HOST_URL }}
           echo "CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}"
-          echo "SKIP_BUILDS: ${{ env.SKIP_BUILDS }}"
+          echo "SKIP_BUILDS: ${{ vars.SKIP_BUILDS }}"
 
   # Build Images in JFrog
   build-jfrog-moodle:
