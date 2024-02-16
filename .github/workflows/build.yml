@@ -4,6 +4,8 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
+
+
 env:
   APP: moodle
   USER: ${{ github.actor }}
@@ -56,8 +58,10 @@ on:
       - 'php-fpm-healthcheck.sh'
 
 jobs:
+ 
   #Print variables for logging and debugging purposes
   checkEnv:
+    environment: dev
     name: 📋 Environment Check
     runs-on: ubuntu-latest
     steps:

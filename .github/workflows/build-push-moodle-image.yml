@@ -7,6 +7,8 @@ name: 🔨 Build and publish Moodle images to Artifactory
 env:
   APP: moodle
   USER: ${{ github.actor }}
+  MOODLE_DOCKER_FILE_PATH: ./Moodle.Dockerfile
+  
 
 on:
   workflow_call:
@@ -32,12 +34,13 @@ on:
 jobs:
   #Print variables for logging and debugging purposes
   checkEnv:
+    environment: dev
     name: 📋 Environment Check
     runs-on: ubuntu-latest
     steps:
       - name: Check Env Vars
         run: |
-          echo Building ${{ env.MOODLE_DEPLOYMENT_NAME }}:${{ env.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+          echo Building ${{ env.APP }}:${{ env.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
 
   # Build Images
 
@@ -66,5 +69,5 @@ jobs:
   #         docker push ${{ secrets.ARTIFACTORY_URL }}/${{env.PHP_IMAGE}}
 
   #     - name: 🛠️ Build Moodle Image and push to Artifactory
-  #       run: docker buildx build -t ${{ secrets.ARTIFACTORY_URL }}/${{ env.MOODLE_DEPLOYMENT_NAME }}:${{ env.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }} --output=type=image,push=true --push -f ${{ env.MOODLE_DOCKER_FILE_PATH }} .
+  #       run: docker buildx build -t ${{ secrets.ARTIFACTORY_URL }}/${{ env.APP }}:${{ env.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }} --output=type=image,push=true --push -f ${{ env.MOODLE_DOCKER_FILE_PATH }} .
 
