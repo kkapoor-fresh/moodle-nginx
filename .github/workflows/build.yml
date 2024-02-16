@@ -71,7 +71,7 @@ jobs:
           echo "-----------------------"
           echo URL: https://${{ env.APP_HOST_URL }}
           echo "CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}"
-          echo "SKIP_BUILDS: ${{ vars.SKIP_BUILDS }}"
+          echo "SKIP_BUILDS: ${{ vars.SKIP_BUILD }}"
 
   # Build Images in JFrog
   build-jfrog-moodle:
@@ -79,20 +79,20 @@ jobs:
     needs: [checkEnv]
     uses: ./.github/workflows/build-push-moodle-image.yml
   
-  build-jfrog-php:
-    name: 🔨 Build php Images in JFrog
-    needs: [checkEnv]
-    uses: ./.github/workflows/build-push-php-image.yml
+  # build-jfrog-php:
+  #   name: 🔨 Build php Images in JFrog
+  #   needs: [checkEnv]
+  #   uses: ./.github/workflows/build-push-php-image.yml
 
-  build-jfrog-db:
-    name: 🔨 Build Images in JFrog
-    needs: [checkEnv]
-    uses: ./.github/workflows/build-push-db-image.yml
+  # build-jfrog-db:
+  #   name: 🔨 Build Images in JFrog
+  #   needs: [checkEnv]
+  #   uses: ./.github/workflows/build-push-db-image.yml
   
-  build-jfrog-images:
-     name: 🔨 Build Images in JFrog
-     needs: [checkEnv]
-     uses: ./.github/workflows/build-push-cron-image.yml
+  # build-jfrog-images:
+  #    name: 🔨 Build Images in JFrog
+  #    needs: [checkEnv]
+  #    uses: ./.github/workflows/build-push-cron-image.yml
 
   # #Buid 
 

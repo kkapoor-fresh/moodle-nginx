@@ -40,7 +40,7 @@ jobs:
     steps:
       - name: Check Env Vars
         run: |
-          echo Building ${{ env.APP }}:${{ env.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+          echo Building ${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
 
   # Build Images
 
