@@ -89,7 +89,7 @@ jobs:
   #   needs: [checkEnv]
   #   uses: ./.github/workflows/build-push-db-image.yml
   
-  # build-jfrog-images:
+  # build-jfrog-cron:
   #    name: 🔨 Build Images in JFrog
   #    needs: [checkEnv]
   #    uses: ./.github/workflows/build-push-cron-image.yml
