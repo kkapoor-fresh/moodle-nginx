@@ -88,9 +88,7 @@ jobs:
 
       - name: Print ENV
         run: |
-         echo "$GITHUB_CONTEXT"
-         echo "$GITHUB_ENV"
-         echo "PHP image is: " ${{env.PHP_IMAGE}}
+         echo "PHP image is: " ${{ env.PHP_IMAGE }}
 
 
       # Login to Artifactory
