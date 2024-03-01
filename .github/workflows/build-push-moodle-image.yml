@@ -36,20 +36,20 @@ on:
 #       - '**/workflows/build-push-moodle-image.yml'
 jobs:
   #Print variables for logging and debugging purposes
-  getEnvFile:
-    name: Set Env file
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get Env file       
-        run: |
-          echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
-          {
-            echo 'ENV_FILE_OUTPUT<<EOF'
-            grep -v '^#' ./example.env | grep -v '^$'
-            echo EOF
-          } >> "$GITHUB_ENV"
+  # getEnvFile:
+  #   name: Set Env file
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Get Env file       
+  #       run: |
+  #         echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
+  #         {
+  #           echo 'ENV_FILE_OUTPUT<<EOF'
+  #           grep -v '^#' ./example.env | grep -v '^$'
+  #           echo EOF
+  #         } >> "$GITHUB_ENV"
 
-          echo "PHP image is: " {{env.PHP_IMAGE}}
+  #         echo "PHP image is: " {{env.PHP_IMAGE}}
          
 
   checkEnv:
@@ -75,16 +75,18 @@ jobs:
       # Checkout the PR branch
       - name: 📤 Checkout Target Branch
         uses: actions/checkout@v2
-      
-      - name: Set Env Vars
+
+
+      - name: Get Env file       
         run: |
-          echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
-          {
-            echo 'ENV_FILE_OUTPUT<<EOF'
-            grep -v '^#' ./example.env | grep -v '^$'
-            echo EOF
-          } >> "$GITHUB_ENV"
-          echo "PHP image is: " ${{env.PHP_IMAGE}}
+                echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
+                {
+                  echo 'ENV_FILE_OUTPUT<<EOF'
+                  grep -v '^#' ./example.env | grep -v '^$'
+                  echo EOF
+                } >> "$GITHUB_ENV"
+      
+                echo "PHP image is: " {{env.PHP_IMAGE}}
 
 
       # Login to Artifactory
