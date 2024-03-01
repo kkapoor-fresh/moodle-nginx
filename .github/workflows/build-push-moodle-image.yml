@@ -59,9 +59,13 @@ jobs:
       
       - name: Set Env Vars
         run: |
-          echo "Import .env"
-          grep -v '^#' ./example.env | grep -v '^$' >> $GITHUB_ENV
-          grep -v '^#' ./versions.env | grep -v '^$' >> $GITHUB_ENV
+          echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
+          {
+            echo 'ENV_FILE_OUTPUT<<EOF'
+            grep -v '^#' ./example.env | grep -v '^$'
+            echo EOF
+          } >> "$GITHUB_ENV"
+
 
       # Login to Artifactory
       - name: 🔑 Login to Artifactory
