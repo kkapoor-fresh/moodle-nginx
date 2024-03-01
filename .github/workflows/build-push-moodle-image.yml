@@ -4,6 +4,9 @@ name: 🔨 Build and publish Moodle images to Artifactory
 #   group: ${{ github.ref }}
 #   cancel-in-progress: true
 
+
+
+
 env:
   APP: moodle
   USER: ${{ github.actor }}
@@ -33,6 +36,22 @@ on:
 #       - '**/workflows/build-push-moodle-image.yml'
 jobs:
   #Print variables for logging and debugging purposes
+  getEnvFile:
+    name: Set Env file
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Env file       
+        run: |
+          echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
+          {
+            echo 'ENV_FILE_OUTPUT<<EOF'
+            grep -v '^#' ./example.env | grep -v '^$'
+            echo EOF
+          } >> "$GITHUB_ENV"
+
+          echo "PHP image is: " {{env.PHP_IMAGE}}
+         
+
   checkEnv:
     environment: dev
     name: 📋 Environment Check
@@ -49,7 +68,7 @@ jobs:
     name: '🔨 Build Moodle image and push to Artifactory'
     needs: [checkEnv]
     runs-on: ubuntu-latest
-    environment: dev
+    #environment: dev
   # if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     if: ${{ vars.SKIP_BUILD!= 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     steps:
