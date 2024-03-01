@@ -85,7 +85,7 @@ jobs:
                   grep -v '^#' ./example.env | grep -v '^$'
                   echo EOF
                 } >> "$GITHUB_ENV"
-      
+                echo GITHUB_ENV
                 echo "PHP image is: " {{env.PHP_IMAGE}}
 
 
