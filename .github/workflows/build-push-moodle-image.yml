@@ -82,7 +82,7 @@ jobs:
                 echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
                 {
                   echo 'ENV_FILE_OUTPUT<<EOF'
-                  grep -v '^#' ./example.env | grep -v '^$'|sed 's/^ *//'
+                  grep -v '^#' ./example.env | grep -v '^$'
                   echo EOF
                 } >> "$GITHUB_ENV"
 
