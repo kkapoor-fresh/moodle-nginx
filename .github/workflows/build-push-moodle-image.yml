@@ -36,30 +36,46 @@ on:
 #       - '**/workflows/build-push-moodle-image.yml'
 jobs:
   #Print variables for logging and debugging purposes
-  # getEnvFile:
-  #   name: Set Env file
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Get Env file       
-  #       run: |
-  #         echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
-  #         {
-  #           echo 'ENV_FILE_OUTPUT<<EOF'
-  #           grep -v '^#' ./example.env | grep -v '^$'
-  #           echo EOF
-  #         } >> "$GITHUB_ENV"
-
-  #         echo "PHP image is: " {{env.PHP_IMAGE}}
-         
 
   checkEnv:
-    environment: dev
     name: 📋 Environment Check
     runs-on: ubuntu-latest
     steps:
-      - name: Check Env Vars
+      - name: 📤 Checkout Target Branch
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            example.env
+            versions.env
+
+      - name: Set Env Vars
         run: |
-          echo Building ${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+          echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
+          grep -v '^#' ./example.env | grep -v '^$' >> $GITHUB_ENV
+          grep -v '^#' ./example.versions.env | grep -v '^$' >> $GITHUB_ENV
+
+
+         
+
+  # checkEnv:
+  #   environment: dev
+  #   name: 📋 Environment Check
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check Env Vars
+  #       run: |
+  #         echo Building ${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+
+
+  #     - name: Set Env Vars
+  #       run: |
+  #         echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
+  #         grep -v '^#' ./example.env | grep -v '^$' >> $GITHUB_ENV
+  #         grep -v '^#' ./versions.env | grep -v '^$' >> $GITHUB_ENV
+  
+  #     - name: Print ENV
+  #       run: |
+  #         echo "PHP image is: " ${{ env.PHP_IMAGE }}
   
 
   # Build Images
@@ -76,19 +92,6 @@ jobs:
       - name: 📤 Checkout Target Branch
         uses: actions/checkout@v2
 
-
-      - name: Get Env file       
-        run: |
-                echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
-                {
-                  echo 'ENV_FILE_OUTPUT<<EOF'
-                  grep -v '^#' ./example.env | grep -v '^$'
-                  echo EOF
-                } >> "$GITHUB_ENV"
-
-      - name: Print ENV
-        run: |
-        echo "PHP image is: " ${{ env.PHP_IMAGE }}
 
 
       # Login to Artifactory
