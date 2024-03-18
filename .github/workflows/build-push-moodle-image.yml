@@ -36,7 +36,7 @@ on:
 #       - '**/workflows/build-push-moodle-image.yml'
 jobs:
   #Print variables for logging and debugging purposes
-  printEnv:
+  checkEnv:
     environment: dev
     name: 📋 Environment Check
     runs-on: ubuntu-latest
@@ -45,13 +45,13 @@ jobs:
         run: |
           echo Building ${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
 
-  checkEnv:
-    name: 📋 Environment Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Import env file
-        id: dotenv
-        uses: ./.github/actions/dotenv-action
+  # setEnv:
+  #   name: 📋 Environment Check
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Import env file
+  #       id: dotenv
+  #       uses: ./.github/actions/dotenv-action
 
 
          
