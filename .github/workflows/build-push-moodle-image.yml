@@ -52,7 +52,7 @@ jobs:
         run: |
           echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
           grep -v '^#' ./example.env | grep -v '^$' >> $GITHUB_ENV
-          grep -v '^#' ./example.versions.env | grep -v '^$' >> $GITHUB_ENV
+          grep -v '^#' ./versions.env | grep -v '^$' >> $GITHUB_ENV
 
 
          
