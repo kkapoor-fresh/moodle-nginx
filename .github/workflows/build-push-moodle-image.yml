@@ -36,31 +36,7 @@ on:
 #       - '**/workflows/build-push-moodle-image.yml'
 jobs:
   #Print variables for logging and debugging purposes
-
-  checkEnv:
-    name: 📋 Environment Check
-    runs-on: ubuntu-latest
-    steps:
-      # - name: 📤 Checkout Target Branch
-      #   uses: actions/checkout@v4
-      #   with:
-      #     sparse-checkout: |
-      #       example.env
-      #       versions.env
-
-      # - name: Set Env Vars
-      #   run: |
-      #     echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
-      #     grep -v '^#' ./example.env | grep -v '^$' >> $GITHUB_ENV
-      #     grep -v '^#' ./versions.env | grep -v '^$' >> $GITHUB_ENV
-      - name: Import env file
-        id: dotenv
-        uses: ./.github/actions/dotenv-action
-
-
-         
-
-  checkEnv:
+  printEnv:
     environment: dev
     name: 📋 Environment Check
     runs-on: ubuntu-latest
@@ -68,6 +44,18 @@ jobs:
       - name: Check Env Vars
         run: |
           echo Building ${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+
+  checkEnv:
+    name: 📋 Environment Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Import env file
+        id: dotenv
+        uses: ./.github/actions/dotenv-action
+
+
+         
+
 
 
   #     - name: Set Env Vars
