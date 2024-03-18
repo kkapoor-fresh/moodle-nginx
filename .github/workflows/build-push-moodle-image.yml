@@ -90,10 +90,6 @@ jobs:
         with:
           path: example.env
 
-      - name: envs
-        run: |
-        echo "PHP image is: "${{ steps.dotenv.outputs.PHP_IMAGE }}
-
 
 
       # Login to Artifactory
