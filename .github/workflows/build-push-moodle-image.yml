@@ -86,7 +86,7 @@ jobs:
 
       - name: Import env file
         id: dotenv
-        uses: ./.github/actions/dotenv-action
+        uses: dotenv-action
 
 
 
