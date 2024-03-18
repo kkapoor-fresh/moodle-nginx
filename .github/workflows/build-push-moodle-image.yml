@@ -41,30 +41,33 @@ jobs:
     name: 📋 Environment Check
     runs-on: ubuntu-latest
     steps:
-      - name: 📤 Checkout Target Branch
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            example.env
-            versions.env
+      # - name: 📤 Checkout Target Branch
+      #   uses: actions/checkout@v4
+      #   with:
+      #     sparse-checkout: |
+      #       example.env
+      #       versions.env
 
-      - name: Set Env Vars
-        run: |
-          echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
-          grep -v '^#' ./example.env | grep -v '^$' >> $GITHUB_ENV
-          grep -v '^#' ./versions.env | grep -v '^$' >> $GITHUB_ENV
+      # - name: Set Env Vars
+      #   run: |
+      #     echo "Import .env to $GITHUB_ENV (ignoring any commented [#] or empty lines)"
+      #     grep -v '^#' ./example.env | grep -v '^$' >> $GITHUB_ENV
+      #     grep -v '^#' ./versions.env | grep -v '^$' >> $GITHUB_ENV
+      - name: Import env file
+        id: dotenv
+        uses: ./.github/actions/dotenv-action
 
 
          
 
-  # checkEnv:
-  #   environment: dev
-  #   name: 📋 Environment Check
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check Env Vars
-  #       run: |
-  #         echo Building ${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+  checkEnv:
+    environment: dev
+    name: 📋 Environment Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Env Vars
+        run: |
+          echo Building ${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
 
 
   #     - name: Set Env Vars
@@ -73,24 +76,29 @@ jobs:
   #         grep -v '^#' ./example.env | grep -v '^$' >> $GITHUB_ENV
   #         grep -v '^#' ./versions.env | grep -v '^$' >> $GITHUB_ENV
   
-  #     - name: Print ENV
-  #       run: |
-  #         echo "PHP image is: " ${{ env.PHP_IMAGE }}
+      - name: Print ENV
+        run: |
+          echo "PHP image is: "${{ steps.dotenv.outputs.PHP_IMAGE }}
   
 
   # Build Images
 
   build-images:
+
     name: '🔨 Build Moodle image and push to Artifactory'
     needs: [checkEnv]
     runs-on: ubuntu-latest
-    #environment: dev
+    environment: dev
   # if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     if: ${{ vars.SKIP_BUILD!= 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     steps:
       # Checkout the PR branch
       - name: 📤 Checkout Target Branch
         uses: actions/checkout@v2
+
+      - name: Import env file
+        id: dotenv
+        uses: ./.github/actions/dotenv-action
 
 
 
@@ -104,10 +112,10 @@ jobs:
 
       - name: 🛠️ Pull PHP base image
         run: |
-          docker pull ${{env.PHP_IMAGE}}
-          docker tag ${{env.PHP_IMAGE}} ${{ secrets.ARTIFACTORY_URL }}/${{env.PHP_IMAGE}}
-          docker push ${{ secrets.ARTIFACTORY_URL }}/${{env.PHP_IMAGE}}
+          docker pull ${{ steps.dotenv.outputs.PHP_IMAGE }}
+          docker tag ${{ steps.dotenv.outputs.PHP_IMAGE }} ${{ secrets.ARTIFACTORY_URL }}/${{ steps.dotenv.outputs.PHP_IMAGE }}
+          docker push ${{ secrets.ARTIFACTORY_URL }}/${{steps.dotenv.outputs.PHP_IMAGE}}
 
       - name: 🛠️ Build Moodle Image and push to Artifactory
-        run: docker buildx build -t ${{ secrets.ARTIFACTORY_URL }}/${{ env.APP }}:${{ env.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }} --output=type=image,push=true --push -f ${{ env.MOODLE_DOCKER_FILE_PATH }} .
+        run: docker buildx build -t ${{ secrets.ARTIFACTORY_URL }}/${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }} --output=type=image,push=true --push -f ${{ env.MOODLE_DOCKER_FILE_PATH }} .
 
