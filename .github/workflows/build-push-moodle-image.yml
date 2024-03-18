@@ -64,9 +64,9 @@ jobs:
   #         grep -v '^#' ./example.env | grep -v '^$' >> $GITHUB_ENV
   #         grep -v '^#' ./versions.env | grep -v '^$' >> $GITHUB_ENV
   
-      - name: Print ENV
-        run: |
-          echo "PHP image is: "${{ steps.dotenv.outputs.PHP_IMAGE }}
+      # - name: Print ENV
+      #   run: |
+      #     echo "PHP image is: "${{ steps.dotenv.outputs.PHP_IMAGE }}
   
 
   # Build Images
