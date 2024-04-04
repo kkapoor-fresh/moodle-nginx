@@ -44,6 +44,7 @@ on:
       - '**/workflows/**.yml'
       - '**.json'
       - '**.sh'
+      - 'trigger.txt'
   pull_request:
     branches:
       - dev
