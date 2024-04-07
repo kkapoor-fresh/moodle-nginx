@@ -15,6 +15,14 @@ env:
 
 on:
   workflow_call:
+    secrets:
+      ARTIFACTORY_URL:
+        required: true
+      ARTIFACTORY_USER:
+        required: true
+      ARTIFACTORY_PASSWORD:
+        required: true
+      
 # on:
 #   push:
 #     branches:
@@ -77,7 +85,7 @@ jobs:
     needs: [checkEnv]
     runs-on: ubuntu-latest
     environment: dev
-  # if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+    #if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     if: ${{ vars.SKIP_BUILD!= 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     steps:
       # Checkout the PR branch
@@ -91,7 +99,6 @@ jobs:
           path: example.env
 
 
-
       # Login to Artifactory
       - name: 🔑 Login to Artifactory
         uses: docker/login-action@v3
@@ -99,6 +106,7 @@ jobs:
           registry: ${{ secrets.ARTIFACTORY_URL }}
           username: ${{ secrets.ARTIFACTORY_USER }}
           password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          environment: dev
 
       - name: 🛠️ Pull PHP base image
         run: |
