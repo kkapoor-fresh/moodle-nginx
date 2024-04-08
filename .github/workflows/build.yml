@@ -81,11 +81,11 @@ jobs:
   #   uses: ./.github/workflows/build-push-moodle-image.yml
   #   secrets: inherit
   
-  build-jfrog-php:
-    name: 🔨 Build php Images in JFrog
-    needs: [checkEnv]
-    uses: ./.github/workflows/build-push-php-image.yml
-    secrets: inherit
+  # build-jfrog-php:
+  #   name: 🔨 Build php Images in JFrog
+  #   needs: [checkEnv]
+  #   uses: ./.github/workflows/build-push-php-image.yml
+  #   secrets: inherit
 
   build-jfrog-db:
     name: 🔨 Build Images in JFrog

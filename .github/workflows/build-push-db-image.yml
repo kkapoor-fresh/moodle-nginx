@@ -42,12 +42,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     steps:
-      - name: Import env file
-        id: dotenv
-        uses: falti/dotenv-action@v1.1
-        with:
-          path: example.env
-     
       - name: Check Env Vars
         run: |
           echo Building ${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
