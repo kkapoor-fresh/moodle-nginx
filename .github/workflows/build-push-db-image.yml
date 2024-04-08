@@ -5,11 +5,18 @@ name: 🔨 Build and publish DB image to Artifactory
 #   cancel-in-progress: true
 
 env:
-  APP: moodle
+  APP: db
   USER: ${{ github.actor }}
 
 on:
   workflow_call:
+    secrets:
+      ARTIFACTORY_URL:
+        required: true
+      ARTIFACTORY_USER:
+        required: true
+      ARTIFACTORY_PASSWORD:
+        required: true
 
 # on:
 #   push:
@@ -33,30 +40,38 @@ jobs:
   checkEnv:
     name: 📋 Environment Check
     runs-on: ubuntu-latest
+    environment: dev
     steps:
+      - name: Import env file
+        id: dotenv
+        uses: falti/dotenv-action@v1.1
+        with:
+          path: example.env
+     
       - name: Check Env Vars
         run: |
-          echo Pulling ${{env.DB_IMAGE}}
-          echo Push to ${{ secrets.ARTIFACTORY_URL }}/${{env.DB_IMAGE}}
+          echo Pulling ${{steps.dotenv.outputs.DB_IMAGE}}
+          echo Push to ${{ secrets.ARTIFACTORY_URL }}/${{steps.dotenv.outputs.DB_IMAGE}}
 
   # # Build Images
 
-  # build-images:
-  #   name: '🔨 Build DB image'
-  #   needs: [checkEnv]
-  #   runs-on: ubuntu-latest
-  #   if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
-  #   steps:
-  #     # Login to Artifactory
-  #     - name: 🔑 Login to Artifactory
-  #       uses: docker/login-action@v3
-  #       with:
-  #         registry: ${{ secrets.ARTIFACTORY_URL }}
-  #         username: ${{ secrets.ARTIFACTORY_USER }}
-  #         password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+  build-images:
+    name: '🔨 Build DB image'
+    needs: [checkEnv]
+    runs-on: ubuntu-latest
+    if: ${{ vars.SKIP_BUILD!= 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+    #if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
+    steps:
+      # Login to Artifactory
+      - name: 🔑 Login to Artifactory
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ARTIFACTORY_URL }}
+          username: ${{ secrets.ARTIFACTORY_USER }}
+          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
-  #     - name: 🛠️ Pull latest DB base image, tag, then push to Artifactory
-  #       run: |
-  #         docker pull ${{env.DB_IMAGE}}
-  #         docker tag ${{env.DB_IMAGE}} ${{ secrets.ARTIFACTORY_URL }}/${{env.DB_IMAGE}}
-  #         docker push ${{ secrets.ARTIFACTORY_URL }}/${{env.DB_IMAGE}}
+      - name: 🛠️ Pull latest DB base image, tag, then push to Artifactory
+        run: |
+          docker pull ${{steps.dotenv.outputs.DB_IMAGE}}
+          docker tag ${{steps.dotenv.outputs.DB_IMAGE}} ${{ secrets.ARTIFACTORY_URL }}/${{steps.dotenv.outputs.DB_IMAGE}}
+          docker push ${{ secrets.ARTIFACTORY_URL }}/${{steps.dotenv.outputs.DB_IMAGE}}

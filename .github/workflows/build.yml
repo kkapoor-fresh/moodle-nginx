@@ -74,27 +74,32 @@ jobs:
           echo "CLEAN_BUILDS: ${{ env.CLEAN_BUILDS }}"
           echo "SKIP_BUILDS: ${{ vars.SKIP_BUILD }}"
 
-  # Build Images in JFrog
-  build-jfrog-moodle:
-    name: 🔨 Build moodle Images in JFrog
+  # # Build Images in JFrog
+  # build-jfrog-moodle:
+  #   name: 🔨 Build moodle Images in JFrog
+  #   needs: [checkEnv]
+  #   uses: ./.github/workflows/build-push-moodle-image.yml
+  #   secrets: inherit
+  
+  build-jfrog-php:
+    name: 🔨 Build php Images in JFrog
     needs: [checkEnv]
-    uses: ./.github/workflows/build-push-moodle-image.yml
+    uses: ./.github/workflows/build-push-php-image.yml
     secrets: inherit
-  
-  # build-jfrog-php:
-  #   name: 🔨 Build php Images in JFrog
-  #   needs: [checkEnv]
-  #   uses: ./.github/workflows/build-push-php-image.yml
 
-  # build-jfrog-db:
-  #   name: 🔨 Build Images in JFrog
-  #   needs: [checkEnv]
-  #   uses: ./.github/workflows/build-push-db-image.yml
+  build-jfrog-db:
+    name: 🔨 Build Images in JFrog
+    needs: [checkEnv]
+    uses: ./.github/workflows/build-push-db-image.yml
+    secrets: inherit
+
   
-  # build-jfrog-cron:
-  #    name: 🔨 Build Images in JFrog
-  #    needs: [checkEnv]
-  #    uses: ./.github/workflows/build-push-cron-image.yml
+  build-jfrog-cron:
+     name: 🔨 Build Images in JFrog
+     needs: [checkEnv]
+     uses: ./.github/workflows/build-push-cron-image.yml
+     secrets: inherit
+
 
   # #Buid 
 
