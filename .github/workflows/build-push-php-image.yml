@@ -50,7 +50,7 @@ jobs:
 
   # Build Images
 
-   build-images:
+  build-images:
     name: '🔨 Build Moodle and PHP images'
     needs: [checkEnv]
     runs-on: ubuntu-latest
