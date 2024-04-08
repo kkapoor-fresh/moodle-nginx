@@ -50,8 +50,8 @@ jobs:
      
       - name: Check Env Vars
         run: |
-          echo Pulling ${{steps.dotenv.outputs.DB_IMAGE}}
-          echo Push to ${{ secrets.ARTIFACTORY_URL }}/${{steps.dotenv.outputs.DB_IMAGE}}
+          echo Building ${{ env.APP }}:${{ vars.OPENSHIFT_DEPLOY_PROJECT }}-${{ github.ref_name }}
+
 
   # # Build Images
 
@@ -62,6 +62,15 @@ jobs:
     if: ${{ vars.SKIP_BUILD!= 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     #if: ${{ needs.checkEnv.SKIP_BUILDS != 'YES' }} && (github.ref_name == 'dev' || github.ref_name == 'test' || github.ref_name == 'prod')
     steps:
+      - name: 📤 Checkout Target Branch
+        uses: actions/checkout@v2
+
+      - name: Import env file
+        id: dotenv
+        uses: falti/dotenv-action@v1.1
+        with:
+          path: example.env
+
       # Login to Artifactory
       - name: 🔑 Login to Artifactory
         uses: docker/login-action@v3
